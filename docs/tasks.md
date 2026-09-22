@@ -1,1515 +1,831 @@
-# Acadexa — Implementation Tasks & Progress
+# TASKS.md — Acadexa Implementation Plan
 
-**Document:** `docs/tasks.md`  
-**Project:** Acadexa  
-**Institution:** RAS University  
-**Status:** Initial implementation roadmap  
-**Primary references:** `data.md`, `docs/prd.md`, `docs/architecture.md`, `docs/features.md`, `docs/rules.md`, `docs/design.md`, `docs/folder_structure.md`
+## How to use this file
 
----
+- Work **one task at a time**, top to bottom, phase by phase.
+- Each task below is sized to be **one IDE execution + one reviewable commit**.
+- Do not start a task until the previous task is committed and, where applicable, its validation check passes.
+- Do not jump ahead to later tasks "while you're at it."
+- Do not scaffold implementation for future tasks unless the current task explicitly requires it.
+- When a task is complete, stop. Do not self-advance to the next task.
+- The user reviews the diff and performs the Git commit manually.
+- Check tasks as `[x]` only after the implementation has actually been reviewed/completed.
+- If a task is discovered to be too large, split it into smaller tasks **before starting it** rather than bundling multiple commits.
+- Generated large datasets must never be committed to Git.
+- The MVP is a hard gate: **one school + one semester must work end-to-end before full-scale generation begins.**
 
-# 1. Purpose
+### Task execution prompt
 
-This document is the implementation roadmap for Acadexa.
-
-It converts the approved requirements and architecture into:
-
-- phases,
-- tasks,
-- dependencies,
-- milestones,
-- validation gates,
-- team responsibilities,
-- MVP criteria,
-- full-scale criteria,
-- documentation work.
-
-This document is also intended to act as the project's working progress tracker.
-
-The roadmap follows the project's most important implementation principle:
-
-> **Build one school and one semester end-to-end first, validate the entire pipeline, then scale to the full synthetic dataset.**
-
----
-
-# 2. Project Execution Strategy
-
-Acadexa should not be developed as isolated features.
-
-The recommended implementation flow is:
+Use this pattern when asking an IDE agent to implement a task:
 
 ```text
-Documentation
-    ↓
-Repository foundation
-    ↓
-Configuration + schema contract
-    ↓
-Synthetic generator
-    ↓
-One-school / one-semester data
-    ↓
-MongoDB + Parquet
-    ↓
-Spark cleaning
-    ↓
-Feature engineering
-    ↓
-Analytics
-    ↓
-Gold collections
-    ↓
-Dashboard
-    ↓
-Validation / recovery
-    ↓
-Benchmarking
-    ↓
-Full-scale generation
-    ↓
-Full-scale pipeline
-    ↓
-Final testing
-    ↓
-Documentation / report / viva
+Proceed with task <TASK_ID> from docs/TASKS.md only.
+
+Rules still apply:
+1. Only this task — nothing from later tasks, even if it seems convenient to bundle in.
+2. When done, stop and tell me it's ready to commit. Do not run git commit yourself — I'll review the diff and commit it using the message format specified in TASKS.md.
+3. Don't scaffold anything for future tasks in advance.
+4. Don't self-advance to the next task after this one.
+5. Use the docs/ directory to contextually understand the project requirements, architecture, rules, design and constraints.
+```
+
+### Commit message format
+
+```text
+Update - <Phase>.<Task> - <description>
+```
+
+Example:
+
+```text
+Update - 1.1 - Update - 0.1 - Project Folder Setup
 ```
 
 ---
 
-# 3. Development Principles
+# Phase 0 — Project Documentation Baseline
 
-## 3.1 Vertical slice first
+This phase establishes the documentation source of truth before implementation begins.
 
-The first milestone is not:
+The detailed project documents already exist conceptually and should be present in the repository before implementation work starts.
+
+- [x] 0.1 — Add the finalized `docs/` documentation set to the repository: `prd.md`, `architecture.md`, `tech_stack.md`, `features.md`, `rules.md`, `design.md`, `tasks.md`, `memory.md`, and `folder_structure.md`. Do not modify their content in this task.
+  Commit: `Update - 0.1 - Project Folder Setup`
+
+- [x] 0.2 — Review the documentation set for internal consistency only; fix only obvious path/name references required for the repository to match the documented structure. Do not introduce new architecture or features.
+  Commit: `Update - 0.2 - docs folder setup`
+
+- [x] 0.3 — Updated the tasks & readme files, for project betterment.
+  Commit: `Update - 0.3 - tasks & readme file update`
+
+**Checkpoint:** The repository contains the complete documentation source of truth. No application implementation has started yet.
+
+---
+
+# Phase 1 — Repository Foundation
+
+## Goal
+
+Create the actual repository skeleton without implementing application logic.
+
+- [ ] 1.1 — Initialize/verify Git repository and create the root `.gitignore` covering Python environments, IDE files, `.env`, logs, generated data, Parquet output, caches, Spark artifacts and other local/generated files defined by the project rules.
+  Commit: `Update - 1.1 - initialize repository ignore rules`
+
+- [ ] 1.2 — Add the root `README.md` containing project overview, architecture summary, technology stack, target scale, setup outline, repository structure, scope boundaries and academic synthetic-data disclaimer. Keep detailed requirements in `docs/`.
+  Commit: `Update - 1.2 - add project README`
+
+- [ ] 1.3 — Add `.env.example` with only safe configuration placeholders for MongoDB and local application settings. Do not add real credentials.
+  Commit: `Update - 1.3 - add environment configuration template`
+
+- [ ] 1.4 — Create the complete repository folder structure from `docs/folder_structure.md`, using only required placeholder files such as `.gitkeep` or `__init__.py`. No business logic.
+  Commit: `Update - 1.4 - create repository folder structure`
+
+- [ ] 1.5 — Create the Python package skeleton under `src/acadexa/` with package initialization files and empty module boundaries for config, generator, database, processing, analytics, dashboard, validation, benchmarks and utils. No implementation logic.
+  Commit: `Update - 1.5 - create Python package skeleton`
+
+- [ ] 1.6 — Create the script entry-point placeholders under `scripts/`: `generate_data.py`, `load_mongodb.py`, `run_pipeline.py`, `publish_gold.py`, and `run_benchmarks.py`. Each should contain only a minimal executable entry point or TODO, not future implementation.
+  Commit: `Update - 1.6 - create pipeline entry points`
+
+- [ ] 1.7 — Create the initial test structure under `tests/` and add a minimal test configuration so the test runner executes successfully with no application tests yet.
+  Commit: `Update - 1.7 - initialize test structure`
+
+- [ ] 1.8 — Add the initial dependency configuration (`requirements.txt` or `pyproject.toml`) containing only the foundational runtime/development dependencies required at this stage. Do not add speculative libraries.
+  Commit: `Update - 1.8 - add initial Python dependencies`
+
+**Checkpoint:** Repository structure, documentation, environment template, Python package skeleton and test runner exist. No functional application logic exists.
+
+---
+
+# Phase 2 — Configuration Contract
+
+## Goal
+
+Build the configuration layer before data generation or database implementation depends on hard-coded values.
+
+- [ ] 2.1 — Implement configuration loading under `src/acadexa/config/` so application configuration can be read from project configuration files and environment variables without hard-coding secrets.
+  Commit: `Update - 2.1 - implement configuration loading`
+
+- [ ] 2.2 — Create the RAS University hierarchy configuration: six schools, departments, programs and the initial course catalog structure. Keep hierarchy data configuration-driven rather than embedding it in generator logic.
+  Commit: `Update - 2.2 - define university hierarchy configuration`
+
+- [ ] 2.3 — Create academic-period configuration for two academic years and four semesters, including identifiers and dates required by the generator.
+  Commit: `Update - 2.3 - define academic period configuration`
+
+- [ ] 2.4 — Create generator configuration containing seed, target population, generation scale, behavioral parameters, course difficulty settings and data-quality injection rates.
+  Commit: `Update - 2.4 - define synthetic generator configuration`
+
+- [ ] 2.5 — Create risk configuration containing the five approved thresholds/rules only: attendance, LMS decline, late submissions, marks decline and quiz bottom-quartile activity.
+  Commit: `Update - 2.5 - define risk signal configuration`
+
+- [ ] 2.6 — Add configuration validation and tests for required fields, valid ranges and incompatible configuration values. Do not generate data yet.
+  Commit: `Update - 2.6 - validate project configuration`
+
+**Checkpoint:** All project-level values needed by generation, analytics and risk logic are configuration-driven.
+
+---
+
+# Phase 3 — Schema Contract
+
+## Goal
+
+Freeze the data contract before implementing the generator.
+
+- [ ] 3.1 — Define the canonical schema for `students`, including identifiers, hierarchy references and required student attributes.
+  Commit: `Update - 3.1 - define student schema`
+
+- [ ] 3.2 — Define the canonical schema for `courses`, including hierarchy references, semester applicability and course-difficulty metadata.
+  Commit: `Update - 3.2 - define course schema`
+
+- [ ] 3.3 — Define the canonical schema for `academic_records`, preserving the student × course × semester grain.
+  Commit: `Update - 3.3 - define academic record schema`
+
+- [ ] 3.4 — Define the canonical schema for `attendance`, preserving the student × course × week grain and raw attended/conducted counts.
+  Commit: `Update - 3.4 - define attendance schema`
+
+- [ ] 3.5 — Define the canonical schema for `coursework`, including assignments, quizzes, submission status/timing and student/course relationships.
+  Commit: `Update - 3.5 - define coursework schema`
+
+- [ ] 3.6 — Define the canonical LMS event schema and allowed event types, timestamps, identifiers and course/student references.
+  Commit: `Update - 3.6 - define LMS event schema`
+
+- [ ] 3.7 — Define the gold schemas for `student_features`, `course_metrics`, `school_summary` and `risk_indicators`.
+  Commit: `Update - 3.7 - define gold collection schemas`
+
+- [ ] 3.8 — Add schema validation utilities/tests that verify required fields, data types, identifier formats and expected record grain using small fixtures.
+  Commit: `Update - 3.8 - add schema validation layer`
+
+**Checkpoint:** The generator, MongoDB layer, Spark jobs and dashboard can all reference a stable documented schema.
+
+---
+
+# Phase 4 — Synthetic Generator Foundation
+
+## Goal
+
+Build a reproducible generator before attempting the full dataset.
+
+- [ ] 4.1 — Implement deterministic seed handling and generator run metadata. Given the same seed/configuration, the generator must initialize reproducibly.
+  Commit: `Update - 4.1 - implement deterministic generator foundation`
+
+- [ ] 4.2 — Implement generation of the university hierarchy from configuration: schools, departments, programs and courses.
+  Commit: `Update - 4.2 - generate university hierarchy`
+
+- [ ] 4.3 — Implement synthetic student generation with stable IDs and valid hierarchy assignments.
+  Commit: `Update - 4.3 - generate synthetic students`
+
+- [ ] 4.4 — Implement synthetic academic-record generation for student/course/semester combinations, including course difficulty and performance behavior.
+  Commit: `Update - 4.4 - generate academic records`
+
+- [ ] 4.5 — Implement synthetic attendance generation using conducted/attended counts and weekly behavior.
+  Commit: `Update - 4.5 - generate attendance data`
+
+- [ ] 4.6 — Implement synthetic coursework generation for assignments and quizzes, including submission timing, late submissions and attempts.
+  Commit: `Update - 4.6 - generate coursework data`
+
+- [ ] 4.7 — Implement the synthetic behavioral model: ability, diligence, engagement, course difficulty and controlled student-level variation.
+  Commit: `Update - 4.7 - implement synthetic behavioral model`
+
+- [ ] 4.8 — Implement the approximately 8% decliner population and make its behavior reproducible from the generator configuration.
+  Commit: `Update - 4.8 - implement synthetic decliner population`
+
+---
+
+# Phase 5 — Synthetic LMS Generation & Ground Truth
+
+## Goal
+
+Build the large event generator and analytical ground truth without yet scaling to the full target.
+
+- [ ] 5.1 — Implement LMS event-type generation using only the approved event types and configuration-driven distributions.
+  Commit: `Update - 5.1 - implement LMS event generation`
+
+- [ ] 5.2 — Implement timestamp generation with weekly and semester rhythms while preserving valid student/course/semester context.
+  Commit: `Update - 5.2 - implement LMS temporal behavior`
+
+- [ ] 5.3 — Implement chunked LMS generation so large event volumes are written incrementally instead of accumulated in driver/Python memory.
+  Commit: `Update - 5.3 - implement chunked LMS generation`
+
+- [ ] 5.4 — Implement Parquet output for LMS events with a small development-scale dataset only. Validate that it can be read back successfully.
+  Commit: `Update - 5.4 - write development LMS data to Parquet`
+
+- [ ] 5.5 — Implement the ground-truth registry describing planted relationships, decliner behavior and the decoy relationship. Ground truth must be generated before analytical results are observed.
+  Commit: `Update - 5.5 - implement synthetic ground truth registry`
+
+- [ ] 5.6 — Implement controlled data-quality injection for duplicates, selected nulls, timestamp inconsistencies, course-ID formatting, orphan records and out-of-range values using the approved approximate rates.
+  Commit: `Update - 5.6 - implement data quality injection`
+
+- [ ] 5.7 — Implement the generation/injection manifest recording seed, configuration, target counts, actual counts and injected issue counts.
+  Commit: `Update - 5.7 - implement generation manifests`
+
+- [ ] 5.8 — Implement `scripts/generate_data.py` as the single development-scale generator entry point and verify that a small dataset can be generated from a clean configuration.
+  Commit: `Update - 5.8 - wire development data generation entry point`
+
+**Checkpoint:** A reproducible small synthetic dataset exists, including all core entities, LMS events, planted relationships and controlled quality issues.
+
+---
+
+# Phase 6 — MongoDB Data Layer
+
+## Goal
+
+Make the generated development dataset queryable in MongoDB.
+
+- [ ] 6.1 — Implement MongoDB configuration/connection handling with credentials coming from environment configuration.
+  Commit: `Update - 6.1 - implement MongoDB connection layer`
+
+- [ ] 6.2 — Implement database initialization for the core collections and gold collection placeholders. Do not populate gold data yet.
+  Commit: `Update - 6.2 - initialize MongoDB collections`
+
+- [ ] 6.3 — Implement loading of `students`, `courses`, `academic_records`, `attendance` and `coursework` into MongoDB with validation of inserted counts.
+  Commit: `Update - 6.3 - load core academic collections`
+
+- [ ] 6.4 — Implement loading of the defined development LMS serving slice into MongoDB. Keep the full LMS Parquet dataset outside MongoDB.
+  Commit: `Update - 6.4 - load LMS serving slice`
+
+- [ ] 6.5 — Add indexes based on documented query patterns for student, course, semester, hierarchy and LMS access.
+  Commit: `Update - 6.5 - add MongoDB query indexes`
+
+- [ ] 6.6 — Implement representative MongoDB aggregation demonstrations required by the project: `$match`, `$group`, `$project`, `$sort`, `$lookup`, `$unwind`, `$setWindowFields` and `$facet` where applicable.
+  Commit: `Update - 6.6 - implement MongoDB analytical aggregations`
+
+- [ ] 6.7 — Implement `scripts/load_mongodb.py` as the reproducible development database-loading entry point and verify counts against generated manifests.
+  Commit: `Update - 6.7 - wire MongoDB loading entry point`
+
+**Checkpoint:** Development data is stored in the intended MongoDB/Parquet split and representative MongoDB operations work.
+
+---
+
+# Phase 7 — PySpark Environment & J1/J2
+
+## Goal
+
+Establish Spark processing and the first two pipeline jobs.
+
+- [ ] 7.1 — Configure PySpark local mode and verify Spark can start within the documented local environment.
+  Commit: `Update - 7.1 - configure local PySpark runtime`
+
+- [ ] 7.2 — Configure the MongoDB Spark integration and verify a small development collection can be read into a Spark DataFrame.
+  Commit: `Update - 7.2 - configure Spark MongoDB integration`
+
+- [ ] 7.3 — Implement J1 clean/validate for the development dataset: duplicates, null handling, ID normalization, timestamp issues, orphan detection and range validation.
+  Commit: `Update - 7.3 - implement Spark clean and validate job`
+
+- [ ] 7.4 — Implement J1 quality reporting so injected/detected/corrected/dropped/remaining counts are measurable.
+  Commit: `Update - 7.4 - add Spark data quality reporting`
+
+- [ ] 7.5 — Implement J2 event aggregation for weekly student/course LMS activity, active days and approved activity categories.
+  Commit: `Update - 7.5 - implement Spark LMS aggregation job`
+
+- [ ] 7.6 — Add unit/integration tests for J1 and J2 using small fixtures; explicitly verify no large `collect()` or unnecessary driver-side iteration is introduced.
+  Commit: `Update - 7.6 - test Spark cleaning and event aggregation`
+
+**Checkpoint:** Raw development data can be cleaned and transformed through the first Spark stages.
+
+---
+
+# Phase 8 — Feature Engineering & Analytics
+
+## Goal
+
+Build the analytical core from validated Spark outputs.
+
+- [ ] 8.1 — Implement J3 integrated student feature construction by joining academic records, attendance, coursework and LMS features at the documented grain.
+  Commit: `Update - 8.1 - implement integrated student feature table`
+
+- [ ] 8.2 — Implement attendance, coursework, LMS and academic derived features required by the feature contract.
+  Commit: `Update - 8.2 - implement academic and engagement features`
+
+- [ ] 8.3 — Implement within-course normalization required for cross-factor analysis.
+  Commit: `Update - 8.3 - implement within-course normalization`
+
+- [ ] 8.4 — Implement J4 Spearman correlation analysis for the approved planted relationships and the decoy relationship.
+  Commit: `Update - 8.4 - implement correlation analytics`
+
+- [ ] 8.5 — Add optional Pearson correlation output without replacing Spearman as the default method.
+  Commit: `Update - 8.5 - add optional Pearson analysis`
+
+- [ ] 8.6 — Implement J5 four-week trend detection for LMS engagement and marks where applicable.
+  Commit: `Update - 8.6 - implement temporal trend detection`
+
+- [ ] 8.7 — Implement J6 attendance, LMS decline, late-submission, marks-decline and quiz-activity risk signals exactly from configuration.
+  Commit: `Update - 8.7 - implement five-rule risk signals`
+
+- [ ] 8.8 — Add explainability fields to risk outputs so each triggered signal can be traced to its underlying metric/value.
+  Commit: `Update - 8.8 - add risk signal explanations`
+
+**Checkpoint:** The development dataset produces integrated features, associations, trends and the five-rule signal count.
+
+---
+
+# Phase 9 — Gold Layer & Pipeline Orchestration
+
+## Goal
+
+Create the serving layer and one reproducible pipeline command.
+
+- [ ] 9.1 — Implement J7 publication of `student_features` to MongoDB.
+  Commit: `Update - 9.1 - publish student features`
+
+- [ ] 9.2 — Implement J7 publication of `course_metrics` and `school_summary`.
+  Commit: `Update - 9.2 - publish course and school metrics`
+
+- [ ] 9.3 — Implement publication of `risk_indicators` with signal breakdown and run metadata.
+  Commit: `Update - 9.3 - publish risk indicators`
+
+- [ ] 9.4 — Add validation after publication to confirm counts, grain and required fields of all gold collections.
+  Commit: `Update - 9.4 - validate gold collections`
+
+- [ ] 9.5 — Implement `scripts/run_pipeline.py` to execute the development Spark pipeline in the documented order: J1 → J2 → J3 → J4/J5/J6 → J7.
+  Commit: `Update - 9.5 - wire end-to-end Spark pipeline`
+
+- [ ] 9.6 — Implement pipeline run metadata/logging so each run records configuration/seed, start/end status, stage outcomes and output counts.
+  Commit: `Update - 9.6 - add pipeline run metadata`
+
+**Checkpoint:** The project can run from generated development data through gold MongoDB collections using one documented pipeline command.
+
+---
+
+# Phase 10 — MVP Validation Gate
+
+## Goal
+
+Prove the complete architecture before building the polished dashboard or generating the full dataset.
+
+- [ ] 10.1 — Add end-to-end integration test covering generation → Parquet/MongoDB → Spark → gold collections using a small fixture/development dataset.
+  Commit: `Update - 10.1 - add end-to-end MVP pipeline test`
+
+- [ ] 10.2 — Implement ground-truth recovery comparison for planted relationships and the decoy relationship.
+  Commit: `Update - 10.2 - implement ground truth recovery test`
+
+- [ ] 10.3 — Validate that risk-rule boundary cases behave correctly, including 75% attendance, 50% LMS comparison, 30% late submissions and 10-point marks decline boundaries.
+  Commit: `Update - 10.3 - validate risk signal boundaries`
+
+- [ ] 10.4 — Validate reproducibility by running the same development configuration/seed twice and comparing deterministic outputs/manifest characteristics.
+  Commit: `Update - 10.4 - verify generator reproducibility`
+
+- [ ] 10.5 — Run a local resource/performance smoke test and document actual development-scale runtime and memory observations. Do not optimize prematurely.
+  Commit: `Update - 10.5 - record MVP resource baseline`
+
+**MVP CHECKPOINT:** Stop here and review the complete vertical slice.
+
+The following must all work before Phase 11:
 
 ```text
-build generator
+Generator
+→ Parquet/MongoDB
+→ Spark
+→ Gold collections
+→ Ground-truth recovery
+→ Risk signals
+→ Validated outputs
 ```
 
-or:
+Do not begin full-scale generation until this checkpoint passes.
+
+---
+
+# Phase 11 — Streamlit Dashboard Foundation
+
+## Goal
+
+Build the dashboard against real gold/serving data, not permanent mock values.
+
+- [ ] 11.1 — Implement Streamlit application entry point and shared configuration/data-access layer. The app should start and display a basic authenticated shell.
+  Commit: `Update - 11.1 - initialize Streamlit dashboard`
+
+- [ ] 11.2 — Implement dummy login/session state with the four approved roles: University Admin, School/Department Admin, Faculty and Academic Analyst.
+  Commit: `Update - 11.2 - implement dashboard dummy authentication`
+
+- [ ] 11.3 — Implement centralized role/scope resolution so dashboard pages do not duplicate permission logic.
+  Commit: `Update - 11.3 - implement role and scope control`
+
+- [ ] 11.4 — Implement shared dashboard layout, navigation, page header, breadcrumbs and global academic filters.
+  Commit: `Update - 11.4 - implement shared dashboard layout`
+
+- [ ] 11.5 — Implement reusable KPI, analytical-card, status and risk-signal UI components following `docs/design.md`.
+  Commit: `Update - 11.5 - implement shared dashboard components`
+
+---
+
+# Phase 12 — Dashboard Views
+
+## Goal
+
+Build each analytical view as one reviewable page-level task.
+
+- [ ] 12.1 — Build the University Overview page using actual gold data: university KPIs, school comparison, academic/attendance/LMS overview, trend summary and risk summary.
+  Commit: `Update - 12.1 - build university overview`
+
+- [ ] 12.2 — Build School/Department views with scoped KPIs, course breakdown, trends and risk distribution.
+  Commit: `Update - 12.2 - build school and department analytics`
+
+- [ ] 12.3 — Build Course view with enrollment, marks, attendance, coursework, LMS engagement, trend and association information.
+  Commit: `Update - 12.3 - build course analytics`
+
+- [ ] 12.4 — Build Student view with integrated academic, attendance, coursework, LMS, trend and five-rule signal breakdown.
+  Commit: `Update - 12.4 - build student intelligence view`
+
+- [ ] 12.5 — Build Analysis view with correlation, trend analysis and methodology/explainability sections.
+  Commit: `Update - 12.5 - build analytical analysis view`
+
+- [ ] 12.6 — Build Data Quality view showing injected/detected/corrected/dropped/remaining issues from actual pipeline output.
+  Commit: `Update - 12.6 - build data quality dashboard`
+
+- [ ] 12.7 — Add the synthetic-data disclosure and non-causal/risk methodology notices to the appropriate dashboard locations.
+  Commit: `Update - 12.7 - add analytical disclosure and methodology notices`
+
+- [ ] 12.8 — Perform one cross-dashboard usability/accessibility/error-state pass without adding new features.
+  Commit: `Update - 12.8 - dashboard usability and accessibility pass`
+
+**Checkpoint:** The MVP dashboard operates on real generated/gold data and supports the documented roles and hierarchy.
+
+---
+
+# Phase 13 — Benchmarking
+
+## Goal
+
+Measure technology trade-offs using real workloads.
+
+- [ ] 13.1 — Implement J8 benchmark harness with repeatable workload definitions, timing and run metadata.
+  Commit: `Update - 13.1 - implement benchmark harness`
+
+- [ ] 13.2 — Implement the weekly LMS engagement benchmark using pandas where the workload is feasible.
+  Commit: `Update - 13.2 - benchmark pandas workload`
+
+- [ ] 13.3 — Implement the equivalent MongoDB aggregation benchmark.
+  Commit: `Update - 13.3 - benchmark MongoDB aggregation`
+
+- [ ] 13.4 — Implement the equivalent PySpark benchmark.
+  Commit: `Update - 13.4 - benchmark PySpark workload`
+
+- [ ] 13.5 — Add the full feature-table join benchmark where equivalent implementations are practical.
+  Commit: `Update - 13.5 - benchmark feature-table join`
+
+- [ ] 13.6 — Generate benchmark output containing dataset size, execution time, memory observations where practical and environment information. Do not manufacture conclusions.
+  Commit: `Update - 13.6 - publish benchmark results`
+
+---
+
+# Phase 14 — Full-Scale Generation
+
+## Goal
+
+Scale the validated architecture toward the documented target.
+
+- [ ] 14.1 — Review and freeze the generator configuration for the full target run. Do not change schema or architecture in this task.
+  Commit: `Update - 14.1 - freeze full-scale generator configuration`
+
+- [ ] 14.2 — Run/implement full university hierarchy generation for the six-school target and record actual counts.
+  Commit: `Update - 14.2 - generate full university hierarchy`
+
+- [ ] 14.3 — Generate the full target student population and academic records across two academic years/four semesters using the validated generator.
+  Commit: `Update - 14.3 - generate full academic dataset`
+
+- [ ] 14.4 — Generate full attendance and coursework datasets and record actual counts/storage usage.
+  Commit: `Update - 14.4 - generate full attendance and coursework data`
+
+- [ ] 14.5 — Generate the full LMS event dataset in chunked Parquet form toward the ~70M target and record actual event count and disk usage.
+  Commit: `Update - 14.5 - generate full LMS Parquet dataset`
+
+- [ ] 14.6 — Generate the defined MongoDB LMS serving slice from the full dataset without loading all LMS events into MongoDB.
+  Commit: `Update - 14.6 - generate full LMS serving slice`
+
+- [ ] 14.7 — Record full-scale generation manifest containing actual counts, seed, configuration, disk usage and generation duration.
+  Commit: `Update - 14.7 - record full-scale generation manifest`
+
+**Checkpoint:** Full synthetic data exists and actual scale is documented.
+
+---
+
+# Phase 15 — Full-Scale Spark Pipeline
+
+## Goal
+
+Run the validated processing architecture at target scale.
+
+- [ ] 15.1 — Run J1 on the full dataset and record cleaning/data-quality metrics.
+  Commit: `Update - 15.1 - run full-scale data validation`
+
+- [ ] 15.2 — Run J2 full-scale LMS aggregation and record runtime/memory observations.
+  Commit: `Update - 15.2 - run full-scale LMS aggregation`
+
+- [ ] 15.3 — Run J3 full-scale feature-table generation and validate output grain/counts.
+  Commit: `Update - 15.3 - run full-scale feature engineering`
+
+- [ ] 15.4 — Run J4 full-scale correlation analysis and store measured results.
+  Commit: `Update - 15.4 - run full-scale correlation analytics`
+
+- [ ] 15.5 — Run J5 full-scale trend detection and validate the synthetic decliner behavior.
+  Commit: `Update - 15.5 - run full-scale trend detection`
+
+- [ ] 15.6 — Run J6 full-scale five-rule risk signals and validate signal distributions.
+  Commit: `Update - 15.6 - run full-scale risk analytics`
+
+- [ ] 15.7 — Run J7 full-scale publication and validate all gold collections.
+  Commit: `Update - 15.7 - publish full-scale gold layer`
+
+- [ ] 15.8 — Run J8 against the documented benchmark workloads and record actual performance.
+  Commit: `Update - 15.8 - run full-scale benchmarks`
+
+**Checkpoint:** Full-scale processing succeeds within the local resource constraints or produces documented engineering findings where the target requires adjustment.
+
+---
+
+# Phase 16 — Full-Scale Validation & Hardening
+
+## Goal
+
+Verify correctness after scaling.
+
+- [ ] 16.1 — Compare full-scale generated counts against the generation manifest and schema expectations.
+  Commit: `Update - 16.1 - validate full-scale record counts`
+
+- [ ] 16.2 — Validate full-scale data-quality detection against the injection manifest.
+  Commit: `Update - 16.2 - validate full-scale data quality`
+
+- [ ] 16.3 — Run full-scale ground-truth recovery and document recovered/non-recovered/decoy relationships.
+  Commit: `Update - 16.3 - validate full-scale ground truth recovery`
+
+- [ ] 16.4 — Validate full-scale risk signal calculations against independent small fixtures and selected sampled records.
+  Commit: `Update - 16.4 - validate full-scale risk signals`
+
+- [ ] 16.5 — Test dashboard behavior against full-scale gold collections, including role scope, filters, drill-down and error/empty states.
+  Commit: `Update - 16.5 - validate dashboard at full scale`
+
+- [ ] 16.6 — Perform a local resource audit covering Spark memory, MongoDB usage, Parquet size, pipeline runtime and dashboard responsiveness.
+  Commit: `Update - 16.6 - record full-scale resource audit`
+
+---
+
+# Phase 17 — Final Documentation & Demonstration
+
+## Goal
+
+Turn the working implementation into a defensible academic project.
+
+- [ ] 17.1 — Update `README.md` with actual setup commands, measured scale and current project status. Do not leave target values presented as measured values.
+  Commit: `Update - 17.1 - finalize README with measured project status`
+
+- [ ] 17.2 — Update `docs/tasks.md` statuses and ensure completed tasks match the actual Git history.
+  Commit: `Update - 17.2 - finalize implementation task status`
+
+- [ ] 17.3 — Update architecture/technology documentation with any approved implementation findings that materially changed the original design.
+  Commit: `Update - 17.3 - document implementation findings`
+
+- [ ] 17.4 — Produce quality, benchmark and recovery reports under `reports/`.
+  Commit: `Update - 17.4 - add project validation reports`
+
+- [ ] 17.5 — Prepare the final academic report content from the actual implementation: problem, architecture, data generation, MongoDB, Spark, analytics, dashboard, quality, benchmarks, recovery, limitations and future scope.
+  Commit: `Update - 17.5 - prepare final project report materials`
+
+- [ ] 17.6 — Prepare the final demonstration flow: login → overview → hierarchy drill-down → course → student → risk signals → analysis → data quality → benchmark/recovery evidence.
+  Commit: `Update - 17.6 - prepare final demonstration flow`
+
+- [ ] 17.7 — Perform final repository hygiene: remove accidental generated artifacts/secrets, verify `.gitignore`, verify documentation links/paths and confirm the repository can be understood from a clean clone.
+  Commit: `Update - 17.7 - final repository hygiene`
+
+**Final Checkpoint:** Acadexa is reproducible, documented, demonstrable and ready for academic submission.
+
+---
+
+# Execution Gates
+
+## Gate 1 — Foundation
+
+Required before Phase 2:
 
 ```text
-build dashboard
+Repository
++
+README
++
+docs
++
+environment template
++
+package/test skeleton
+```
+
+## Gate 2 — Data Contract
+
+Required before Phase 4:
+
+```text
+Configuration
++
+schemas
++
+validation
+```
+
+## Gate 3 — Development Data
+
+Required before Phase 6:
+
+```text
+Small reproducible dataset
++
+ground truth
++
+quality manifest
+```
+
+## Gate 4 — Analytical Pipeline
+
+Required before Phase 11:
+
+```text
+MongoDB
++
+Parquet
++
+Spark J1–J7
++
+gold collections
++
+recovery
++
+risk validation
+```
+
+## Gate 5 — MVP
+
+Required before Phase 14:
+
+```text
+One school
++
+one semester
++
+end-to-end processing
++
+working dashboard
++
+validation
+```
+
+## Gate 6 — Full Scale
+
+Required before finalization:
+
+```text
+Target-scale data
++
+full Spark pipeline
++
+actual benchmarks
++
+full validation
+```
+
+---
+
+# Things That Must Never Be Bundled
+
+Do not combine these into a single task merely because they are technically related:
+
+```text
+Schema + generator
+Generator + MongoDB loader
+MongoDB + Spark
+Spark + dashboard
+Risk logic + ML
+Dashboard + full-scale generation
+Benchmark + optimization
+```
+
+Each boundary exists so that the resulting commit is understandable and reversible.
+
+---
+
+# Things to Keep in Mind During Implementation
+
+## 1. Do not optimize before measuring
+
+The target resource estimates are planning assumptions.
+
+Measure the actual generator and Spark behavior before changing architecture.
+
+## 2. Do not generate 70M events first
+
+The first successful run should be small.
+
+The full dataset is a later milestone.
+
+## 3. Do not use permanent mock dashboard data
+
+Temporary mocks are acceptable while a UI page is being assembled, but the MVP must read actual generated/gold data.
+
+## 4. Do not turn risk signals into predictions
+
+The output is:
+
+```text
+0–5 observed signals
+```
+
+not:
+
+```text
+probability of failure
+```
+
+## 5. Do not interpret correlation causally
+
+Keep analytical language neutral and evidence-based.
+
+## 6. Do not load the entire LMS dataset into MongoDB
+
+The architecture intentionally separates:
+
+```text
+Full LMS → Parquet
+Serving slice → MongoDB
+```
+
+## 7. Do not use large Spark `collect()` operations
+
+The project is specifically intended to demonstrate scalable data processing.
+
+## 8. Do not hard-code dashboard numbers
+
+All KPI values must come from actual data.
+
+## 9. Do not silently change the architecture
+
+If a new requirement conflicts with the documented design, update the documentation/decision first.
+
+## 10. Do not commit secrets or generated datasets
+
+Keep:
+
+```text
+.env
+large Parquet files
+generated Mongo exports
+logs
+local caches
+```
+
+out of Git.
+
+---
+
+# Suggested First Five IDE Tasks
+
+If starting implementation now, execute exactly these in order:
+
+```text
+1.0 / 0.1 — Add finalized docs/
+1.1       — Initialize repository ignore rules
+1.2       — Add project README
+1.3       — Add environment configuration template
+1.4       — Create repository folder structure
+```
+
+Then continue into:
+
+```text
+1.5 → Python package skeleton
+1.6 → script entry points
+1.7 → test structure
+1.8 → dependencies
+2.1 → configuration loader
+2.2 → university hierarchy
+...
+```
+
+Do not start the generator until the configuration and schema contract have been established.
+
+---
+
+# Current Starting Point
+
+The documentation and planning work is complete.
+
+The first implementation objective is **not**:
+
+```text
+Generate 70M LMS events
 ```
 
 It is:
 
 ```text
-one school
-+
-one semester
-+
-real generated records
-+
-MongoDB
-+
-PySpark
-+
-gold outputs
-+
-working Streamlit view
-```
-
-The complete path must work before large-scale generation.
-
-## 3.2 Scale second
-
-After the vertical slice works:
-
-```text
-1 school / 1 semester
+Create a clean repository
         ↓
-full hierarchy
+Freeze configuration
         ↓
-2 academic years / 4 semesters
+Freeze schema
         ↓
-12,000 students
+Generate a tiny but complete dataset
         ↓
-~70M LMS events
+Prove the pipeline end-to-end
 ```
 
-## 3.3 Validate continuously
+The first major technical milestone is therefore:
 
-Every major stage should have a validation checkpoint.
+> **A one-school, one-semester vertical slice that travels from synthetic generation through MongoDB/Parquet, PySpark processing and gold collections, and is then displayed through Streamlit.**
 
-Do not wait until the end to discover schema or data-quality problems.
-
----
-
-# 4. Status Convention
-
-Use the following status values:
-
-```text
-NOT_STARTED
-IN_PROGRESS
-BLOCKED
-REVIEW
-DONE
-DEFERRED
-```
-
-Recommended task notation:
-
-```text
-- [ ] NOT_STARTED — Task
-- [~] IN_PROGRESS — Task
-- [!] BLOCKED — Task
-- [>] REVIEW — Task
-- [x] DONE — Task
-- [-] DEFERRED — Task
-```
-
-The status should be updated as implementation progresses.
-
----
-
-# 5. Phase Overview
-
-| Phase | Name | Main Outcome |
-|---|---|---|
-| P0 | Documentation & Foundation | Repository and project contracts |
-| P1 | Configuration & Schema | Stable synthetic-data contract |
-| P2 | Synthetic Generator | Reproducible one-slice dataset |
-| P3 | MongoDB & Parquet | Operational/raw data layer |
-| P4 | Spark Processing | Cleaning and feature pipeline |
-| P5 | Analytics | Correlation, trends and risk signals |
-| P6 | Gold Layer | Dashboard-ready analytical data |
-| P7 | Dashboard | Role-aware Streamlit application |
-| P8 | Validation | Recovery, quality and integration tests |
-| P9 | Benchmarking | Pandas/Mongo/Spark measurements |
-| P10 | Full-Scale Run | 12k / 2-year / ~70M target |
-| P11 | Finalization | Report, demo, documentation and viva |
-
----
-
-# 6. P0 — Documentation & Repository Foundation
-
-## Objective
-
-Create the project structure and establish a shared source of truth before implementation.
-
-### Tasks
-
-- [x] DONE — Create repository `acadexa`.
-- [x] DONE — Establish `docs/` directory.
-- [x] DONE — Define PRD.
-- [x] DONE — Define architecture.
-- [x] DONE — Define technology stack.
-- [x] DONE — Define feature specification.
-- [x] DONE — Define folder structure.
-- [x] DONE — Define implementation rules.
-- [x] DONE — Define UI/UX design direction.
-- [ ] NOT_STARTED — Create `tasks.md`.
-- [ ] NOT_STARTED — Create `memory.md`.
-- [ ] NOT_STARTED — Create `README.md`.
-- [ ] NOT_STARTED — Create `.gitignore`.
-- [ ] NOT_STARTED — Create `.env.example`.
-- [ ] NOT_STARTED — Create dependency file.
-- [ ] NOT_STARTED — Initialize Python package structure.
-- [ ] NOT_STARTED — Add base test configuration.
-
-### Exit Criteria
-
-```text
-Repository structure exists
-AND
-documentation contracts exist
-AND
-Python project can be initialized
-AND
-secrets/generated data are excluded from Git
-```
-
----
-
-# 7. P1 — Configuration & Schema Contract
-
-## Objective
-
-Create the stable contracts that every subsequent component consumes.
-
-### 7.1 University configuration
-
-- [ ] NOT_STARTED — Define RAS University configuration.
-- [ ] NOT_STARTED — Define six schools.
-- [ ] NOT_STARTED — Define department hierarchy.
-- [ ] NOT_STARTED — Define program hierarchy.
-- [ ] NOT_STARTED — Define course catalog.
-- [ ] NOT_STARTED — Define academic years.
-- [ ] NOT_STARTED — Define semesters.
-- [ ] NOT_STARTED — Define course metadata.
-- [ ] NOT_STARTED — Define configurable school-specific behavior.
-
-### 7.2 Generator configuration
-
-- [ ] NOT_STARTED — Define student target count.
-- [ ] NOT_STARTED — Define semester count.
-- [ ] NOT_STARTED — Define LMS event target.
-- [ ] NOT_STARTED — Define random seed.
-- [ ] NOT_STARTED — Define behavior distributions.
-- [ ] NOT_STARTED — Define course-difficulty parameters.
-- [ ] NOT_STARTED — Define decliner population.
-- [ ] NOT_STARTED — Define quality-injection rates.
-
-### 7.3 Risk configuration
-
-- [ ] NOT_STARTED — Define attendance threshold.
-- [ ] NOT_STARTED — Define LMS decline threshold.
-- [ ] NOT_STARTED — Define late-submission threshold.
-- [ ] NOT_STARTED — Define marks-decline threshold.
-- [ ] NOT_STARTED — Define quiz bottom-quartile rule.
-
-### 7.4 Schema contract
-
-- [ ] NOT_STARTED — Define `students`.
-- [ ] NOT_STARTED — Define `courses`.
-- [ ] NOT_STARTED — Define `academic_records`.
-- [ ] NOT_STARTED — Define `attendance`.
-- [ ] NOT_STARTED — Define `coursework`.
-- [ ] NOT_STARTED — Define `lms_events`.
-- [ ] NOT_STARTED — Define `student_features`.
-- [ ] NOT_STARTED — Define `course_metrics`.
-- [ ] NOT_STARTED — Define `school_summary`.
-- [ ] NOT_STARTED — Define `risk_indicators`.
-
-### Exit Criteria
-
-```text
-All core entities have stable field definitions
-AND
-hierarchy is configuration-driven
-AND
-generator/risk settings are externalized
-AND
-downstream code can rely on the schema
-```
-
----
-
-# 8. P2 — Synthetic Data Generator
-
-## Objective
-
-Build a deterministic generator capable of producing realistic, internally consistent synthetic university data.
-
----
-
-## 8.1 Generator foundation
-
-- [ ] NOT_STARTED — Create generator package.
-- [ ] NOT_STARTED — Implement seed handling.
-- [ ] NOT_STARTED — Implement configuration loading.
-- [ ] NOT_STARTED — Implement reproducibility checks.
-- [ ] NOT_STARTED — Implement generation metadata.
-
----
-
-## 8.2 University entities
-
-- [ ] NOT_STARTED — Generate schools.
-- [ ] NOT_STARTED — Generate departments.
-- [ ] NOT_STARTED — Generate programs.
-- [ ] NOT_STARTED — Generate courses.
-- [ ] NOT_STARTED — Generate students.
-
----
-
-## 8.3 Academic records
-
-- [ ] NOT_STARTED — Generate semester records.
-- [ ] NOT_STARTED — Generate course enrollments.
-- [ ] NOT_STARTED — Generate marks.
-- [ ] NOT_STARTED — Generate grades/statuses where defined.
-- [ ] NOT_STARTED — Maintain hierarchy consistency.
-
----
-
-## 8.4 Attendance
-
-- [ ] NOT_STARTED — Generate weekly attendance.
-- [ ] NOT_STARTED — Apply student behavioral variation.
-- [ ] NOT_STARTED — Apply course variation.
-- [ ] NOT_STARTED — Validate attendance ranges.
-
----
-
-## 8.5 Coursework
-
-- [ ] NOT_STARTED — Generate assignments.
-- [ ] NOT_STARTED — Generate quizzes.
-- [ ] NOT_STARTED — Generate submission timestamps/status.
-- [ ] NOT_STARTED — Generate late submissions.
-- [ ] NOT_STARTED — Generate quiz attempts.
-
----
-
-## 8.6 LMS events
-
-- [ ] NOT_STARTED — Implement event-type distribution.
-- [ ] NOT_STARTED — Implement timestamp generation.
-- [ ] NOT_STARTED — Implement weekly rhythms.
-- [ ] NOT_STARTED — Implement semester rhythms.
-- [ ] NOT_STARTED — Implement engagement variation.
-- [ ] NOT_STARTED — Implement chunked generation.
-- [ ] NOT_STARTED — Write LMS events to Parquet.
-
----
-
-## 8.7 Behavioral model
-
-- [ ] NOT_STARTED — Implement ability trait.
-- [ ] NOT_STARTED — Implement diligence trait.
-- [ ] NOT_STARTED — Implement engagement trait.
-- [ ] NOT_STARTED — Implement course difficulty.
-- [ ] NOT_STARTED — Implement approximately 8% decliners.
-- [ ] NOT_STARTED — Ensure planted relationships are reproducible.
-
----
-
-## 8.8 Ground truth
-
-- [ ] NOT_STARTED — Create planted relationship registry.
-- [ ] NOT_STARTED — Record intended relationships.
-- [ ] NOT_STARTED — Record decoy relationship.
-- [ ] NOT_STARTED — Store generator metadata.
-- [ ] NOT_STARTED — Store generation manifest.
-
----
-
-## 8.9 Data-quality injection
-
-- [ ] NOT_STARTED — Duplicate LMS events.
-- [ ] NOT_STARTED — Controlled nulls.
-- [ ] NOT_STARTED — Timestamp inconsistencies.
-- [ ] NOT_STARTED — Course-ID formatting issues.
-- [ ] NOT_STARTED — Orphan records.
-- [ ] NOT_STARTED — Out-of-range values.
-- [ ] NOT_STARTED — Generate injection manifest.
-
----
-
-## 8.10 MVP generator milestone
-
-Generate:
-
-```text
-One school
-+
-One semester
-+
-All required entity types
-+
-Small LMS event volume
-```
-
-Then verify:
-
-- [ ] NOT_STARTED — Referential integrity.
-- [ ] NOT_STARTED — Record counts.
-- [ ] NOT_STARTED — Reproducibility.
-- [ ] NOT_STARTED — Ground-truth metadata.
-- [ ] NOT_STARTED — Data-quality injection.
-
-### Exit Criteria
-
-The same seed and configuration produce reproducible results, and the one-school/one-semester dataset is valid enough to run through the complete pipeline.
-
----
-
-# 9. P3 — MongoDB & Parquet Data Layer
-
-## Objective
-
-Build the raw and operational storage layer.
-
----
-
-## 9.1 MongoDB setup
-
-- [ ] NOT_STARTED — Create Acadexa database.
-- [ ] NOT_STARTED — Create core collections.
-- [ ] NOT_STARTED — Create LMS time-series collection/slice where applicable.
-- [ ] NOT_STARTED — Create gold collections.
-- [ ] NOT_STARTED — Create indexes.
-- [ ] NOT_STARTED — Add database initialization script.
-
----
-
-## 9.2 Data loading
-
-- [ ] NOT_STARTED — Load students.
-- [ ] NOT_STARTED — Load courses.
-- [ ] NOT_STARTED — Load academic records.
-- [ ] NOT_STARTED — Load attendance.
-- [ ] NOT_STARTED — Load coursework.
-- [ ] NOT_STARTED — Load defined LMS slice.
-
----
-
-## 9.3 MongoDB demonstrations
-
-Implement representative examples of:
-
-- [ ] NOT_STARTED — CRUD.
-- [ ] NOT_STARTED — `$match`.
-- [ ] NOT_STARTED — `$group`.
-- [ ] NOT_STARTED — `$project`.
-- [ ] NOT_STARTED — `$sort`.
-- [ ] NOT_STARTED — `$lookup`.
-- [ ] NOT_STARTED — `$unwind`.
-- [ ] NOT_STARTED — `$setWindowFields`.
-- [ ] NOT_STARTED — `$facet`.
-- [ ] NOT_STARTED — Time-series queries.
-
----
-
-## 9.4 Validation
-
-- [ ] NOT_STARTED — Validate document counts.
-- [ ] NOT_STARTED — Validate indexes.
-- [ ] NOT_STARTED — Validate sample queries.
-- [ ] NOT_STARTED — Validate orphan behavior.
-- [ ] NOT_STARTED — Validate LMS slice.
-
-### Exit Criteria
-
-The MVP dataset exists in the intended storage layers and can be queried reliably.
-
----
-
-# 10. P4 — PySpark Processing Pipeline
-
-## Objective
-
-Implement the large-scale batch processing layer.
-
----
-
-# 10.1 Spark environment
-
-- [ ] NOT_STARTED — Configure PySpark local mode.
-- [ ] NOT_STARTED — Configure memory limits.
-- [ ] NOT_STARTED — Configure MongoDB Spark connectivity.
-- [ ] NOT_STARTED — Validate Spark startup.
-- [ ] NOT_STARTED — Validate Parquet reads.
-
----
-
-# 10.2 J1 — Clean & Validate
-
-- [ ] NOT_STARTED — Read raw datasets.
-- [ ] NOT_STARTED — Detect duplicates.
-- [ ] NOT_STARTED — Handle nulls.
-- [ ] NOT_STARTED — Normalize course identifiers.
-- [ ] NOT_STARTED — Handle timestamp inconsistencies.
-- [ ] NOT_STARTED — Detect orphan records.
-- [ ] NOT_STARTED — Detect out-of-range values.
-- [ ] NOT_STARTED — Produce quality metrics.
-- [ ] NOT_STARTED — Write cleaned output.
-
----
-
-# 10.3 J2 — Event Aggregation
-
-- [ ] NOT_STARTED — Aggregate LMS events by student.
-- [ ] NOT_STARTED — Aggregate by week.
-- [ ] NOT_STARTED — Calculate event counts.
-- [ ] NOT_STARTED — Calculate active days.
-- [ ] NOT_STARTED — Calculate activity categories.
-- [ ] NOT_STARTED — Preserve course context where required.
-
----
-
-# 10.4 J3 — Feature Table
-
-Create integrated student-level features.
-
-- [ ] NOT_STARTED — Join academic records.
-- [ ] NOT_STARTED — Join attendance.
-- [ ] NOT_STARTED — Join coursework.
-- [ ] NOT_STARTED — Join LMS features.
-- [ ] NOT_STARTED — Calculate marks trends.
-- [ ] NOT_STARTED — Calculate attendance metrics.
-- [ ] NOT_STARTED — Calculate LMS metrics.
-- [ ] NOT_STARTED — Calculate late-submission metrics.
-- [ ] NOT_STARTED — Create student feature table.
-
----
-
-# 10.5 J4 — Correlation
-
-- [ ] NOT_STARTED — Implement within-course normalization.
-- [ ] NOT_STARTED — Implement Spearman correlation.
-- [ ] NOT_STARTED — Implement optional Pearson correlation.
-- [ ] NOT_STARTED — Calculate attendance/marks association.
-- [ ] NOT_STARTED — Calculate LMS/marks association.
-- [ ] NOT_STARTED — Calculate late-submission/marks association.
-- [ ] NOT_STARTED — Calculate decoy relationship.
-- [ ] NOT_STARTED — Store correlation outputs.
-
----
-
-# 10.6 J5 — Trend Detection
-
-- [ ] NOT_STARTED — Implement rolling four-week windows.
-- [ ] NOT_STARTED — Compare current vs previous window.
-- [ ] NOT_STARTED — Detect engagement decline.
-- [ ] NOT_STARTED — Detect marks decline.
-- [ ] NOT_STARTED — Generate interpretable trend records.
-
----
-
-# 10.7 J6 — Risk Signals
-
-Implement exactly the five documented rules.
-
-- [ ] NOT_STARTED — Attendance signal.
-- [ ] NOT_STARTED — LMS decline signal.
-- [ ] NOT_STARTED — Late-submission signal.
-- [ ] NOT_STARTED — Marks-decline signal.
-- [ ] NOT_STARTED — Quiz-activity signal.
-- [ ] NOT_STARTED — Aggregate signal count.
-- [ ] NOT_STARTED — Store triggered-signal explanation.
-
----
-
-# 10.8 J7 — Publish
-
-- [ ] NOT_STARTED — Publish student features.
-- [ ] NOT_STARTED — Publish course metrics.
-- [ ] NOT_STARTED — Publish school summaries.
-- [ ] NOT_STARTED — Publish risk indicators.
-- [ ] NOT_STARTED — Validate published counts.
-- [ ] NOT_STARTED — Validate dashboard-readiness.
-
----
-
-# 10.9 J8 — Benchmark
-
-- [ ] NOT_STARTED — Define benchmark workload.
-- [ ] NOT_STARTED — Define dataset slices.
-- [ ] NOT_STARTED — Implement timing.
-- [ ] NOT_STARTED — Implement memory measurement where practical.
-- [ ] NOT_STARTED — Compare pandas.
-- [ ] NOT_STARTED — Compare MongoDB.
-- [ ] NOT_STARTED — Compare PySpark.
-- [ ] NOT_STARTED — Store measured results.
-
-### Exit Criteria
-
-The full analytical pipeline runs on the MVP dataset from raw input to gold collections.
-
----
-
-# 11. P5 — Analytics Validation
-
-## Objective
-
-Verify that the analytical system recovers intended synthetic relationships and produces correct rule-based outputs.
-
----
-
-## 11.1 Correlation recovery
-
-- [ ] NOT_STARTED — Compare planted vs observed relationships.
-- [ ] NOT_STARTED — Verify attendance/marks association.
-- [ ] NOT_STARTED — Verify LMS/marks association.
-- [ ] NOT_STARTED — Verify late-submission/marks relationship.
-- [ ] NOT_STARTED — Verify course difficulty effect/confounding behavior.
-- [ ] NOT_STARTED — Verify decoy does not appear artificially strong.
-
----
-
-## 11.2 Decliner/trend validation
-
-- [ ] NOT_STARTED — Verify planted decliners show intended trend patterns.
-- [ ] NOT_STARTED — Compare observed trends with generator ground truth.
-- [ ] NOT_STARTED — Record recovery rate.
-
----
-
-## 11.3 Risk validation
-
-- [ ] NOT_STARTED — Create boundary cases.
-- [ ] NOT_STARTED — Verify each signal independently.
-- [ ] NOT_STARTED — Verify signal counts.
-- [ ] NOT_STARTED — Verify no prediction output exists.
-
----
-
-# 12. P6 — Gold Layer
-
-## Objective
-
-Create dashboard-ready analytical collections.
-
-### Tasks
-
-- [ ] NOT_STARTED — Finalize `student_features`.
-- [ ] NOT_STARTED — Finalize `course_metrics`.
-- [ ] NOT_STARTED — Finalize `school_summary`.
-- [ ] NOT_STARTED — Finalize `risk_indicators`.
-- [ ] NOT_STARTED — Add required indexes.
-- [ ] NOT_STARTED — Validate aggregation grain.
-- [ ] NOT_STARTED — Validate completeness.
-- [ ] NOT_STARTED — Validate freshness metadata/run metadata where needed.
-
-### Exit Criteria
-
-The dashboard can operate primarily against gold/serving data without repeatedly executing expensive raw-data processing.
-
----
-
-# 13. P7 — Streamlit Dashboard
-
-## Objective
-
-Build the role-aware analytical interface.
-
----
-
-## 13.1 Authentication
-
-- [ ] NOT_STARTED — Create dummy user configuration.
-- [ ] NOT_STARTED — Create login page.
-- [ ] NOT_STARTED — Create session state.
-- [ ] NOT_STARTED — Implement logout.
-- [ ] NOT_STARTED — Implement role resolution.
-
----
-
-## 13.2 Navigation
-
-- [ ] NOT_STARTED — Overview.
-- [ ] NOT_STARTED — Schools.
-- [ ] NOT_STARTED — Courses.
-- [ ] NOT_STARTED — Students.
-- [ ] NOT_STARTED — Analysis.
-- [ ] NOT_STARTED — Data Quality.
-
----
-
-## 13.3 University overview
-
-- [ ] NOT_STARTED — KPI cards.
-- [ ] NOT_STARTED — School comparison.
-- [ ] NOT_STARTED — Academic overview.
-- [ ] NOT_STARTED — Attendance overview.
-- [ ] NOT_STARTED — LMS overview.
-- [ ] NOT_STARTED — Trend summary.
-- [ ] NOT_STARTED — Risk summary.
-
----
-
-## 13.4 School/department view
-
-- [ ] NOT_STARTED — School summary.
-- [ ] NOT_STARTED — Department summary.
-- [ ] NOT_STARTED — Course breakdown.
-- [ ] NOT_STARTED — Trend view.
-- [ ] NOT_STARTED — Risk distribution.
-
----
-
-## 13.5 Course view
-
-- [ ] NOT_STARTED — Course metadata.
-- [ ] NOT_STARTED — Marks.
-- [ ] NOT_STARTED — Attendance.
-- [ ] NOT_STARTED — Coursework.
-- [ ] NOT_STARTED — LMS engagement.
-- [ ] NOT_STARTED — Trend.
-- [ ] NOT_STARTED — Association analysis.
-
----
-
-## 13.6 Student view
-
-- [ ] NOT_STARTED — Student profile.
-- [ ] NOT_STARTED — Academic summary.
-- [ ] NOT_STARTED — Attendance.
-- [ ] NOT_STARTED — Coursework.
-- [ ] NOT_STARTED — LMS engagement.
-- [ ] NOT_STARTED — Trends.
-- [ ] NOT_STARTED — Five-rule risk breakdown.
-
----
-
-## 13.7 Analysis view
-
-- [ ] NOT_STARTED — Correlation matrix.
-- [ ] NOT_STARTED — Factor comparison.
-- [ ] NOT_STARTED — Trend analysis.
-- [ ] NOT_STARTED — Ground-truth recovery.
-- [ ] NOT_STARTED — Methodology notes.
-
----
-
-## 13.8 Data-quality view
-
-- [ ] NOT_STARTED — Quality KPIs.
-- [ ] NOT_STARTED — Issue table.
-- [ ] NOT_STARTED — Injection vs detection.
-- [ ] NOT_STARTED — Cleaning results.
-
----
-
-## 13.9 Dashboard UX validation
-
-- [ ] NOT_STARTED — Empty states.
-- [ ] NOT_STARTED — Error states.
-- [ ] NOT_STARTED — Loading states.
-- [ ] NOT_STARTED — Scope-aware filters.
-- [ ] NOT_STARTED — Breadcrumbs/drill-down.
-- [ ] NOT_STARTED — Synthetic-data disclosure.
-- [ ] NOT_STARTED — Accessibility review.
-
-### Exit Criteria
-
-All core MVP views work against actual generated/gold data.
-
----
-
-# 14. P8 — Testing & Integration
-
-## Objective
-
-Ensure the project works as one system.
-
----
-
-## 14.1 Unit tests
-
-- [ ] NOT_STARTED — Configuration tests.
-- [ ] NOT_STARTED — Generator tests.
-- [ ] NOT_STARTED — Schema tests.
-- [ ] NOT_STARTED — Attendance tests.
-- [ ] NOT_STARTED — Coursework tests.
-- [ ] NOT_STARTED — Quality-injection tests.
-- [ ] NOT_STARTED — Risk-rule tests.
-- [ ] NOT_STARTED — Feature-calculation tests.
-
----
-
-## 14.2 Integration tests
-
-- [ ] NOT_STARTED — Generator → Parquet.
-- [ ] NOT_STARTED — Generator → MongoDB.
-- [ ] NOT_STARTED — Parquet → Spark.
-- [ ] NOT_STARTED — MongoDB → Spark.
-- [ ] NOT_STARTED — Spark → Gold.
-- [ ] NOT_STARTED — Gold → Dashboard data layer.
-
----
-
-## 14.3 End-to-end test
-
-Run:
-
-```text
-generate
-→ load
-→ clean
-→ aggregate
-→ feature
-→ correlation
-→ trends
-→ risk
-→ publish
-→ dashboard
-```
-
-using the MVP dataset.
-
-### Exit Criteria
-
-The complete MVP pipeline can be reproduced from a clean environment.
-
----
-
-# 15. P9 — Benchmarking
-
-## Objective
-
-Demonstrate why multiple technologies are used.
-
-### Benchmark workloads
-
-- [ ] NOT_STARTED — Weekly LMS engagement aggregation.
-- [ ] NOT_STARTED — Appropriate full-set workload.
-- [ ] NOT_STARTED — Full feature-table join.
-- [ ] NOT_STARTED — Equivalent pandas workload where feasible.
-- [ ] NOT_STARTED — Equivalent MongoDB aggregation where feasible.
-- [ ] NOT_STARTED — Equivalent Spark workload.
-
-### Metrics
-
-- [ ] NOT_STARTED — Wall-clock time.
-- [ ] NOT_STARTED — Peak memory where practical.
-- [ ] NOT_STARTED — Dataset size.
-- [ ] NOT_STARTED — Environment details.
-
-### Reporting
-
-- [ ] NOT_STARTED — Generate benchmark report.
-- [ ] NOT_STARTED — Add benchmark dashboard/report section.
-- [ ] NOT_STARTED — Document workload limitations.
-
----
-
-# 16. P10 — Full-Scale Dataset
-
-## Objective
-
-Scale the validated pipeline to the intended project target.
-
-Target:
-
-```text
-~12,000 students
-2 academic years
-4 semesters
-~6 schools / ~18 departments / ~40 programs
-~250 courses
-~70M LMS events
-```
-
-These are target values. Actual generated counts and measured storage/performance must be recorded after the generator and pipeline run.
-
----
-
-## 16.1 Pre-scale checklist
-
-Before full generation:
-
-- [ ] MVP end-to-end pipeline passes.
-- [ ] Generator is reproducible.
-- [ ] Schema is stable.
-- [ ] MongoDB indexes validated.
-- [ ] Spark local mode validated.
-- [ ] Memory behavior measured.
-- [ ] Dashboard reads gold data correctly.
-- [ ] Recovery test passes.
-- [ ] Benchmark framework works.
-
-Do not start full-scale generation before these checks are substantially complete.
-
----
-
-## 16.2 Full generation
-
-- [ ] NOT_STARTED — Generate complete hierarchy.
-- [ ] NOT_STARTED — Generate complete student population.
-- [ ] NOT_STARTED — Generate four semesters.
-- [ ] NOT_STARTED — Generate full LMS Parquet.
-- [ ] NOT_STARTED — Generate MongoDB LMS slice.
-- [ ] NOT_STARTED — Generate manifests.
-- [ ] NOT_STARTED — Record actual counts.
-- [ ] NOT_STARTED — Record actual disk usage.
-
----
-
-## 16.3 Full processing
-
-- [ ] NOT_STARTED — Run J1.
-- [ ] NOT_STARTED — Run J2.
-- [ ] NOT_STARTED — Run J3.
-- [ ] NOT_STARTED — Run J4.
-- [ ] NOT_STARTED — Run J5.
-- [ ] NOT_STARTED — Run J6.
-- [ ] NOT_STARTED — Run J7.
-- [ ] NOT_STARTED — Run J8.
-
----
-
-## 16.4 Full-scale validation
-
-- [ ] NOT_STARTED — Validate counts.
-- [ ] NOT_STARTED — Validate quality.
-- [ ] NOT_STARTED — Validate recovery.
-- [ ] NOT_STARTED — Validate risk signals.
-- [ ] NOT_STARTED — Validate gold collections.
-- [ ] NOT_STARTED — Validate dashboard performance.
-- [ ] NOT_STARTED — Measure memory usage.
-- [ ] NOT_STARTED — Measure processing times.
-
----
-
-# 17. P11 — Finalization
-
-## Objective
-
-Prepare Acadexa for final demonstration, submission and viva.
-
----
-
-## 17.1 Documentation
-
-- [ ] NOT_STARTED — Finalize README.
-- [ ] NOT_STARTED — Finalize PRD.
-- [ ] NOT_STARTED — Finalize architecture.
-- [ ] NOT_STARTED — Finalize tech stack.
-- [ ] NOT_STARTED — Finalize features.
-- [ ] NOT_STARTED — Finalize rules.
-- [ ] NOT_STARTED — Finalize design.
-- [ ] NOT_STARTED — Finalize tasks.
-- [ ] NOT_STARTED — Finalize memory.
-- [ ] NOT_STARTED — Document measured dataset size.
-- [ ] NOT_STARTED — Document measured performance.
-- [ ] NOT_STARTED — Document benchmark results.
-- [ ] NOT_STARTED — Document recovery results.
-
----
-
-## 17.2 Final report
-
-Include:
-
-- [ ] NOT_STARTED — Problem statement.
-- [ ] NOT_STARTED — Objectives.
-- [ ] NOT_STARTED — Architecture.
-- [ ] NOT_STARTED — Dataset generation.
-- [ ] NOT_STARTED — MongoDB design.
-- [ ] NOT_STARTED — Spark processing.
-- [ ] NOT_STARTED — Analytics.
-- [ ] NOT_STARTED — Risk indicator.
-- [ ] NOT_STARTED — Dashboard.
-- [ ] NOT_STARTED — Data quality.
-- [ ] NOT_STARTED — Benchmarking.
-- [ ] NOT_STARTED — Recovery test.
-- [ ] NOT_STARTED — Limitations.
-- [ ] NOT_STARTED — Future scope.
-
----
-
-## 17.3 Demo preparation
-
-- [ ] NOT_STARTED — Prepare login demonstration.
-- [ ] NOT_STARTED — Demonstrate university overview.
-- [ ] NOT_STARTED — Demonstrate school/department drill-down.
-- [ ] NOT_STARTED — Demonstrate course analytics.
-- [ ] NOT_STARTED — Demonstrate student integrated view.
-- [ ] NOT_STARTED — Demonstrate risk signal explanation.
-- [ ] NOT_STARTED — Demonstrate correlation.
-- [ ] NOT_STARTED — Demonstrate trend detection.
-- [ ] NOT_STARTED — Demonstrate data-quality page.
-- [ ] NOT_STARTED — Demonstrate MongoDB operations.
-- [ ] NOT_STARTED — Demonstrate Spark jobs.
-- [ ] NOT_STARTED — Demonstrate benchmark.
-- [ ] NOT_STARTED — Demonstrate recovery test.
-
----
-
-# 18. Two-Person Team Split
-
-The split should follow functional ownership while keeping both members familiar with the complete architecture.
-
-## Track A — Data Engineering & Analytics
-
-Primary ownership:
-
-```text
-Configuration
-Generator
-MongoDB
-Parquet
-PySpark
-Analytics
-Gold layer
-Benchmarks
-```
-
-Tasks:
-
-- [ ] NOT_STARTED — Own generator implementation.
-- [ ] NOT_STARTED — Own MongoDB loading/indexing.
-- [ ] NOT_STARTED — Own J1–J8.
-- [ ] NOT_STARTED — Own recovery test.
-- [ ] NOT_STARTED — Own benchmark pipeline.
-
----
-
-## Track B — Application & Validation
-
-Primary ownership:
-
-```text
-Dashboard
-Role/login
-Visualization
-Integration
-Testing
-Documentation/demo
-```
-
-Tasks:
-
-- [ ] NOT_STARTED — Own Streamlit application.
-- [ ] NOT_STARTED — Own dashboard role/scope.
-- [ ] NOT_STARTED — Own visualization system.
-- [ ] NOT_STARTED — Own integration tests.
-- [ ] NOT_STARTED — Own dashboard validation.
-- [ ] NOT_STARTED — Own demo/report preparation.
-
----
-
-## Shared responsibilities
-
-Both members should participate in:
-
-- [ ] NOT_STARTED — Schema review.
-- [ ] NOT_STARTED — MVP vertical slice.
-- [ ] NOT_STARTED — Architecture decisions.
-- [ ] NOT_STARTED — Recovery validation.
-- [ ] NOT_STARTED — Full-scale validation.
-- [ ] NOT_STARTED — Final presentation/viva.
-
----
-
-# 19. Dependency Graph
-
-The critical dependency chain is:
-
-```text
-Schema
-  ↓
-Generator
-  ↓
-MVP Data
-  ↓
-MongoDB / Parquet
-  ↓
-Spark J1
-  ↓
-Spark J2
-  ↓
-Spark J3
-  ↓
-J4 / J5 / J6
-  ↓
-J7 Gold
-  ↓
-Dashboard
-  ↓
-End-to-End Validation
-  ↓
-Full Scale
-  ↓
-Benchmark / Finalization
-```
-
-Some work can proceed in parallel.
-
-For example:
-
-```text
-Generator ───────────────┐
-                         ├──→ Integration
-Dashboard shell ─────────┤
-                         │
-Mongo schema ────────────┘
-```
-
-The dashboard shell does not need to wait for the full dataset, but dashboard analytical values should not be fabricated.
-
----
-
-# 20. MVP Definition
-
-The MVP is complete when all of the following work together:
-
-```text
-One school
-+
-One semester
-+
-Synthetic generator
-+
-MongoDB
-+
-Parquet
-+
-Spark cleaning
-+
-Feature engineering
-+
-At least core analytics
-+
-Five-rule risk signals
-+
-Gold collections
-+
-Streamlit
-+
-Dummy login
-+
-At least one role-aware flow
-+
-Data-quality reporting
-```
-
-The MVP must use actual generated data.
-
-Mock UI data may be used temporarily during interface development, but it must be replaced before the MVP is declared complete.
-
----
-
-# 21. MVP Gate
-
-Do not scale to the full dataset until the following questions can be answered "yes":
-
-- [ ] Can the dataset be regenerated using the same seed?
-- [ ] Are the schemas stable?
-- [ ] Can MongoDB load and query the data?
-- [ ] Can Spark process it successfully?
-- [ ] Can gold collections be produced?
-- [ ] Does the dashboard read gold data?
-- [ ] Does the five-rule risk indicator work?
-- [ ] Can the planted relationships be recovered?
-- [ ] Are injected quality problems measurable?
-- [ ] Are the main tests passing?
-
----
-
-# 22. Full-Scale Gate
-
-Before final demonstration:
-
-- [ ] Full target dataset generated.
-- [ ] Actual counts recorded.
-- [ ] Actual disk usage recorded.
-- [ ] Actual MongoDB size recorded.
-- [ ] Actual Spark execution times recorded.
-- [ ] Peak memory measured where practical.
-- [ ] Full gold layer generated.
-- [ ] Dashboard tested against full data.
-- [ ] Benchmark results captured.
-- [ ] Recovery test documented.
-- [ ] No critical test failures.
-
----
-
-# 23. Task Priorities
-
-Use:
-
-```text
-P0 = Blocks the entire project
-P1 = Required for MVP
-P2 = Required for full project
-P3 = Enhancement
-```
-
-Examples:
-
-### P0
-
-```text
-Schema contract
-Generator foundation
-MongoDB connection
-Spark environment
-```
-
-### P1
-
-```text
-MVP pipeline
-Five-rule risk indicator
-Gold collections
-Dashboard core
-```
-
-### P2
-
-```text
-Full-scale generation
-Benchmarking
-Recovery reporting
-Advanced analytical views
-```
-
-### P3
-
-```text
-UI polish
-Additional visualizations
-Convenience features
-```
-
----
-
-# 24. What Not to Build Before MVP
-
-Do not prioritize the following before the vertical slice works:
-
-- production authentication,
-- cloud deployment,
-- Kafka,
-- streaming,
-- ML prediction,
-- advanced recommendation systems,
-- mobile application,
-- complex notification systems,
-- unnecessary microservices,
-- external institutional integrations.
-
-These are outside the current core scope.
-
----
-
-# 25. Progress Tracking Rules
-
-When a task is completed:
-
-1. Change its status.
-2. Verify the result.
-3. Update dependent tasks if unblocked.
-4. Update documentation if the implementation changed a requirement.
-5. Record significant measured results.
-
-Do not mark a task `DONE` simply because code was written.
-
----
-
-# 26. Blocker Rules
-
-When blocked, record:
-
-```text
-BLOCKER:
-Reason:
-Affected tasks:
-Required decision/action:
-```
-
-Examples:
-
-```text
-BLOCKER:
-MongoDB connection unavailable.
-
-Affected:
-P3, P4, P7.
-
-Required:
-Restore local MongoDB service.
-```
-
-Avoid working around blockers with undocumented architectural changes.
-
----
-
-# 27. Milestones
-
-## M1 — Repository Ready
-
-```text
-Documentation
-+
-Project structure
-+
-Configuration foundation
-```
-
-## M2 — MVP Data Ready
-
-```text
-One school
-+
-One semester
-+
-Synthetic data
-+
-MongoDB
-+
-Parquet
-```
-
-## M3 — MVP Pipeline Ready
-
-```text
-Generator
-→ Mongo/Parquet
-→ Spark
-→ Gold
-```
-
-## M4 — MVP Dashboard Ready
-
-```text
-Login
-+
-Roles
-+
-Overview
-+
-Course
-+
-Student
-+
-Risk
-```
-
-## M5 — Analytical Validation Ready
-
-```text
-Correlation
-+
-Trends
-+
-Recovery
-+
-Data quality
-```
-
-## M6 — Full Scale Ready
-
-```text
-12k students
-+
-2 academic years
-+
-~70M LMS events
-```
-
-## M7 — Final Submission Ready
-
-```text
-Working system
-+
-Benchmarks
-+
-Report
-+
-Documentation
-+
-Demo
-+
-Viva preparation
-```
-
----
-
-# 28. Current Progress Baseline
-
-At the time this roadmap was created:
-
-```text
-Documentation foundation:
-████████████████████░  mostly established
-
-Repository:
-██████████░░░░░░░░░░  foundation established
-
-Implementation:
-░░░░░░░░░░░░░░░░░░░░  not yet started in this roadmap
-
-MVP:
-░░░░░░░░░░░░░░░░░░░░  not started
-
-Full-scale pipeline:
-░░░░░░░░░░░░░░░░░░░░  not started
-```
-
-The task statuses in this file should be updated as actual implementation progresses.
-
----
-
-# 29. Recommended Immediate Execution Order
-
-The next implementation actions should be:
-
-```text
-1. Create README.md
-2. Create .gitignore
-3. Create .env.example
-4. Create Python project/package skeleton
-5. Create configuration files
-6. Freeze schema contract
-7. Implement one-school/one-semester generator
-8. Validate generated data
-9. Load MongoDB
-10. Write/read Parquet
-11. Implement J1
-12. Implement J2
-13. Implement J3
-14. Implement J4/J5/J6
-15. Implement J7
-16. Build MVP dashboard
-17. Run end-to-end MVP
-18. Run recovery/quality validation
-19. Implement benchmark framework
-20. Scale to full dataset
-21. Measure actual resources/performance
-22. Finalize report and demo
-```
-
----
-
-# 30. Final Task Rule
-
-The project should always prefer:
-
-```text
-Working vertical slice
-        >
-unfinished collection of modules
-```
-
-and:
-
-```text
-measured result
-        >
-assumed result
-```
-
-and:
-
-```text
-documented decision
-        >
-silent architectural change
-```
-
-and:
-
-```text
-explainable analytical signal
-        >
-unsupported AI prediction
-```
-
----
-
-# 31. Completion Definition
-
-Acadexa is ready for final submission when:
-
-```text
-Synthetic data generation is reproducible
-        AND
-MongoDB and Parquet layers work
-        AND
-PySpark processes the intended scale
-        AND
-Gold analytical collections are generated
-        AND
-Correlation/trend/risk analytics are validated
-        AND
-Five-rule risk indicators are explainable
-        AND
-Streamlit dashboard works with dummy login and roles
-        AND
-Data quality is measured
-        AND
-Benchmarks are measured
-        AND
-Ground-truth recovery is documented
-        AND
-Final documentation/report/demo are complete
-```
-
-The target scale is an engineering objective, not a guaranteed number until the actual generator and pipeline have been executed and measured.
+Everything after that is scaling, validation and refinement of a pipeline that is already proven to work.
