@@ -1,0 +1,97 @@
+# RAS University hierarchy — schools, departments, programs.
+# Configuration-driven: generator and pipeline must read this file,
+# never embed hierarchy values in source code.
+
+[university]
+id = "RAS"
+name = "RAS University"
+structure_reference = "MIT-WPU (fictional institution, synthetic data only)"
+
+# ── 6 schools ──────────────────────────────────────────
+[schools]
+cet = { code = "CET", name = "School of Computer Engineering & Technology" }
+set = { code = "SET", name = "School of Engineering & Technology" }
+sci = { code = "SCI", name = "School of Sciences" }
+som = { code = "SOM", name = "School of Management" }
+sol = { code = "SOL", name = "School of Law" }
+lad = { code = "LAD", name = "School of Liberal Arts & Design" }
+
+# ── 18 departments ─────────────────────────────────────
+[departments]
+csa = { school = "cet", code = "CSA", name = "Computer Science and Applications" }
+itl = { school = "cet", code = "ITL", name = "Information Technology" }
+cyb = { school = "cet", code = "CYB", name = "Cyber Security & Digital Forensics" }
+
+mec = { school = "set", code = "MEC", name = "Mechanical Engineering" }
+civ = { school = "set", code = "CIV", name = "Civil Engineering" }
+ext = { school = "set", code = "EXT", name = "Electronics & Telecommunication Engineering" }
+
+mat = { school = "sci", code = "MAT", name = "Mathematics & Statistics" }
+phy = { school = "sci", code = "PHY", name = "Physics" }
+chem = { school = "sci", code = "CHE", name = "Chemistry" }
+
+mgt = { school = "som", code = "MGT", name = "Management Studies" }
+eco = { school = "som", code = "ECO", name = "Economics & Commerce" }
+bda = { school = "som", code = "BDA", name = "Business Analytics" }
+
+law = { school = "sol", code = "LAW", name = "Legal Studies" }
+pol = { school = "sol", code = "POL", name = "Policy & Governance" }
+crm = { school = "sol", code = "CRM", name = "Criminology & Forensic Studies" }
+
+des = { school = "lad", code = "DES", name = "Design" }
+med = { school = "lad", code = "MED", name = "Media & Communication" }
+hum = { school = "lad", code = "HUM", name = "Humanities & Social Sciences" }
+
+# ── 40 programs ────────────────────────────────────────
+[programs]
+# School of Computer Engineering & Technology
+btech_cse_ai_ds = { department = "csa", degree = "B.Tech", name = "B.Tech CSE (AI & DS)" }
+btech_cse_full_stack = { department = "csa", degree = "B.Tech", name = "B.Tech CSE (Full Stack)" }
+mtech_cse_data_science = { department = "csa", degree = "M.Tech", name = "M.Tech CSE (Data Science)" }
+btech_it = { department = "itl", degree = "B.Tech", name = "B.Tech Information Technology" }
+btech_it_business_systems = { department = "itl", degree = "B.Tech", name = "B.Tech IT (Business Systems)" }
+btech_cse_cyber_security = { department = "cyb", degree = "B.Tech", name = "B.Tech CSE (Cyber Security)" }
+btech_cse_blockchain = { department = "cyb", degree = "B.Tech", name = "B.Tech CSE (Blockchain)" }
+
+# School of Engineering & Technology
+btech_mechanical = { department = "mec", degree = "B.Tech", name = "B.Tech Mechanical Engineering" }
+btech_mechanical_robotics = { department = "mec", degree = "B.Tech", name = "B.Tech Mechanical (Robotics & Automation)" }
+mtech_mechanical_design = { department = "mec", degree = "M.Tech", name = "M.Tech Mechanical (Design)" }
+btech_civil = { department = "civ", degree = "B.Tech", name = "B.Tech Civil Engineering" }
+btech_civil_infrastructure = { department = "civ", degree = "B.Tech", name = "B.Tech Civil (Sustainable Infrastructure)" }
+btech_entc = { department = "ext", degree = "B.Tech", name = "B.Tech Electronics & Telecommunication" }
+btech_entc_vlsi = { department = "ext", degree = "B.Tech", name = "B.Tech E&TC (VLSI Design)" }
+
+# School of Sciences
+bsc_mathematics = { department = "mat", degree = "B.Sc", name = "B.Sc Mathematics (Hons)" }
+bsc_data_science = { department = "mat", degree = "B.Sc", name = "B.Sc Data Science & Analytics" }
+bsc_physics = { department = "phy", degree = "B.Sc", name = "B.Sc Physics (Hons)" }
+msc_physics = { department = "phy", degree = "M.Sc", name = "M.Sc Physics" }
+bsc_chemistry = { department = "chem", degree = "B.Sc", name = "B.Sc Chemistry (Hons)" }
+msc_chemistry = { department = "chem", degree = "M.Sc", name = "M.Sc Chemistry" }
+
+# School of Management
+bba = { department = "mgt", degree = "BBA", name = "BBA (Hons)" }
+mba = { department = "mgt", degree = "MBA", name = "MBA" }
+b_com_hons = { department = "eco", degree = "B.Com", name = "B.Com (Hons)" }
+ba_economics = { department = "eco", degree = "B.A", name = "B.A Economics (Hons)" }
+bba_data_analytics = { department = "bda", degree = "BBA", name = "BBA (Data Analytics)" }
+mba_business_analytics = { department = "bda", degree = "MBA", name = "MBA (Business Analytics)" }
+
+# School of Law
+ba_llb_hons = { department = "law", degree = "BA LLB", name = "BA LLB (Hons)" }
+bba_llb_hons = { department = "law", degree = "BBA LLB", name = "BBA LLB (Hons)" }
+llb = { department = "law", degree = "LLB", name = "LLB" }
+llm_constitutional = { department = "pol", degree = "LLM", name = "LLM (Constitutional & Administrative Law)" }
+llm_international = { department = "pol", degree = "LLM", name = "LLM (International Law & Policy)" }
+ba_criminology = { department = "crm", degree = "B.A", name = "B.A Criminology & Forensic Science" }
+
+# School of Liberal Arts & Design
+bdes_interaction = { department = "des", degree = "B.Des", name = "B.Des Interaction Design" }
+bdes_graphic_digital = { department = "des", degree = "B.Des", name = "B.Des Graphic & Digital Media" }
+bdes_film_animation = { department = "des", degree = "B.Des", name = "B.Des Film & Animation" }
+ba_mass_communication = { department = "med", degree = "B.A", name = "B.A Mass Media & Communication" }
+ba_film_television = { department = "med", degree = "B.A", name = "B.A Film & Television Production" }
+ba_psychology = { department = "hum", degree = "B.A", name = "B.A Psychology (Hons)" }
+ba_english = { department = "hum", degree = "B.A", name = "B.A English (Hons)" }
+ba_sociology = { department = "hum", degree = "B.A", name = "B.A Sociology (Hons)" }

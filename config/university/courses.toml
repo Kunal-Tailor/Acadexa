@@ -1,0 +1,112 @@
+# RAS University — initial course catalog.
+# Starter catalog only; the full ~250-course target is extended through
+# configuration as the project scales. Courses attach to departments.
+
+[courses]
+# Computer Science and Applications
+CSA101 = { title = "Programming Fundamentals", department = "csa" }
+CSA102 = { title = "Data Structures & Algorithms", department = "csa" }
+CSA103 = { title = "Database Systems", department = "csa" }
+CSA104 = { title = "Machine Learning Foundations", department = "csa" }
+
+# Information Technology
+ITL101 = { title = "Computer Networks", department = "itl" }
+ITL102 = { title = "Cloud Computing Fundamentals", department = "itl" }
+ITL103 = { title = "Operating Systems", department = "itl" }
+ITL104 = { title = "Web Technologies", department = "itl" }
+
+# Cyber Security & Digital Forensics
+CYB101 = { title = "Cyber Security Fundamentals", department = "cyb" }
+CYB102 = { title = "Cryptography", department = "cyb" }
+CYB103 = { title = "Digital Forensics", department = "cyb" }
+CYB104 = { title = "Network Security", department = "cyb" }
+
+# Mechanical Engineering
+MEC101 = { title = "Engineering Mechanics", department = "mec" }
+MEC102 = { title = "Thermodynamics", department = "mec" }
+MEC103 = { title = "Machine Design", department = "mec" }
+MEC104 = { title = "Robotics & Automation", department = "mec" }
+
+# Civil Engineering
+CIV101 = { title = "Structural Analysis", department = "civ" }
+CIV102 = { title = "Geotechnical Engineering", department = "civ" }
+CIV103 = { title = "Transportation Engineering", department = "civ" }
+CIV104 = { title = "Sustainable Construction", department = "civ" }
+
+# Electronics & Telecommunication Engineering
+EXT101 = { title = "Circuit Analysis", department = "ext" }
+EXT102 = { title = "Signals & Systems", department = "ext" }
+EXT103 = { title = "VLSI Design Fundamentals", department = "ext" }
+EXT104 = { title = "Embedded Systems", department = "ext" }
+
+# Mathematics & Statistics
+MAT101 = { title = "Linear Algebra", department = "mat" }
+MAT102 = { title = "Calculus & Differential Equations", department = "mat" }
+MAT103 = { title = "Probability & Statistics", department = "mat" }
+MAT104 = { title = "Discrete Mathematics", department = "mat" }
+
+# Physics
+PHY101 = { title = "Classical Mechanics", department = "phy" }
+PHY102 = { title = "Electromagnetism", department = "phy" }
+PHY103 = { title = "Quantum Physics", department = "phy" }
+PHY104 = { title = "Computational Physics", department = "phy" }
+
+# Chemistry
+CHE101 = { title = "Organic Chemistry", department = "chem" }
+CHE102 = { title = "Physical Chemistry", department = "chem" }
+CHE103 = { title = "Inorganic Chemistry", department = "chem" }
+CHE104 = { title = "Analytical Chemistry", department = "chem" }
+
+# Management Studies
+MGT101 = { title = "Principles of Management", department = "mgt" }
+MGT102 = { title = "Organizational Behavior", department = "mgt" }
+MGT103 = { title = "Marketing Management", department = "mgt" }
+MGT104 = { title = "Financial Accounting", department = "mgt" }
+
+# Economics & Commerce
+ECO101 = { title = "Microeconomics", department = "eco" }
+ECO102 = { title = "Macroeconomics", department = "eco" }
+ECO103 = { title = "Business Statistics", department = "eco" }
+ECO104 = { title = "Corporate Finance", department = "eco" }
+
+# Business Analytics
+BDA101 = { title = "Data Analytics Foundations", department = "bda" }
+BDA102 = { title = "Business Intelligence", department = "bda" }
+BDA103 = { title = "Data Visualization", department = "bda" }
+BDA104 = { title = "Decision Analysis", department = "bda" }
+
+# Legal Studies
+LAW101 = { title = "Legal Methods", department = "law" }
+LAW102 = { title = "Law of Contract", department = "law" }
+LAW103 = { title = "Constitutional Law", department = "law" }
+LAW104 = { title = "Jurisprudence", department = "law" }
+
+# Policy & Governance
+POL101 = { title = "Public Policy Analysis", department = "pol" }
+POL102 = { title = "International Law & Organizations", department = "pol" }
+POL103 = { title = "Governance & Ethics", department = "pol" }
+POL104 = { title = "Human Rights Law", department = "pol" }
+
+# Criminology & Forensic Studies
+CRM101 = { title = "Criminology Foundations", department = "crm" }
+CRM102 = { title = "Forensic Science Techniques", department = "crm" }
+CRM103 = { title = "Criminal Law & Procedure", department = "crm" }
+CRM104 = { title = "Investigation & Evidence", department = "crm" }
+
+# Design
+DES101 = { title = "Design Thinking", department = "des" }
+DES102 = { title = "Interaction Design Fundamentals", department = "des" }
+DES103 = { title = "Typography & Visual Systems", department = "des" }
+DES104 = { title = "Human-Centered Design", department = "des" }
+
+# Media & Communication
+MED101 = { title = "Media & Communication Theory", department = "med" }
+MED102 = { title = "Journalism Practice", department = "med" }
+MED103 = { title = "Film & Television Production", department = "med" }
+MED104 = { title = "Digital Media Strategy", department = "med" }
+
+# Humanities & Social Sciences
+HUM101 = { title = "Psychology Foundations", department = "hum" }
+HUM102 = { title = "English Literature & Criticism", department = "hum" }
+HUM103 = { title = "Sociological Thought", department = "hum" }
+HUM104 = { title = "Technical Communication", department = "hum" }
