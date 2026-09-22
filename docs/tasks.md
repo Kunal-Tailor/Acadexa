@@ -117,7 +117,7 @@ Build the configuration layer before data generation or database implementation 
 - [x] 2.5 — Create risk configuration containing the five approved thresholds/rules only: attendance, LMS decline, late submissions, marks decline and quiz bottom-quartile activity.
   Commit: `Update - 2.5 - define risk signal configuration`
 
-- [ ] 2.6 — Add configuration validation and tests for required fields, valid ranges and incompatible configuration values. Do not generate data yet.
+- [x] 2.6 — Add configuration validation and tests for required fields, valid ranges and incompatible configuration values. Do not generate data yet.
   Commit: `Update - 2.6 - validate project configuration`
 
 **Checkpoint:** All project-level values needed by generation, analytics and risk logic are configuration-driven.
