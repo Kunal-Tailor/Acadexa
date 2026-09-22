@@ -98,6 +98,33 @@ streamlit run src/acadexa/dashboard/app.py
 
 ---
 
+## Repository Structure
+
+```text
+acadexa/
+├── docs/          # project knowledge (requirements, architecture, rules…)
+├── config/        # non-secret configuration (university, generator, risk…)
+├── src/acadexa/   # application code (generator, database, processing, dashboard…)
+├── scripts/       # execution entry points
+├── tests/         # unit / integration tests & fixtures
+├── data/          # generated & local data (mostly git-ignored)
+├── reports/       # generated analytical outputs
+├── logs/          # runtime logs (git-ignored)
+└── notebooks/     # exploratory work
+```
+
+Large generated datasets are never committed — the repository contains the machinery to generate them. Full layout: [`docs/folder_structure.md`](docs/folder_structure.md).
+
+---
+
+## Scope
+
+**In scope:** synthetic data generation, Parquet/MongoDB storage, PySpark batch analytics (association, trends, rule-based signals), gold-layer publishing, benchmarking, role-aware Streamlit dashboard.
+
+**Out of scope:** Kafka, Spark Structured Streaming, live streaming, ML/failure prediction, real student or institutional data, production IAM, cloud deployment, loading the full LMS dataset into MongoDB.
+
+---
+
 ## Documentation
 
 The `docs/` directory is the project's source of truth:
@@ -123,8 +150,6 @@ The `docs/` directory is the project's source of truth:
 - [x] Requirements, architecture, tech stack, features, design, rules, roadmap
 - [ ] **Next:** one-school, one-semester end-to-end vertical slice (MVP)
 - [ ] Scale to full target dataset
-
-**Out of scope:** Kafka, streaming, ML prediction, cloud deployment, real data.
 
 ---
 
