@@ -111,7 +111,7 @@ Build the configuration layer before data generation or database implementation 
 - [x] 2.3 — Create academic-period configuration for two academic years and four semesters, including identifiers and dates required by the generator.
   Commit: `Update - 2.3 - define academic period configuration`
 
-- [ ] 2.4 — Create generator configuration containing seed, target population, generation scale, behavioral parameters, course difficulty settings and data-quality injection rates.
+- [x] 2.4 — Create generator configuration containing seed, target population, generation scale, behavioral parameters, course difficulty settings and data-quality injection rates.
   Commit: `Update - 2.4 - define synthetic generator configuration`
 
 - [ ] 2.5 — Create risk configuration containing the five approved thresholds/rules only: attendance, LMS decline, late submissions, marks decline and quiz bottom-quartile activity.

@@ -1,0 +1,86 @@
+# RAS University synthetic generator configuration.
+# All generator behavior must read these values — none may be hard-coded
+# in source. Effect sizes marked "tunable" are engineering parameters to be
+# calibrated during Phase 4; documented targets (rates, scale) must match
+# docs/prd.md and docs/memory.md.
+
+# ── Seed ───────────────────────────────────────────────
+# Same seed + same config => reproducible dataset (rules.md §8.2).
+[generator]
+seed = 42
+
+# ── Target population & generation scale ───────────────
+# Engineering targets (docs/prd.md §7), not measured results.
+[scale]
+target_students = 12000
+target_courses = 250              # full target; initial catalog in config/university/courses.toml is smaller
+courses_per_student_per_semester = 6
+target_lms_events = 70000000
+lms_events_per_student_per_day = 15   # documented assumption (~15/day)
+teaching_days_per_academic_year = 200
+
+# Student population split across the six schools; must sum to target_students.
+[scale.school_population]
+cet = 2600
+set = 3000
+som = 2400
+lad = 2200
+sci = 1000
+sol = 800
+
+# ── Student behavioral traits (docs/prd.md §13.1) ──────
+# Latent traits in [0, 1]; attendance, marks, LMS activity and submission
+# timing are drawn from these with noise and course-difficulty effects.
+[behavior.student_traits]
+ability = { mean = 0.65, std = 0.15 }
+diligence = { mean = 0.60, std = 0.18 }
+engagement = { mean = 0.55, std = 0.20 }
+observation_noise_std = 0.10   # tunable: controlled noise on generated outcomes
+
+# ── Decliner population (docs/memory.md §6: ~8%) ───────
+# Engagement fades during the semester; marks drop a few weeks later.
+[behavior.decliners]
+rate = 0.08
+start_week = 5                  # tunable: approximate decline start week
+weekly_engagement_decay = 0.07  # tunable: fraction of engagement lost per week
+marks_decline_lag_weeks = 3     # tunable: marks follow engagement decline
+
+# ── Weekly & semester rhythms (original_idea §7.1) ─────
+# Fewer weekend events, spikes before deadlines/exams, mid-semester dip.
+[behavior.rhythms]
+weekend_event_factor = 0.40          # tunable
+mid_semester_dip_factor = 0.80       # tunable
+pre_deadline_spike_factor = 1.60     # tunable
+pre_exam_spike_factor = 1.80         # tunable
+
+# ── School behavior profiles ───────────────────────────
+# Multipliers shift generated behavior per school (original_idea §5.2).
+# Values near 1.0 = baseline; all tunable.
+[school_profiles]
+cet = { lms_activity = 1.40, attendance = 1.00, quiz_activity = 1.50, late_submission = 1.00 }  # very high LMS/quiz, coding-style assessments
+set = { lms_activity = 0.90, attendance = 1.00, quiz_activity = 1.00, late_submission = 1.10 }  # assignment/lab heavy, moderate LMS
+som = { lms_activity = 1.00, attendance = 1.15, quiz_activity = 0.80, late_submission = 1.10 }  # attendance-sensitive, case/assignment heavy
+lad = { lms_activity = 1.00, attendance = 0.95, quiz_activity = 0.50, late_submission = 1.20 }  # reading/forum heavy, fewer quizzes, lumpy submissions
+sci = { lms_activity = 1.00, attendance = 1.10, quiz_activity = 1.00, late_submission = 0.95 }  # steady, exam-weighted
+sol = { lms_activity = 0.85, attendance = 1.05, quiz_activity = 0.60, late_submission = 1.00 }  # reading heavy, fewer quizzes
+
+# ── Course difficulty (docs/memory.md §6, §7) ──────────
+# Difficulty is a confounder that shifts marks/attendance together.
+[course_difficulty]
+easy_share = 0.30
+medium_share = 0.45
+hard_share = 0.25
+max_score_drag = 12        # tunable: max marks penalty at hardest level (points)
+attendance_drag = 0.08     # tunable: max attendance probability penalty at hardest level
+
+# ── Data-quality injection rates (docs/memory.md §12) ──
+# Approximate rates; exact injected counts go to the injection manifest.
+# Key identifiers must never be nulled (rules.md §10.1).
+[data_quality_injection]
+duplicate_lms_events = 0.01
+nulls_non_key = 0.015            # midpoint of documented ~1–2%
+timestamp_inconsistencies = 0.01
+course_id_formatting = 0.005
+orphan_records = 0.001
+out_of_range_values = 0.001
+null_key_fields_allowed = false
