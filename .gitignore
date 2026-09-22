@@ -43,14 +43,18 @@ Thumbs.db
 desktop.ini
 
 # ── Logs ───────────────────────────────────────────────
-logs/
+logs/*
+!logs/.gitkeep
 *.log
 !docs/**/*.log
 
 # ── Generated data (large; never commit) ───────────────
-data/raw/
-data/processed/
-data/generated/
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/generated/*
+!data/generated/.gitkeep
 data/samples/*
 !data/samples/.gitkeep
 *.parquet

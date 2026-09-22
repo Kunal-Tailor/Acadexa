@@ -77,10 +77,10 @@ Create the actual repository skeleton without implementing application logic.
 - [x] 1.3 — Add `.env.example` with only safe configuration placeholders for MongoDB and local application settings. Do not add real credentials.
   Commit: `Update - 1.3 - add environment configuration template`
 
-- [ ] 1.4 — Create the complete repository folder structure from `docs/folder_structure.md`, using only required placeholder files such as `.gitkeep` or `__init__.py`. No business logic.
+- [x] 1.4 — Create the complete repository folder structure from `docs/folder_structure.md`, using only required placeholder files such as `.gitkeep` or `__init__.py`. No business logic.
   Commit: `Update - 1.4 - create repository folder structure`
 
-- [ ] 1.5 — Create the Python package skeleton under `src/acadexa/` with package initialization files and empty module boundaries for config, generator, database, processing, analytics, dashboard, validation, benchmarks and utils. No implementation logic.
+- [x] 1.5 — Create the Python package skeleton under `src/acadexa/` with package initialization files and empty module boundaries for config, generator, database, processing, analytics, dashboard, validation, benchmarks and utils. No implementation logic.
   Commit: `Update - 1.5 - create Python package skeleton`
 
 - [ ] 1.6 — Create the script entry-point placeholders under `scripts/`: `generate_data.py`, `load_mongodb.py`, `run_pipeline.py`, `publish_gold.py`, and `run_benchmarks.py`. Each should contain only a minimal executable entry point or TODO, not future implementation.
