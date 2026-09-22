@@ -74,7 +74,7 @@ Create the actual repository skeleton without implementing application logic.
 - [x] 1.2 — Add the root `README.md` containing project overview, architecture summary, technology stack, target scale, setup outline, repository structure, scope boundaries and academic synthetic-data disclaimer. Keep detailed requirements in `docs/`.
   Commit: `Update - 1.2 - add project README`
 
-- [ ] 1.3 — Add `.env.example` with only safe configuration placeholders for MongoDB and local application settings. Do not add real credentials.
+- [x] 1.3 — Add `.env.example` with only safe configuration placeholders for MongoDB and local application settings. Do not add real credentials.
   Commit: `Update - 1.3 - add environment configuration template`
 
 - [ ] 1.4 — Create the complete repository folder structure from `docs/folder_structure.md`, using only required placeholder files such as `.gitkeep` or `__init__.py`. No business logic.
