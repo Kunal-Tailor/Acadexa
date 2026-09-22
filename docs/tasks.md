@@ -102,7 +102,7 @@ Create the actual repository skeleton without implementing application logic.
 
 Build the configuration layer before data generation or database implementation depends on hard-coded values.
 
-- [ ] 2.1 — Implement configuration loading under `src/acadexa/config/` so application configuration can be read from project configuration files and environment variables without hard-coding secrets.
+- [x] 2.1 — Implement configuration loading under `src/acadexa/config/` so application configuration can be read from project configuration files and environment variables without hard-coding secrets.
   Commit: `Update - 2.1 - implement configuration loading`
 
 - [ ] 2.2 — Create the RAS University hierarchy configuration: six schools, departments, programs and the initial course catalog structure. Keep hierarchy data configuration-driven rather than embedding it in generator logic.
