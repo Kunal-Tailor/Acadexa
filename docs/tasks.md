@@ -108,7 +108,7 @@ Build the configuration layer before data generation or database implementation 
 - [x] 2.2 — Create the RAS University hierarchy configuration: six schools, departments, programs and the initial course catalog structure. Keep hierarchy data configuration-driven rather than embedding it in generator logic.
   Commit: `Update - 2.2 - define university hierarchy configuration`
 
-- [ ] 2.3 — Create academic-period configuration for two academic years and four semesters, including identifiers and dates required by the generator.
+- [x] 2.3 — Create academic-period configuration for two academic years and four semesters, including identifiers and dates required by the generator.
   Commit: `Update - 2.3 - define academic period configuration`
 
 - [ ] 2.4 — Create generator configuration containing seed, target population, generation scale, behavioral parameters, course difficulty settings and data-quality injection rates.
