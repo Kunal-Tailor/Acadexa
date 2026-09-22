@@ -1,0 +1,6 @@
+numpy
+pyarrow
+pymongo
+pyspark
+streamlit
+pytest

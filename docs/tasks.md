@@ -83,13 +83,13 @@ Create the actual repository skeleton without implementing application logic.
 - [x] 1.5 — Create the Python package skeleton under `src/acadexa/` with package initialization files and empty module boundaries for config, generator, database, processing, analytics, dashboard, validation, benchmarks and utils. No implementation logic.
   Commit: `Update - 1.5 - create Python package skeleton`
 
-- [ ] 1.6 — Create the script entry-point placeholders under `scripts/`: `generate_data.py`, `load_mongodb.py`, `run_pipeline.py`, `publish_gold.py`, and `run_benchmarks.py`. Each should contain only a minimal executable entry point or TODO, not future implementation.
+- [x] 1.6 — Create the script entry-point placeholders under `scripts/`: `generate_data.py`, `load_mongodb.py`, `run_pipeline.py`, `publish_gold.py`, and `run_benchmarks.py`. Each should contain only a minimal executable entry point or TODO, not future implementation.
   Commit: `Update - 1.6 - create pipeline entry points`
 
-- [ ] 1.7 — Create the initial test structure under `tests/` and add a minimal test configuration so the test runner executes successfully with no application tests yet.
+- [x] 1.7 — Create the initial test structure under `tests/` and add a minimal test configuration so the test runner executes successfully with no application tests yet.
   Commit: `Update - 1.7 - initialize test structure`
 
-- [ ] 1.8 — Add the initial dependency configuration (`requirements.txt` or `pyproject.toml`) containing only the foundational runtime/development dependencies required at this stage. Do not add speculative libraries.
+- [x] 1.8 — Add the initial dependency configuration (`requirements.txt` or `pyproject.toml`) containing only the foundational runtime/development dependencies required at this stage. Do not add speculative libraries.
   Commit: `Update - 1.8 - add initial Python dependencies`
 
 **Checkpoint:** Repository structure, documentation, environment template, Python package skeleton and test runner exist. No functional application logic exists.
