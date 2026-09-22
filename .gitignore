@@ -1,0 +1,92 @@
+# ── Secrets & environment ──────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Python ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# ── Caches & tooling ───────────────────────────────────
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.cache/
+.ipynb_checkpoints/
+
+# ── IDE / editor files ─────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+*.sublime-workspace
+*.sublime-project
+
+# ── OS temporary files ─────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ───────────────────────────────────────────────
+logs/
+*.log
+!docs/**/*.log
+
+# ── Generated data (large; never commit) ───────────────
+data/raw/
+data/processed/
+data/generated/
+data/samples/*
+!data/samples/.gitkeep
+*.parquet
+*.parquet/
+*.orc
+*.avro
+
+# Small manifests may be committed as reproducibility artifacts
+# (data/manifests/ is intentionally NOT ignored)
+
+# ── Reports (generated analytical outputs) ─────────────
+reports/quality/*
+reports/benchmarks/*
+reports/recovery/*
+reports/exports/*
+!reports/quality/.gitkeep
+!reports/benchmarks/.gitkeep
+!reports/recovery/.gitkeep
+!reports/exports/.gitkeep
+
+# ── Spark artifacts ────────────────────────────────────
+spark-warehouse/
+spark-logs/
+metastore_db/
+derby.log
+*.crc
+_SUCCESS
+part-*
+.tmp/
+
+# ── MongoDB local dumps / exports ──────────────────────
+*.bson
+dump/
+
+# ── Notebooks output (keep sources if intentionally committed) ──
+notebooks/exploratory/*.ipynb_checkpoints/
+
+# ── Local test outputs ─────────────────────────────────
+tests/data/generated/
