@@ -1,0 +1,48 @@
+# Risk signal configuration — the five approved rule-based signals only
+# (docs/prd.md §15.3, docs/memory.md §9, docs/rules.md §22).
+#
+# Each triggered signal contributes one point; count = 0–5.
+# This is an observed signal count — NOT an ML model, NOT a failure
+# prediction, NOT a probability, NOT an academic decision engine.
+# Do not add or remove rules without an explicit project decision.
+
+[risk]
+max_signal_count = 5
+points_per_signal = 1
+score_type = "observed_signal_count"
+
+# Signal 1 — Low attendance
+# Term-to-date attendance below 75%.
+[signals.low_attendance]
+window = "term_to_date"
+threshold_percent = 75.0
+comparison = "below"
+
+# Signal 2 — LMS decline
+# Current 4-week engagement <= 50% of the previous 4-week period.
+[signals.lms_decline]
+window_weeks = 4
+comparison_ratio = 0.50
+comparison = "less_than_or_equal"
+
+# Signal 3 — Late submissions
+# More than 30% of assignments submitted late.
+[signals.late_submissions]
+scope = "assignments"
+late_rate_threshold = 0.30
+comparison = "greater_than"
+
+# Signal 4 — Marks decline
+# Average of the latest 3 graded items >= 10 points below
+# the earlier comparison average.
+[signals.marks_decline]
+recent_items = 3
+point_drop_threshold = 10.0
+comparison = "greater_than_or_equal"
+
+# Signal 5 — Low quiz activity
+# Quiz attempts in the bottom quartile within the student's course.
+[signals.low_quiz_activity]
+scope = "course"
+percentile_threshold = 0.25
+comparison = "bottom_quartile"

@@ -114,7 +114,7 @@ Build the configuration layer before data generation or database implementation 
 - [x] 2.4 — Create generator configuration containing seed, target population, generation scale, behavioral parameters, course difficulty settings and data-quality injection rates.
   Commit: `Update - 2.4 - define synthetic generator configuration`
 
-- [ ] 2.5 — Create risk configuration containing the five approved thresholds/rules only: attendance, LMS decline, late submissions, marks decline and quiz bottom-quartile activity.
+- [x] 2.5 — Create risk configuration containing the five approved thresholds/rules only: attendance, LMS decline, late submissions, marks decline and quiz bottom-quartile activity.
   Commit: `Update - 2.5 - define risk signal configuration`
 
 - [ ] 2.6 — Add configuration validation and tests for required fields, valid ranges and incompatible configuration values. Do not generate data yet.
