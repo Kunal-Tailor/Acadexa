@@ -130,7 +130,7 @@ Build the configuration layer before data generation or database implementation 
 
 Freeze the data contract before implementing the generator.
 
-- [ ] 3.1 — Define the canonical schema for `students`, including identifiers, hierarchy references and required student attributes.
+- [x] 3.1 — Define the canonical schema for `students`, including identifiers, hierarchy references and required student attributes.
   Commit: `Update - 3.1 - define student schema`
 
 - [ ] 3.2 — Define the canonical schema for `courses`, including hierarchy references, semester applicability and course-difficulty metadata.
