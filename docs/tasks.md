@@ -139,7 +139,7 @@ Freeze the data contract before implementing the generator.
 - [x] 3.3 — Define the canonical schema for `academic_records`, preserving the student × course × semester grain.
   Commit: `Update - 3.3 - define academic record schema`
 
-- [ ] 3.4 — Define the canonical schema for `attendance`, preserving the student × course × week grain and raw attended/conducted counts.
+- [x] 3.4 — Define the canonical schema for `attendance`, preserving the student × course × week grain and raw attended/conducted counts.
   Commit: `Update - 3.4 - define attendance schema`
 
 - [ ] 3.5 — Define the canonical schema for `coursework`, including assignments, quizzes, submission status/timing and student/course relationships.

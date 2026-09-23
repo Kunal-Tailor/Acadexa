@@ -10,7 +10,8 @@ Each schema is a declarative description of one MongoDB collection:
   (regex for identifier formats), optional ``min``/``max`` (numeric
   ranges), optional ``enum`` (allowed scalar values), optional
   ``item_type``/``min_items`` (list fields), ``description``
-  (purpose of the field)
+  (purpose of the field); schemas may additionally declare
+  ``invariants``: cross-field statements that records must satisfy
 
 Schemas are the stable contract referenced by the generator, MongoDB
 layer, Spark jobs and dashboard. Changing a schema requires following
@@ -18,6 +19,8 @@ the schema-change rule in rules.md §11.
 """
 
 from __future__ import annotations
+
+from datetime import date
 
 STUDENT_ID_PATTERN = r"^STU\d{6}$"
 COURSE_ID_PATTERN = r"^[A-Z]{2,5}\d{3}$"
@@ -192,5 +195,61 @@ ACADEMIC_RECORDS_SCHEMA: dict = {
         "midterm_marks": 18,
         "endterm_marks": 42,
         "final_grade": "A",
+    },
+}
+
+ATTENDANCE_SCHEMA: dict = {
+    "collection": "attendance",
+    "grain": ["student_id", "course_id", "week_start"],
+    "grain_description": "student × course × week",
+    "fields": {
+        "student_id": {
+            "type": str,
+            "required": True,
+            "pattern": STUDENT_ID_PATTERN,
+            "description": "Student reference",
+        },
+        "course_id": {
+            "type": str,
+            "required": True,
+            "pattern": COURSE_ID_PATTERN,
+            "description": "Course reference",
+        },
+        "semester_id": {
+            "type": str,
+            "required": True,
+            "pattern": SEMESTER_ID_PATTERN,
+            "description": "Semester reference (ids from config/university/academic_periods.toml)",
+        },
+        "week_start": {
+            "type": date,
+            "required": True,
+            "description": "Monday starting the attendance week",
+        },
+        "classes_conducted": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "description": "Raw count of classes conducted that week (denominator)",
+        },
+        "classes_attended": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "description": "Raw count of classes attended that week; must not exceed classes_conducted",
+        },
+    },
+    "invariants": [
+        "classes_attended <= classes_conducted",
+        "attendance percentage is derived, never stored as the raw field (rules.md §13)",
+        "week_start is a Monday (calendar convention: Monday–Sunday weeks)",
+    ],
+    "example": {
+        "student_id": "STU010482",
+        "course_id": "CSE301",
+        "semester_id": "S1",
+        "week_start": date(2025, 9, 1),
+        "classes_conducted": 4,
+        "classes_attended": 3,
     },
 }

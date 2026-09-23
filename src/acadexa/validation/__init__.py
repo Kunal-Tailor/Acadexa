@@ -2,6 +2,7 @@
 
 from acadexa.validation.schema import (
     ACADEMIC_RECORDS_SCHEMA,
+    ATTENDANCE_SCHEMA,
     COURSE_ID_PATTERN,
     COURSES_SCHEMA,
     SEMESTER_ID_PATTERN,
@@ -11,6 +12,7 @@ from acadexa.validation.schema import (
 
 __all__ = [
     "ACADEMIC_RECORDS_SCHEMA",
+    "ATTENDANCE_SCHEMA",
     "COURSE_ID_PATTERN",
     "COURSES_SCHEMA",
     "SEMESTER_ID_PATTERN",
