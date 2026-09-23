@@ -21,6 +21,7 @@ from __future__ import annotations
 
 STUDENT_ID_PATTERN = r"^STU\d{6}$"
 COURSE_ID_PATTERN = r"^[A-Z]{2,5}\d{3}$"
+SEMESTER_ID_PATTERN = r"^S[1-4]$"
 DIFFICULTY_LEVELS = ("easy", "medium", "hard")
 
 STUDENTS_SCHEMA: dict = {
@@ -130,5 +131,66 @@ COURSES_SCHEMA: dict = {
         "semester_applicability": [1, 2],
         "difficulty_level": "easy",
         "difficulty": 0.35,
+    },
+}
+
+ACADEMIC_RECORDS_SCHEMA: dict = {
+    "collection": "academic_records",
+    "grain": ["student_id", "course_id", "semester_id"],
+    "grain_description": "student × course × semester",
+    "fields": {
+        "student_id": {
+            "type": str,
+            "required": True,
+            "pattern": STUDENT_ID_PATTERN,
+            "description": "Student reference",
+        },
+        "course_id": {
+            "type": str,
+            "required": True,
+            "pattern": COURSE_ID_PATTERN,
+            "description": "Course reference",
+        },
+        "semester_id": {
+            "type": str,
+            "required": True,
+            "pattern": SEMESTER_ID_PATTERN,
+            "description": "Semester reference (ids from config/university/academic_periods.toml)",
+        },
+        "internal_marks": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "max": 100,
+            "description": "Internal assessment marks (validity bound 0–100)",
+        },
+        "midterm_marks": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "max": 100,
+            "description": "Midterm marks (validity bound 0–100)",
+        },
+        "endterm_marks": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "max": 100,
+            "description": "Endterm marks (validity bound 0–100)",
+        },
+        "final_grade": {
+            "type": str,
+            "required": True,
+            "description": "Term letter grade, e.g. A",
+        },
+    },
+    "example": {
+        "student_id": "STU010482",
+        "course_id": "CSE301",
+        "semester_id": "S1",
+        "internal_marks": 34,
+        "midterm_marks": 18,
+        "endterm_marks": 42,
+        "final_grade": "A",
     },
 }
