@@ -133,7 +133,7 @@ Freeze the data contract before implementing the generator.
 - [x] 3.1 — Define the canonical schema for `students`, including identifiers, hierarchy references and required student attributes.
   Commit: `Update - 3.1 - define student schema`
 
-- [ ] 3.2 — Define the canonical schema for `courses`, including hierarchy references, semester applicability and course-difficulty metadata.
+- [x] 3.2 — Define the canonical schema for `courses`, including hierarchy references, semester applicability and course-difficulty metadata.
   Commit: `Update - 3.2 - define course schema`
 
 - [ ] 3.3 — Define the canonical schema for `academic_records`, preserving the student × course × semester grain.

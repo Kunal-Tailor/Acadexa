@@ -8,7 +8,9 @@ Each schema is a declarative description of one MongoDB collection:
 - ``fields``: mapping of field name to constraints with keys:
   ``type`` (Python type), ``required`` (bool), optional ``pattern``
   (regex for identifier formats), optional ``min``/``max`` (numeric
-  ranges), ``description`` (purpose of the field)
+  ranges), optional ``enum`` (allowed scalar values), optional
+  ``item_type``/``min_items`` (list fields), ``description``
+  (purpose of the field)
 
 Schemas are the stable contract referenced by the generator, MongoDB
 layer, Spark jobs and dashboard. Changing a schema requires following
@@ -18,6 +20,8 @@ the schema-change rule in rules.md §11.
 from __future__ import annotations
 
 STUDENT_ID_PATTERN = r"^STU\d{6}$"
+COURSE_ID_PATTERN = r"^[A-Z]{2,5}\d{3}$"
+DIFFICULTY_LEVELS = ("easy", "medium", "hard")
 
 STUDENTS_SCHEMA: dict = {
     "collection": "students",
@@ -66,5 +70,65 @@ STUDENTS_SCHEMA: dict = {
         "program": "B.Tech CSE (AI & DS)",
         "batch": 2024,
         "semester": 3,
+    },
+}
+
+COURSES_SCHEMA: dict = {
+    "collection": "courses",
+    "grain": ["course_id"],
+    "grain_description": "one document per course",
+    "fields": {
+        "course_id": {
+            "type": str,
+            "required": True,
+            "pattern": COURSE_ID_PATTERN,
+            "description": "Stable course identifier, e.g. CSA101 or CSE301",
+        },
+        "title": {
+            "type": str,
+            "required": True,
+            "description": "Course title from the catalogue",
+        },
+        "school": {
+            "type": str,
+            "required": True,
+            "description": "Hierarchy reference: school name",
+        },
+        "department": {
+            "type": str,
+            "required": True,
+            "description": "Hierarchy reference: department name",
+        },
+        "semester_applicability": {
+            "type": list,
+            "required": True,
+            "item_type": int,
+            "min_items": 1,
+            "min": 1,
+            "max": 4,
+            "description": "Semester indexes (1–4) in which the course is offered",
+        },
+        "difficulty_level": {
+            "type": str,
+            "required": True,
+            "enum": list(DIFFICULTY_LEVELS),
+            "description": "Difficulty bucket assigned from generator configuration shares",
+        },
+        "difficulty": {
+            "type": float,
+            "required": True,
+            "min": 0.0,
+            "max": 1.0,
+            "description": "Numeric difficulty factor used by the behavioral model",
+        },
+    },
+    "example": {
+        "course_id": "CSA101",
+        "title": "Programming Fundamentals",
+        "school": "School of Computer Engineering & Technology",
+        "department": "Computer Science and Applications",
+        "semester_applicability": [1, 2],
+        "difficulty_level": "easy",
+        "difficulty": 0.35,
     },
 }
