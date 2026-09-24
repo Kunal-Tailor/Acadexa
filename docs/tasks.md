@@ -170,7 +170,7 @@ Build a reproducible generator before attempting the full dataset.
 - [x] 4.2 — Implement generation of the university hierarchy from configuration: schools, departments, programs and courses.
   Commit: `Update - 4.2 - generate university hierarchy`
 
-- [ ] 4.3 — Implement synthetic student generation with stable IDs and valid hierarchy assignments.
+- [x] 4.3 — Implement synthetic student generation with stable IDs and valid hierarchy assignments.
   Commit: `Update - 4.3 - generate synthetic students`
 
 - [ ] 4.4 — Implement synthetic academic-record generation for student/course/semester combinations, including course difficulty and performance behavior.

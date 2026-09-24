@@ -5,6 +5,7 @@ from acadexa.generator.foundation import (
     GeneratorRun,
     GeneratorRunMetadata,
 )
+from acadexa.generator.students import generate_students
 from acadexa.generator.university import (
     UniversityHierarchy,
     generate_university_hierarchy,
@@ -15,5 +16,6 @@ __all__ = [
     "GeneratorRun",
     "GeneratorRunMetadata",
     "UniversityHierarchy",
+    "generate_students",
     "generate_university_hierarchy",
 ]
