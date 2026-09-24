@@ -164,7 +164,7 @@ Freeze the data contract before implementing the generator.
 
 Build a reproducible generator before attempting the full dataset.
 
-- [ ] 4.1 — Implement deterministic seed handling and generator run metadata. Given the same seed/configuration, the generator must initialize reproducibly.
+- [x] 4.1 — Implement deterministic seed handling and generator run metadata. Given the same seed/configuration, the generator must initialize reproducibly.
   Commit: `Update - 4.1 - implement deterministic generator foundation`
 
 - [ ] 4.2 — Implement generation of the university hierarchy from configuration: schools, departments, programs and courses.
