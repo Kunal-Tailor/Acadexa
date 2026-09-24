@@ -449,3 +449,278 @@ LMS_EVENTS_SCHEMA: dict = {
         "session_id": "SES3320041",
     },
 }
+
+STUDENT_FEATURES_SCHEMA: dict = {
+    "collection": "student_features",
+    "grain": ["student_id", "semester_id"],
+    "grain_description": "student × semester",
+    "fields": {
+        "student_id": {
+            "type": str,
+            "required": True,
+            "pattern": STUDENT_ID_PATTERN,
+            "description": "Student reference",
+        },
+        "semester_id": {
+            "type": str,
+            "required": True,
+            "pattern": SEMESTER_ID_PATTERN,
+            "description": "Semester reference (ids from config/university/academic_periods.toml)",
+        },
+        "attendance_mean": {
+            "type": float,
+            "required": True,
+            "min": 0.0,
+            "max": 100.0,
+            "description": "Attendance summary: mean derived attendance percentage for the semester",
+        },
+        "engagement_count": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "description": "Engagement count: LMS events for the student in the semester",
+        },
+        "late_submission_rate": {
+            "type": float,
+            "required": True,
+            "min": 0.0,
+            "max": 1.0,
+            "description": "Fraction of the student's assignments submitted late in the semester",
+        },
+        "score_trend": {
+            "type": float,
+            "required": True,
+            "description": "Recent-minus-earlier graded-item average in points; negative = declining",
+        },
+    },
+    "example": {
+        "student_id": "STU010482",
+        "semester_id": "S1",
+        "attendance_mean": 78.5,
+        "engagement_count": 412,
+        "late_submission_rate": 0.2,
+        "score_trend": -12.0,
+    },
+}
+
+COURSE_METRICS_SCHEMA: dict = {
+    "collection": "course_metrics",
+    "grain": ["course_id", "semester_id"],
+    "grain_description": "course × semester",
+    "fields": {
+        "course_id": {
+            "type": str,
+            "required": True,
+            "pattern": COURSE_ID_PATTERN,
+            "description": "Course reference",
+        },
+        "semester_id": {
+            "type": str,
+            "required": True,
+            "pattern": SEMESTER_ID_PATTERN,
+            "description": "Semester reference (ids from config/university/academic_periods.toml)",
+        },
+        "avg_performance": {
+            "type": float,
+            "required": True,
+            "min": 0.0,
+            "max": 100.0,
+            "description": "Mean performance of enrolled students in the semester",
+        },
+        "avg_attendance": {
+            "type": float,
+            "required": True,
+            "min": 0.0,
+            "max": 100.0,
+            "description": "Mean derived attendance percentage for the course",
+        },
+        "engagement_count": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "description": "LMS events for the course in the semester",
+        },
+        "difficulty_adjusted_performance": {
+            "type": float,
+            "required": True,
+            "description": "Within-course normalized performance (z-score style, unbounded)",
+        },
+    },
+    "example": {
+        "course_id": "CSA101",
+        "semester_id": "S1",
+        "avg_performance": 71.2,
+        "avg_attendance": 82.4,
+        "engagement_count": 15230,
+        "difficulty_adjusted_performance": -0.35,
+    },
+}
+
+SCHOOL_SUMMARY_SCHEMA: dict = {
+    "collection": "school_summary",
+    "grain": ["school", "department"],
+    "grain_description": "school × department roll-up",
+    "fields": {
+        "school": {
+            "type": str,
+            "required": True,
+            "description": "Hierarchy reference: school name (config/university/hierarchy.toml)",
+        },
+        "department": {
+            "type": str,
+            "required": True,
+            "description": "Hierarchy reference: department name",
+        },
+        "student_count": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "description": "Students in the department roll-up",
+        },
+        "course_count": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "description": "Courses in the roll-up",
+        },
+        "avg_performance": {
+            "type": float,
+            "required": True,
+            "min": 0.0,
+            "max": 100.0,
+            "description": "Mean performance across the roll-up",
+        },
+        "avg_attendance": {
+            "type": float,
+            "required": True,
+            "min": 0.0,
+            "max": 100.0,
+            "description": "Mean derived attendance percentage across the roll-up",
+        },
+        "engagement_count": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "description": "LMS events for the roll-up",
+        },
+    },
+    "example": {
+        "school": "School of Computer Engineering & Technology",
+        "department": "Computer Science and Applications",
+        "student_count": 1840,
+        "course_count": 12,
+        "avg_performance": 73.5,
+        "avg_attendance": 80.1,
+        "engagement_count": 245000,
+    },
+}
+
+RISK_INDICATORS_SCHEMA: dict = {
+    "collection": "risk_indicators",
+    "grain": ["student_id", "week_start"],
+    "grain_description": "student × week",
+    "fields": {
+        "student_id": {
+            "type": str,
+            "required": True,
+            "pattern": STUDENT_ID_PATTERN,
+            "description": "Student reference",
+        },
+        "week_start": {
+            "type": date,
+            "required": True,
+            "description": "Monday starting the evaluation week",
+        },
+        "signal_count": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "max": 5,
+            "description": "Observed signal count 0–5; not a prediction (prd.md §15.3)",
+        },
+        "low_attendance": {
+            "type": bool,
+            "required": True,
+            "description": "Signal 1 flag: term-to-date attendance below threshold",
+        },
+        "lms_decline": {
+            "type": bool,
+            "required": True,
+            "description": "Signal 2 flag: last 4 weeks at or below the decline threshold",
+        },
+        "late_submissions": {
+            "type": bool,
+            "required": True,
+            "description": "Signal 3 flag: more than the configured share of assignments late",
+        },
+        "marks_decline": {
+            "type": bool,
+            "required": True,
+            "description": "Signal 4 flag: recent graded-item average below earlier average by threshold",
+        },
+        "low_quiz_activity": {
+            "type": bool,
+            "required": True,
+            "description": "Signal 5 flag: quiz attempts in the bottom quartile of the student's course",
+        },
+        "explanations": {
+            "type": dict,
+            "required": True,
+            "description": "Per-signal traceability to the underlying metric/value (tasks.md 8.8)",
+            "fields": {
+                "low_attendance": {
+                    "type": str,
+                    "required": True,
+                    "description": "Metric/value behind the low-attendance flag",
+                },
+                "lms_decline": {
+                    "type": str,
+                    "required": True,
+                    "description": "Metric/value behind the LMS-decline flag",
+                },
+                "late_submissions": {
+                    "type": str,
+                    "required": True,
+                    "description": "Metric/value behind the late-submissions flag",
+                },
+                "marks_decline": {
+                    "type": str,
+                    "required": True,
+                    "description": "Metric/value behind the marks-decline flag",
+                },
+                "low_quiz_activity": {
+                    "type": str,
+                    "required": True,
+                    "description": "Metric/value behind the low-quiz-activity flag",
+                },
+            },
+        },
+        "computed_at": {
+            "type": datetime,
+            "required": True,
+            "description": "Timestamp of the pipeline run that published this record (tasks.md 9.3 run metadata)",
+        },
+    },
+    "invariants": [
+        "signal_count equals the number of true signal flags "
+        "(each signal contributes one point, maximum 5)",
+    ],
+    "example": {
+        "student_id": "STU010482",
+        "week_start": date(2025, 11, 3),
+        "signal_count": 3,
+        "low_attendance": True,
+        "lms_decline": True,
+        "late_submissions": False,
+        "marks_decline": True,
+        "low_quiz_activity": False,
+        "explanations": {
+            "low_attendance": "term-to-date attendance 68.0% < 75% threshold",
+            "lms_decline": "last 4 weeks = 42% of previous 4 weeks (<= 50% threshold)",
+            "late_submissions": "late rate 20.0% <= 30% threshold",
+            "marks_decline": "recent average -12.0 pts vs earlier average (>= 10 pts below)",
+            "low_quiz_activity": "quiz attempts 6 not in bottom quartile",
+        },
+        "computed_at": datetime(2025, 11, 3, 6, 0, 0),
+    },
+}

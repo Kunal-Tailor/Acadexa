@@ -148,7 +148,7 @@ Freeze the data contract before implementing the generator.
 - [x] 3.6 — Define the canonical LMS event schema and allowed event types, timestamps, identifiers and course/student references.
   Commit: `Update - 3.6 - define LMS event schema`
 
-- [ ] 3.7 — Define the gold schemas for `student_features`, `course_metrics`, `school_summary` and `risk_indicators`.
+- [x] 3.7 — Define the gold schemas for `student_features`, `course_metrics`, `school_summary` and `risk_indicators`.
   Commit: `Update - 3.7 - define gold collection schemas`
 
 - [ ] 3.8 — Add schema validation utilities/tests that verify required fields, data types, identifier formats and expected record grain using small fixtures.
