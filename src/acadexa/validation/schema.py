@@ -724,3 +724,16 @@ RISK_INDICATORS_SCHEMA: dict = {
         "computed_at": datetime(2025, 11, 3, 6, 0, 0),
     },
 }
+
+ALL_SCHEMAS: dict[str, dict] = {
+    "students": STUDENTS_SCHEMA,
+    "courses": COURSES_SCHEMA,
+    "academic_records": ACADEMIC_RECORDS_SCHEMA,
+    "attendance": ATTENDANCE_SCHEMA,
+    "coursework": COURSEWORK_SCHEMA,
+    "lms_events": LMS_EVENTS_SCHEMA,
+    "student_features": STUDENT_FEATURES_SCHEMA,
+    "course_metrics": COURSE_METRICS_SCHEMA,
+    "school_summary": SCHOOL_SUMMARY_SCHEMA,
+    "risk_indicators": RISK_INDICATORS_SCHEMA,
+}
