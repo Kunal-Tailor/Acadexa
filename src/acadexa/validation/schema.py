@@ -9,9 +9,10 @@ Each schema is a declarative description of one MongoDB collection:
   ``type`` (Python type), ``required`` (bool), optional ``pattern``
   (regex for identifier formats), optional ``min``/``max`` (numeric
   ranges), optional ``enum`` (allowed scalar values), optional
-  ``item_type``/``min_items`` (list fields), ``description``
-  (purpose of the field); schemas may additionally declare
-  ``invariants``: cross-field statements that records must satisfy
+  ``item_type``/``min_items`` (list fields), optional ``nullable``
+  (value may be ``None``), ``description`` (purpose of the field);
+  schemas may additionally declare ``invariants``: cross-field
+  statements that records must satisfy
 
 Schemas are the stable contract referenced by the generator, MongoDB
 layer, Spark jobs and dashboard. Changing a schema requires following
@@ -20,7 +21,7 @@ the schema-change rule in rules.md §11.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 STUDENT_ID_PATTERN = r"^STU\d{6}$"
 COURSE_ID_PATTERN = r"^[A-Z]{2,5}\d{3}$"
@@ -251,5 +252,99 @@ ATTENDANCE_SCHEMA: dict = {
         "week_start": date(2025, 9, 1),
         "classes_conducted": 4,
         "classes_attended": 3,
+    },
+}
+
+COURSEWORK_SCHEMA: dict = {
+    "collection": "coursework",
+    "grain": ["student_id", "course_id", "item_id"],
+    "grain_description": "student × coursework item (item_id unique within a course)",
+    "fields": {
+        "student_id": {
+            "type": str,
+            "required": True,
+            "pattern": STUDENT_ID_PATTERN,
+            "description": "Student reference",
+        },
+        "course_id": {
+            "type": str,
+            "required": True,
+            "pattern": COURSE_ID_PATTERN,
+            "description": "Course reference",
+        },
+        "item_id": {
+            "type": str,
+            "required": True,
+            "description": "Coursework item identifier within the course, e.g. A07",
+        },
+        "item_type": {
+            "type": str,
+            "required": True,
+            "enum": ["ASSIGNMENT", "QUIZ"],
+            "description": "Unified coursework item type (features.md F-B06)",
+        },
+        "assigned_date": {
+            "type": date,
+            "required": True,
+            "description": "Date the item was assigned",
+        },
+        "due_date": {
+            "type": date,
+            "required": True,
+            "description": "Submission deadline",
+        },
+        "submitted_at": {
+            "type": datetime,
+            "required": True,
+            "nullable": True,
+            "description": "Submission timestamp; null when not submitted (status MISSING)",
+        },
+        "score": {
+            "type": int,
+            "required": True,
+            "nullable": True,
+            "min": 0,
+            "description": "Earned score; null when not submitted (status MISSING)",
+        },
+        "max_score": {
+            "type": int,
+            "required": True,
+            "min": 1,
+            "description": "Maximum score attainable for the item",
+        },
+        "attempts": {
+            "type": int,
+            "required": True,
+            "min": 0,
+            "description": "Number of attempts made (0 when not submitted)",
+        },
+        "status": {
+            "type": str,
+            "required": True,
+            "enum": ["ON_TIME", "LATE", "MISSING"],
+            "description": "Submission status: LATE is documented (original_idea example); "
+            "ON_TIME/MISSING complete the set required by late-submission and "
+            "coursework-completion analytics",
+        },
+    },
+    "invariants": [
+        "assigned_date <= due_date",
+        "status matches timing: MISSING ⟺ submitted_at is null; "
+        "LATE ⟺ submitted_at is after the end of the due day "
+        "(submitted_at.date() > due_date); otherwise ON_TIME",
+        "score is null exactly when status is MISSING; when present, score <= max_score",
+    ],
+    "example": {
+        "student_id": "STU010482",
+        "course_id": "CSE301",
+        "item_id": "A07",
+        "item_type": "ASSIGNMENT",
+        "assigned_date": date(2025, 9, 8),
+        "due_date": date(2025, 9, 15),
+        "submitted_at": datetime(2025, 9, 17, 21, 40, 0),
+        "score": 15,
+        "max_score": 20,
+        "attempts": 1,
+        "status": "LATE",
     },
 }

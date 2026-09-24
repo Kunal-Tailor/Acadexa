@@ -142,7 +142,7 @@ Freeze the data contract before implementing the generator.
 - [x] 3.4 — Define the canonical schema for `attendance`, preserving the student × course × week grain and raw attended/conducted counts.
   Commit: `Update - 3.4 - define attendance schema`
 
-- [ ] 3.5 — Define the canonical schema for `coursework`, including assignments, quizzes, submission status/timing and student/course relationships.
+- [x] 3.5 — Define the canonical schema for `coursework`, including assignments, quizzes, submission status/timing and student/course relationships.
   Commit: `Update - 3.5 - define coursework schema`
 
 - [ ] 3.6 — Define the canonical LMS event schema and allowed event types, timestamps, identifiers and course/student references.
