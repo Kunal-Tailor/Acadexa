@@ -5,5 +5,15 @@ from acadexa.generator.foundation import (
     GeneratorRun,
     GeneratorRunMetadata,
 )
+from acadexa.generator.university import (
+    UniversityHierarchy,
+    generate_university_hierarchy,
+)
 
-__all__ = ["GeneratorError", "GeneratorRun", "GeneratorRunMetadata"]
+__all__ = [
+    "GeneratorError",
+    "GeneratorRun",
+    "GeneratorRunMetadata",
+    "UniversityHierarchy",
+    "generate_university_hierarchy",
+]
