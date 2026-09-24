@@ -176,7 +176,7 @@ Build a reproducible generator before attempting the full dataset.
 - [x] 4.4 — Implement synthetic academic-record generation for student/course/semester combinations, including course difficulty and performance behavior.
   Commit: `Update - 4.4 - generate academic records`
 
-- [ ] 4.5 — Implement synthetic attendance generation using conducted/attended counts and weekly behavior.
+- [x] 4.5 — Implement synthetic attendance generation using conducted/attended counts and weekly behavior.
   Commit: `Update - 4.5 - generate attendance data`
 
 - [ ] 4.6 — Implement synthetic coursework generation for assignments and quizzes, including submission timing, late submissions and attempts.

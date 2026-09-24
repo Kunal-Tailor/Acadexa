@@ -74,6 +74,20 @@ B = 75
 C = 65
 D = 50
 
+# ── Weekly attendance (F-B05) ───────────────────────────
+# Per student×course×week: classes_attended ~ Binomial(classes_conducted, p).
+# p combines the base rate, the school profile attendance multiplier, the
+# course difficulty drag (confounder, F-B09), alignment with the term
+# aggregate marks (plants attendance↔marks, F-B09) and weekly noise.
+# Engineering parameters; attendance percentage is never stored (rules.md §13).
+[behavior.weekly_attendance]
+classes_conducted = 4        # per course per week (matches the schema example)
+base_probability = 0.85      # tunable: university-wide weekly attendance rate
+alignment_weight = 0.20      # tunable: strength of the attendance↔marks coupling
+weekly_noise_std = 0.08      # tunable: week-to-week probability noise
+probability_floor = 0.05     # tunable: clip bounds after shifting
+probability_ceiling = 0.98
+
 # ── School behavior profiles ───────────────────────────
 # Multipliers shift generated behavior per school (original_idea §5.2).
 # Values near 1.0 = baseline; all tunable.
