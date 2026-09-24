@@ -15,6 +15,7 @@ seed = 42
 target_students = 12000
 target_courses = 250              # full target; initial catalog in config/university/courses.toml is smaller
 courses_per_student_per_semester = 6
+elective_courses_per_semester = 3   # drawn from outside the student's school; the rest are in-school courses
 target_lms_events = 70000000
 lms_events_per_student_per_day = 15   # documented assumption (~15/day)
 teaching_days_per_academic_year = 200
@@ -52,6 +53,26 @@ weekend_event_factor = 0.40          # tunable
 mid_semester_dip_factor = 0.80       # tunable
 pre_deadline_spike_factor = 1.60     # tunable
 pre_exam_spike_factor = 1.80         # tunable
+
+# ── Academic performance & grading (F-B04) ─────────────
+# Each marks component (internal/midterm/endterm, 0–100) is drawn per
+# student×course×semester around a record-level latent score: the
+# baseline shifted by the course difficulty drag
+# (difficulty × course_difficulty.max_score_drag points), plus
+# per-component noise. Engineering parameters.
+[behavior.academic_performance]
+baseline_mean = 72.0   # tunable: expected latent score before difficulty drag
+record_std = 10.0      # tunable: spread of record-level latent scores
+component_std = 4.0    # tunable: noise added to each marks component
+
+# Letter grade for the unweighted mean of the three marks components;
+# below the lowest band boundary the grade is "F". Docs fix only that
+# grades are letter strings (e.g. "A"), so boundaries are tunable.
+[behavior.grade_scale]
+A = 85
+B = 75
+C = 65
+D = 50
 
 # ── School behavior profiles ───────────────────────────
 # Multipliers shift generated behavior per school (original_idea §5.2).

@@ -173,7 +173,7 @@ Build a reproducible generator before attempting the full dataset.
 - [x] 4.3 — Implement synthetic student generation with stable IDs and valid hierarchy assignments.
   Commit: `Update - 4.3 - generate synthetic students`
 
-- [ ] 4.4 — Implement synthetic academic-record generation for student/course/semester combinations, including course difficulty and performance behavior.
+- [x] 4.4 — Implement synthetic academic-record generation for student/course/semester combinations, including course difficulty and performance behavior.
   Commit: `Update - 4.4 - generate academic records`
 
 - [ ] 4.5 — Implement synthetic attendance generation using conducted/attended counts and weekly behavior.
