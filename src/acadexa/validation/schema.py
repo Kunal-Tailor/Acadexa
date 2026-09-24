@@ -11,8 +11,10 @@ Each schema is a declarative description of one MongoDB collection:
   ranges), optional ``enum`` (allowed scalar values), optional
   ``item_type``/``min_items`` (list fields), optional ``nullable``
   (value may be ``None``), ``description`` (purpose of the field);
-  schemas may additionally declare ``invariants``: cross-field
-  statements that records must satisfy
+  object-valued fields may declare nested ``fields``; schemas may
+  additionally declare ``invariants``: cross-field statements that
+  records must satisfy, and time-series collections declare
+  ``time_field``/``meta_field`` (MongoDB time-series keys)
 
 Schemas are the stable contract referenced by the generator, MongoDB
 layer, Spark jobs and dashboard. Changing a schema requires following
@@ -26,7 +28,22 @@ from datetime import date, datetime
 STUDENT_ID_PATTERN = r"^STU\d{6}$"
 COURSE_ID_PATTERN = r"^[A-Z]{2,5}\d{3}$"
 SEMESTER_ID_PATTERN = r"^S[1-4]$"
+SESSION_ID_PATTERN = r"^SES\d{7}$"
+SCHOOL_CODE_PATTERN = r"^[A-Z]{3}$"
 DIFFICULTY_LEVELS = ("easy", "medium", "hard")
+LMS_EVENT_TYPES = (
+    "LOGIN",
+    "LOGOUT",
+    "VIDEO_VIEW",
+    "VIDEO_COMPLETE",
+    "PDF_VIEW",
+    "RESOURCE_DOWNLOAD",
+    "QUIZ_ATTEMPT",
+    "ASSIGNMENT_VIEW",
+    "ASSIGNMENT_SUBMISSION",
+    "COURSE_PAGE_VIEW",
+    "FORUM_POST",
+)
 
 STUDENTS_SCHEMA: dict = {
     "collection": "students",
@@ -346,5 +363,89 @@ COURSEWORK_SCHEMA: dict = {
         "max_score": 20,
         "attempts": 1,
         "status": "LATE",
+    },
+}
+
+LMS_EVENTS_SCHEMA: dict = {
+    "collection": "lms_events",
+    "grain": [
+        "timestamp",
+        "meta",
+        "activity_type",
+        "resource_id",
+        "duration_sec",
+        "session_id",
+    ],
+    "grain_description": "one document per LMS event (whole-document identity)",
+    "time_field": "timestamp",
+    "meta_field": "meta",
+    "fields": {
+        "timestamp": {
+            "type": datetime,
+            "required": True,
+            "description": "Event timestamp; MongoDB time-series timeField",
+        },
+        "meta": {
+            "type": dict,
+            "required": True,
+            "description": "Time-series metaField carrying student/course/school context",
+            "fields": {
+                "student_id": {
+                    "type": str,
+                    "required": True,
+                    "pattern": STUDENT_ID_PATTERN,
+                    "description": "Student reference",
+                },
+                "course_id": {
+                    "type": str,
+                    "required": True,
+                    "pattern": COURSE_ID_PATTERN,
+                    "description": "Course reference",
+                },
+                "school": {
+                    "type": str,
+                    "required": True,
+                    "pattern": SCHOOL_CODE_PATTERN,
+                    "description": "Hierarchy school code (config/university/hierarchy.toml), e.g. CET",
+                },
+            },
+        },
+        "activity_type": {
+            "type": str,
+            "required": True,
+            "enum": list(LMS_EVENT_TYPES),
+            "description": "LMS activity type; closed list per rules.md §14",
+        },
+        "resource_id": {
+            "type": str,
+            "required": True,
+            "nullable": True,
+            "description": "Resource identifier, e.g. R118; null for events without a resource",
+        },
+        "duration_sec": {
+            "type": int,
+            "required": True,
+            "nullable": True,
+            "min": 0,
+            "description": "Event duration in seconds; null when not applicable",
+        },
+        "session_id": {
+            "type": str,
+            "required": True,
+            "pattern": SESSION_ID_PATTERN,
+            "description": "LMS session grouping identifier, e.g. SES3320041",
+        },
+    },
+    "example": {
+        "timestamp": datetime(2025, 9, 17, 10, 15, 0),
+        "meta": {
+            "student_id": "STU010482",
+            "course_id": "CSE301",
+            "school": "CET",
+        },
+        "activity_type": "VIDEO_VIEW",
+        "resource_id": "R118",
+        "duration_sec": 1080,
+        "session_id": "SES3320041",
     },
 }
