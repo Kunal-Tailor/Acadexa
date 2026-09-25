@@ -11,6 +11,14 @@ from acadexa.generator.foundation import (
     GeneratorRun,
     GeneratorRunMetadata,
 )
+from acadexa.generator.ground_truth import (
+    DECOY_RELATIONSHIP,
+    DEFAULT_GROUND_TRUTH_PATH,
+    PLANTED_RELATIONSHIPS,
+    GroundTruthRegistry,
+    generate_ground_truth_registry,
+    load_ground_truth_registry,
+)
 from acadexa.generator.lms_events import (
     DEFAULT_LMS_PARQUET_PATH,
     LMS_PARQUET_SCHEMA,
@@ -28,11 +36,15 @@ from acadexa.generator.university import (
 )
 
 __all__ = [
+    "DECOY_RELATIONSHIP",
+    "DEFAULT_GROUND_TRUTH_PATH",
     "DEFAULT_LMS_PARQUET_PATH",
     "GeneratorError",
     "GeneratorRun",
     "GeneratorRunMetadata",
+    "GroundTruthRegistry",
     "LMS_PARQUET_SCHEMA",
+    "PLANTED_RELATIONSHIPS",
     "UniversityHierarchy",
     "assign_course_difficulty",
     "generate_academic_records",
@@ -41,10 +53,12 @@ __all__ = [
     "generate_coursework",
     "generate_decliner_flags",
     "generate_development_lms_parquet",
+    "generate_ground_truth_registry",
     "generate_lms_events",
     "generate_lms_events_chunks",
     "generate_students",
     "generate_university_hierarchy",
+    "load_ground_truth_registry",
     "read_lms_events_from_parquet",
     "validate_lms_events_parquet",
     "write_lms_events_to_parquet",
