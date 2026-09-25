@@ -22,12 +22,18 @@ hard-coded):
 - plus weekly Gaussian noise, clipped to floor/ceiling;
   ``classes_attended ~ Binomial(classes_conducted, p)``.
 
+Decliners multiply each week's probability by
+``(1 − weekly_engagement_decay) ** elapsed`` from ``start_week`` onward
+(``behavior.decliners``, task 4.8): their attendance fades through the
+semester while non-decliner rows stay unchanged. Decliner status itself
+stays hidden (frozen students schema).
+
 Enrollment comes from academic records, so attendance never
 references a non-enrolled student/course/semester. Every
 (student, course) pair must occur in at most one semester — the
 frozen schema grain (student × course × week) does not model retakes.
 
-Decliner decline (4.8) and LMS rhythms (5.2) are not applied here.
+LMS rhythms (5.2) are not applied here.
 """
 
 from __future__ import annotations
@@ -40,6 +46,7 @@ import numpy as np
 from acadexa.generator.academic_records import generate_academic_records
 from acadexa.generator.behavioral_model import generate_behavioral_traits
 from acadexa.generator.courses import assign_course_difficulty
+from acadexa.generator.decliners import generate_decliner_flags
 from acadexa.generator.foundation import GeneratorError, GeneratorRun
 from acadexa.generator.students import generate_students
 
@@ -142,6 +149,10 @@ def generate_attendance(
         "student_traits" in behavior,
         "configs missing generator behavior.student_traits",
     )
+    _check(
+        "decliners" in behavior,
+        "configs missing generator behavior.decliners",
+    )
     traits_config = behavior["student_traits"]
     attendance_weights: dict[str, float] = {}
     for key in ("diligence_attendance_weight", "engagement_attendance_weight"):
@@ -237,6 +248,11 @@ def generate_attendance(
     diligence_mean = traits_config["diligence"]["mean"]
     engagement_mean = traits_config["engagement"]["mean"]
 
+    decliner_flags = generate_decliner_flags(run, students)
+    decliner_params = behavior["decliners"]
+    engagement_start_week = decliner_params["start_week"]
+    engagement_decay = decliner_params["weekly_engagement_decay"]
+
     student_school: dict[str, str] = {}
     for student in students:
         school_name = student["school"]
@@ -297,9 +313,16 @@ def generate_attendance(
             + trait_shift
         )
         noise = rng.normal(0.0, weekly_noise_std, size=len(weeks))
-        probabilities = np.clip(
-            probability + noise, float(floor), float(ceiling)
-        )
+        if decliner_flags[student_id]:
+            week_numbers = np.arange(1, len(weeks) + 1)
+            decay = np.power(
+                1.0 - engagement_decay,
+                np.maximum(0, week_numbers - engagement_start_week + 1),
+            )
+            raw = (probability + noise) * decay
+        else:
+            raw = probability + noise
+        probabilities = np.clip(raw, float(floor), float(ceiling))
         attended = rng.binomial(classes_conducted, probabilities)
         for index, week_start in enumerate(weeks):
             attendance.append(

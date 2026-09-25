@@ -25,8 +25,9 @@ none hard-coded):
 - ``diligence_late_weight`` — relative reduction of the late
   probability (coursework).
 
-Every consumer validates the weight it reads. Decliner behavior
-(4.8) and LMS rhythms (5.2) are not applied here.
+Every consumer validates the weight it reads. The decliner population
+lives in ``decliners`` (task 4.8); LMS rhythms (5.2) are not applied
+here.
 """
 
 from __future__ import annotations

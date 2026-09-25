@@ -249,21 +249,65 @@ def validate_generator(config: dict[str, Any], hierarchy: dict[str, Any]) -> Non
         )
 
     decliners = behavior["decliners"]
-    _require_keys(decliners, ("rate",), "generator.behavior.decliners")
+    _require_keys(
+        decliners,
+        (
+            "rate",
+            "start_week",
+            "weekly_engagement_decay",
+            "marks_decline_lag_weeks",
+            "component_weeks",
+            "marks_weekly_decline",
+            "score_weekly_decay",
+        ),
+        "generator.behavior.decliners",
+    )
     _check(
         0.0 <= decliners["rate"] <= 1.0,
         "generator.behavior.decliners.rate must be in [0, 1]",
     )
-    if "start_week" in decliners:
-        _check(
-            decliners["start_week"] >= 1,
-            "generator.behavior.decliners.start_week must be >= 1",
+    _check(
+        isinstance(decliners["start_week"], int)
+        and not isinstance(decliners["start_week"], bool)
+        and decliners["start_week"] >= 1,
+        "generator.behavior.decliners.start_week must be >= 1",
+    )
+    _check(
+        0.0 <= decliners["weekly_engagement_decay"] < 1.0,
+        "generator.behavior.decliners.weekly_engagement_decay must be in [0, 1)",
+    )
+    _check(
+        isinstance(decliners["marks_decline_lag_weeks"], int)
+        and not isinstance(decliners["marks_decline_lag_weeks"], bool)
+        and decliners["marks_decline_lag_weeks"] >= 1,
+        "generator.behavior.decliners.marks_decline_lag_weeks must be >= 1",
+    )
+    component_weeks = decliners["component_weeks"]
+    _check(
+        isinstance(component_weeks, dict)
+        and all(key in component_weeks for key in ("internal", "midterm", "endterm")),
+        "generator.behavior.decliners.component_weeks must define internal/midterm/endterm",
+    )
+    weeks_list = [component_weeks[key] for key in ("internal", "midterm", "endterm")]
+    _check(
+        all(
+            isinstance(week, int) and not isinstance(week, bool) and week >= 1
+            for week in weeks_list
         )
-    if "marks_decline_lag_weeks" in decliners:
-        _check(
-            decliners["marks_decline_lag_weeks"] >= 1,
-            "generator.behavior.decliners.marks_decline_lag_weeks must be >= 1",
-        )
+        and weeks_list[0] < weeks_list[1] < weeks_list[2],
+        "generator.behavior.decliners.component_weeks must be positive integers "
+        "with internal < midterm < endterm",
+    )
+    _check(
+        isinstance(decliners["marks_weekly_decline"], (int, float))
+        and not isinstance(decliners["marks_weekly_decline"], bool)
+        and decliners["marks_weekly_decline"] >= 0,
+        "generator.behavior.decliners.marks_weekly_decline must be >= 0",
+    )
+    _check(
+        0.0 <= decliners["score_weekly_decay"] < 1.0,
+        "generator.behavior.decliners.score_weekly_decay must be in [0, 1)",
+    )
 
     for factor_name, factor in behavior["rhythms"].items():
         _check(

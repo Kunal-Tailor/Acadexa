@@ -35,10 +35,15 @@ configuration, none hard-coded):
   three components, from ``behavior.grade_scale`` (below the lowest
   band: ``F``).
 
-Decliner behavior and school-profile marks shifts are not applied
-here (school profiles model LMS/attendance/quiz/late behavior);
-course documents do not receive ``difficulty``/
-``semester_applicability`` fields.
+Decliner components decline from ``start_week + marks_decline_lag_weeks``
+onward: each component loses ``marks_weekly_decline`` points per week
+since that start, timed by the configured collection weeks
+(``behavior.decliners``; internal is collected before the decline start
+and endterm well after, producing the documented falling trend).
+Decliner status itself stays hidden (frozen students schema).
+School-profile marks shifts are not applied here (school profiles model
+LMS/attendance/quiz/late behavior); course documents do not receive
+``difficulty``/``semester_applicability`` fields.
 """
 
 from __future__ import annotations
@@ -49,6 +54,7 @@ import numpy as np
 
 from acadexa.generator.behavioral_model import generate_behavioral_traits
 from acadexa.generator.courses import assign_course_difficulty
+from acadexa.generator.decliners import generate_decliner_flags
 from acadexa.generator.foundation import GeneratorError, GeneratorRun
 from acadexa.generator.students import generate_students
 from acadexa.generator.university import generate_university_hierarchy
@@ -205,6 +211,10 @@ def generate_academic_records(
         "student_traits" in behavior,
         "configs missing generator behavior.student_traits",
     )
+    _check(
+        "decliners" in behavior,
+        "configs missing generator behavior.decliners",
+    )
     traits_config = behavior["student_traits"]
     _check(
         "ability_marks_weight" in traits_config,
@@ -243,6 +253,7 @@ def generate_academic_records(
 
     traits = generate_behavioral_traits(run, students)
     ability_mean = traits_config["ability"]["mean"]
+    decliner_flags = generate_decliner_flags(run, students)
 
     school_names = {student["school"] for student in students} | {
         course["school"] for course in courses
@@ -273,6 +284,28 @@ def generate_academic_records(
     baseline = float(baseline_mean)
     record_std = float(performance["record_std"])
     component_std = float(performance["component_std"])
+
+    # Decliners lose marks_weekly_decline points per component-week from
+    # start_week + marks_decline_lag_weeks onward (task 4.8); components
+    # collected before the decline start keep their full value.
+    decliner_params = behavior["decliners"]
+    decline_start_week = (
+        decliner_params["start_week"] + decliner_params["marks_decline_lag_weeks"]
+    )
+    component_penalty = np.array(
+        [
+            0.0
+            if week < decline_start_week
+            else decliner_params["marks_weekly_decline"]
+            * (week - decline_start_week + 1)
+            for week in (
+                decliner_params["component_weeks"]["internal"],
+                decliner_params["component_weeks"]["midterm"],
+                decliner_params["component_weeks"]["endterm"],
+            )
+        ],
+        dtype=float,
+    )
 
     records: list[dict[str, Any]] = []
     for student in students:
@@ -309,6 +342,8 @@ def generate_academic_records(
             components = latent[:, None] + rng.normal(
                 0.0, component_std, size=(len(enrolled), 3)
             )
+            if decliner_flags[student["student_id"]]:
+                components = components - component_penalty
             marks = np.clip(np.rint(components), 0, 100).astype(int)
             for index, course_id in enumerate(enrolled):
                 internal_marks, midterm_marks, endterm_marks = (

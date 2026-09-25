@@ -33,8 +33,15 @@ Outcome model (parameters in configuration, none hard-coded):
 - ``attempts``: submitted assignments 1; submitted quizzes retry with
   ``quiz_retry_probability``, capped at ``max_quiz_attempts``.
 
-Decliner behavior (4.8) and deadline rhythms (5.2) are not applied
-here.
+Decliners multiply score quality by
+``(1 − score_weekly_decay) ** elapsed`` for items due from
+``start_week + marks_decline_lag_weeks`` onward (``behavior.decliners``,
+task 4.8): their graded-item scores fall through the semester — the
+graded-item trend F-D05 consumes — while non-decliner rows and all
+statuses (MISSING/LATE/ON_TIME, timing, attempts) stay unchanged.
+Decliner status itself stays hidden (frozen students schema).
+
+Deadline rhythms (5.2) are not applied here.
 """
 
 from __future__ import annotations
@@ -46,6 +53,7 @@ import numpy as np
 
 from acadexa.generator.academic_records import generate_academic_records
 from acadexa.generator.behavioral_model import generate_behavioral_traits
+from acadexa.generator.decliners import generate_decliner_flags
 from acadexa.generator.foundation import GeneratorError, GeneratorRun
 from acadexa.generator.students import generate_students
 
@@ -132,6 +140,7 @@ def _build_course_items(
                 "due_date": due,
                 "assigned_ord": assigned.toordinal(),
                 "due_ord": due.toordinal(),
+                "due_week": (due - start).days // 7 + 1,
                 "max_score": params["assignment_max_score"],
             }
         )
@@ -153,6 +162,7 @@ def _build_course_items(
                 "due_date": due,
                 "assigned_ord": assigned.toordinal(),
                 "due_ord": due.toordinal(),
+                "due_week": (due - start).days // 7 + 1,
                 "max_score": params["quiz_max_score"],
             }
         )
@@ -234,6 +244,10 @@ def generate_coursework(
         "student_traits" in behavior,
         "configs missing generator behavior.student_traits",
     )
+    _check(
+        "decliners" in behavior,
+        "configs missing generator behavior.decliners",
+    )
     traits_config = behavior["student_traits"]
     _check(
         "diligence_late_weight" in traits_config,
@@ -300,6 +314,22 @@ def generate_coursework(
     traits = generate_behavioral_traits(run, students)
     diligence_mean = traits_config["diligence"]["mean"]
 
+    decliner_flags = generate_decliner_flags(run, students)
+    decliner_params = behavior["decliners"]
+    score_start_week = (
+        decliner_params["start_week"] + decliner_params["marks_decline_lag_weeks"]
+    )
+    score_decay = decliner_params["score_weekly_decay"]
+    max_weeks = max(spec["teaching_weeks"] for spec in semesters.values())
+    score_decay_by_week = {
+        week: (
+            1.0
+            if week < score_start_week
+            else (1.0 - score_decay) ** (week - score_start_week + 1)
+        )
+        for week in range(1, max_weeks + 1)
+    }
+
     student_school: dict[str, str] = {}
     for student in students:
         school_name = student["school"]
@@ -354,6 +384,7 @@ def generate_coursework(
             items = _build_course_items(configs, params, course_id, semester_id)
             items_cache[cache_key] = items
 
+        decliner = decliner_flags[student_id]
         aggregate = (
             record["internal_marks"]
             + record["midterm_marks"]
@@ -473,6 +504,8 @@ def generate_coursework(
                     quality = 0.0
                 elif quality > 1.0:
                     quality = 1.0
+                if decliner:
+                    quality *= score_decay_by_week[item["due_week"]]
                 score = int(round(quality * item["max_score"]))
                 submitted_at = datetime.combine(
                     date.fromordinal(ordinal),

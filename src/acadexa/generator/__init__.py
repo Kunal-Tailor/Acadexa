@@ -5,6 +5,7 @@ from acadexa.generator.attendance import generate_attendance
 from acadexa.generator.behavioral_model import generate_behavioral_traits
 from acadexa.generator.courses import assign_course_difficulty
 from acadexa.generator.coursework import generate_coursework
+from acadexa.generator.decliners import generate_decliner_flags
 from acadexa.generator.foundation import (
     GeneratorError,
     GeneratorRun,
@@ -26,6 +27,7 @@ __all__ = [
     "generate_attendance",
     "generate_behavioral_traits",
     "generate_coursework",
+    "generate_decliner_flags",
     "generate_students",
     "generate_university_hierarchy",
 ]

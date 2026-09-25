@@ -173,6 +173,34 @@ def test_generator_decliner_rate_out_of_range_raises() -> None:
         validate_generator(configs["generator"], configs["hierarchy"])
 
 
+def test_generator_missing_decliner_key_raises() -> None:
+    configs = _load_all()
+    del configs["generator"]["behavior"]["decliners"]["score_weekly_decay"]
+    with pytest.raises(ConfigurationError, match="score_weekly_decay"):
+        validate_generator(configs["generator"], configs["hierarchy"])
+
+
+def test_generator_decliner_engagement_decay_out_of_range_raises() -> None:
+    configs = _load_all()
+    configs["generator"]["behavior"]["decliners"]["weekly_engagement_decay"] = 1.0
+    with pytest.raises(ConfigurationError, match="weekly_engagement_decay"):
+        validate_generator(configs["generator"], configs["hierarchy"])
+
+
+def test_generator_decliner_component_weeks_unordered_raises() -> None:
+    configs = _load_all()
+    configs["generator"]["behavior"]["decliners"]["component_weeks"]["endterm"] = 4
+    with pytest.raises(ConfigurationError, match="component_weeks"):
+        validate_generator(configs["generator"], configs["hierarchy"])
+
+
+def test_generator_decliner_negative_marks_weekly_decline_raises() -> None:
+    configs = _load_all()
+    configs["generator"]["behavior"]["decliners"]["marks_weekly_decline"] = -2.0
+    with pytest.raises(ConfigurationError, match="marks_weekly_decline"):
+        validate_generator(configs["generator"], configs["hierarchy"])
+
+
 def test_generator_difficulty_shares_must_sum_to_one_raises() -> None:
     configs = _load_all()
     configs["generator"]["course_difficulty"]["easy_share"] = 0.50

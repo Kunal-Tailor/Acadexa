@@ -46,11 +46,15 @@ diligence_late_weight = 0.4             # relative late-probability reduction pe
 
 # ── Decliner population (docs/memory.md §6: ~8%) ───────
 # Engagement fades during the semester; marks drop a few weeks later.
+# Decliner status is hidden generator state (frozen students schema).
 [behavior.decliners]
 rate = 0.08
 start_week = 5                  # tunable: approximate decline start week
 weekly_engagement_decay = 0.07  # tunable: fraction of engagement lost per week
 marks_decline_lag_weeks = 3     # tunable: marks follow engagement decline
+component_weeks = { internal = 4, midterm = 9, endterm = 15 }  # week each marks component is collected
+marks_weekly_decline = 2.0      # tunable: marks points lost per week once marks decline starts
+score_weekly_decay = 0.04       # tunable: fraction of coursework score quality lost per week
 
 # ── Weekly & semester rhythms (original_idea §7.1) ─────
 # Fewer weekend events, spikes before deadlines/exams, mid-semester dip.
