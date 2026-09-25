@@ -146,6 +146,16 @@ class InjectionReport:
     total_injected: int
     timestamp: datetime
 
+    @property
+    def counts(self) -> dict[str, int]:
+        """Convenient alias for issue_counts."""
+        return self.issue_counts
+
+    @property
+    def per_dataset_counts(self) -> dict[str, dict[str, int]]:
+        """Convenient alias for collection_counts."""
+        return self.collection_counts
+
     def to_dict(self) -> dict[str, Any]:
         """Convert report to JSON-serializable dictionary."""
         return {
