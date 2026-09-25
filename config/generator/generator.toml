@@ -88,6 +88,29 @@ weekly_noise_std = 0.08      # tunable: week-to-week probability noise
 probability_floor = 0.05     # tunable: clip bounds after shifting
 probability_ceiling = 0.98
 
+# ── Coursework (F-B06) ──────────────────────────────────
+# Items are defined per course-semester and shared by all enrolled students,
+# so rows = enrollment × items (drives the documented ~3.5M coursework
+# target). Quiz counts scale with the course's school quiz_activity profile;
+# late timing scales with the student's school late_submission profile and
+# aligns against term marks (plants late↔marks negative, F-B09). Scores
+# align with term marks as well (score ↔ performance). Engineering
+# parameters unless marked by a document.
+[behavior.coursework]
+assignments_per_course_per_semester = 8
+quizzes_per_course_per_semester = 4     # before school quiz_activity scaling
+assignment_window_days = 7              # due = assigned + window (example: 7 days)
+quiz_window_days = 3
+max_late_days = 7                       # LATE submissions land 1..max_late_days after due
+missing_probability = 0.04              # tunable: P(not submitted)
+late_probability = 0.14                 # tunable: baseline P(late | submitted)
+late_marks_alignment = 0.9              # tunable: strength of the late↔marks (negative) coupling
+quiz_retry_probability = 0.30           # tunable: P(each extra quiz attempt)
+max_quiz_attempts = 3
+assignment_max_score = 20               # matches the original idea example
+quiz_max_score = 5
+score_noise_std = 0.15                  # tunable: noise on score quality
+
 # ── School behavior profiles ───────────────────────────
 # Multipliers shift generated behavior per school (original_idea §5.2).
 # Values near 1.0 = baseline; all tunable.

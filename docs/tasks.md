@@ -179,7 +179,7 @@ Build a reproducible generator before attempting the full dataset.
 - [x] 4.5 — Implement synthetic attendance generation using conducted/attended counts and weekly behavior.
   Commit: `Update - 4.5 - generate attendance data`
 
-- [ ] 4.6 — Implement synthetic coursework generation for assignments and quizzes, including submission timing, late submissions and attempts.
+- [x] 4.6 — Implement synthetic coursework generation for assignments and quizzes, including submission timing, late submissions and attempts.
   Commit: `Update - 4.6 - generate coursework data`
 
 - [ ] 4.7 — Implement the synthetic behavioral model: ability, diligence, engagement, course difficulty and controlled student-level variation.
