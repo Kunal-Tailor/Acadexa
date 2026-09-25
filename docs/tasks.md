@@ -188,6 +188,9 @@ Build a reproducible generator before attempting the full dataset.
 - [x] 4.8 — Implement the approximately 8% decliner population and make its behavior reproducible from the generator configuration.
   Commit: `Update - 4.8 - implement synthetic decliner population`
 
+- [x] 4.9 — Create `docs/IDE_Context.md` containing the complete session context: every executed task from 0.1 to 4.8 with decisions and rationale, calibration data, environment conventions, working rules and the state of the project, so any developer or IDE agent can resume work without re-deriving context. Documentation only — no code changes.
+  Commit: `Update - 4.9 - add IDE context documentation`
+
 ---
 
 # Phase 5 — Synthetic LMS Generation & Ground Truth
