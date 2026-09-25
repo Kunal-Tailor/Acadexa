@@ -214,7 +214,7 @@ Build the large event generator and analytical ground truth without yet scaling 
 - [x] 5.5 — Implement the ground-truth registry describing planted relationships, decliner behavior and the decoy relationship. Ground truth must be generated before analytical results are observed.
   Commit: `Update - 5.5 - implement synthetic ground truth registry`
 
-- [ ] 5.6 — Implement controlled data-quality injection for duplicates, selected nulls, timestamp inconsistencies, course-ID formatting, orphan records and out-of-range values using the approved approximate rates.
+- [x] 5.6 — Implement controlled data-quality injection for duplicates, selected nulls, timestamp inconsistencies, course-ID formatting, orphan records and out-of-range values using the approved approximate rates.
   Commit: `Update - 5.6 - implement data quality injection`
 
 - [ ] 5.7 — Implement the generation/injection manifest recording seed, configuration, target counts, actual counts and injected issue counts.
