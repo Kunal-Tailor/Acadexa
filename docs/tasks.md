@@ -182,7 +182,7 @@ Build a reproducible generator before attempting the full dataset.
 - [x] 4.6 — Implement synthetic coursework generation for assignments and quizzes, including submission timing, late submissions and attempts.
   Commit: `Update - 4.6 - generate coursework data`
 
-- [ ] 4.7 — Implement the synthetic behavioral model: ability, diligence, engagement, course difficulty and controlled student-level variation.
+- [x] 4.7 — Implement the synthetic behavioral model: ability, diligence, engagement, course difficulty and controlled student-level variation.
   Commit: `Update - 4.7 - implement synthetic behavioral model`
 
 - [ ] 4.8 — Implement the approximately 8% decliner population and make its behavior reproducible from the generator configuration.

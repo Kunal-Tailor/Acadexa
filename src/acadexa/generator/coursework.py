@@ -23,15 +23,18 @@ Outcome model (parameters in configuration, none hard-coded):
 - Late: ``late_probability × student-school late_submission profile``
   multiplier, aligned against term marks — high marks lower the late
   chance, planting the documented negative late ↔ marks relationship
-  (F-B09) at the student × course × semester grain.
+  (F-B09) at the student × course × semester grain — and scaled by
+  ``1 − diligence_late_weight × (diligence − configured mean)`` from
+  the hidden behavioral traits (task 4.7): diligent students submit
+  late less often.
 - Otherwise ``ON_TIME`` with a submission inside the item window.
 - ``score`` = quality × ``max_score`` where quality = aggregate
   marks / 100 plus Gaussian noise (score ↔ performance).
 - ``attempts``: submitted assignments 1; submitted quizzes retry with
   ``quiz_retry_probability``, capped at ``max_quiz_attempts``.
 
-Traits (4.7), decliner behavior (4.8) and deadline rhythms (5.2) are
-not applied here.
+Decliner behavior (4.8) and deadline rhythms (5.2) are not applied
+here.
 """
 
 from __future__ import annotations
@@ -42,6 +45,7 @@ from typing import Any
 import numpy as np
 
 from acadexa.generator.academic_records import generate_academic_records
+from acadexa.generator.behavioral_model import generate_behavioral_traits
 from acadexa.generator.foundation import GeneratorError, GeneratorRun
 from acadexa.generator.students import generate_students
 
@@ -227,6 +231,22 @@ def generate_coursework(
     )
 
     _check(
+        "student_traits" in behavior,
+        "configs missing generator behavior.student_traits",
+    )
+    traits_config = behavior["student_traits"]
+    _check(
+        "diligence_late_weight" in traits_config,
+        "generator behavior.student_traits missing 'diligence_late_weight'",
+    )
+    late_weight = traits_config["diligence_late_weight"]
+    _check(
+        _is_number(late_weight) and late_weight >= 0,
+        "generator behavior.student_traits.diligence_late_weight "
+        "must be a non-negative number",
+    )
+
+    _check(
         "academic_periods" in configs
         and "semesters" in configs.get("academic_periods", {}),
         "configs missing academic_periods semesters",
@@ -276,6 +296,9 @@ def generate_coursework(
         students = generate_students(run)
     if records is None:
         records = generate_academic_records(run, students)
+
+    traits = generate_behavioral_traits(run, students)
+    diligence_mean = traits_config["diligence"]["mean"]
 
     student_school: dict[str, str] = {}
     for student in students:
@@ -338,13 +361,17 @@ def generate_coursework(
         ) / 3
         profile = school_profiles.get(student_school[student_id], {})
         late_multiplier = float(profile.get("late_submission", 1.0))
+        diligence_shift = 1.0 - late_weight * (
+            traits[student_id]["diligence"] - diligence_mean
+        )
         late_probability_adj = min(
             1.0,
             max(
                 0.0,
                 late_probability
                 * late_multiplier
-                * (1.0 + late_alignment * (50.0 - aggregate) / 50.0),
+                * (1.0 + late_alignment * (50.0 - aggregate) / 50.0)
+                * diligence_shift,
             ),
         )
 

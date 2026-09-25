@@ -16,6 +16,9 @@ hard-coded):
 - plus ``alignment_weight × (aggregate marks − 50) / 50`` — plants
   the attendance ↔ marks relationship (F-B09) at the student ×
   course × semester grain analytics will join on.
+- plus the configured diligence/engagement attendance weights ×
+  (trait − configured mean) — hidden student traits shift weekly
+  attendance (prd.md §13.1, task 4.7).
 - plus weekly Gaussian noise, clipped to floor/ceiling;
   ``classes_attended ~ Binomial(classes_conducted, p)``.
 
@@ -24,8 +27,7 @@ references a non-enrolled student/course/semester. Every
 (student, course) pair must occur in at most one semester — the
 frozen schema grain (student × course × week) does not model retakes.
 
-Student-level traits (4.7), decliner decline (4.8) and LMS rhythms
-(5.2) are not applied here.
+Decliner decline (4.8) and LMS rhythms (5.2) are not applied here.
 """
 
 from __future__ import annotations
@@ -36,6 +38,7 @@ from typing import Any
 import numpy as np
 
 from acadexa.generator.academic_records import generate_academic_records
+from acadexa.generator.behavioral_model import generate_behavioral_traits
 from acadexa.generator.courses import assign_course_difficulty
 from acadexa.generator.foundation import GeneratorError, GeneratorRun
 from acadexa.generator.students import generate_students
@@ -136,6 +139,24 @@ def generate_attendance(
     )
 
     _check(
+        "student_traits" in behavior,
+        "configs missing generator behavior.student_traits",
+    )
+    traits_config = behavior["student_traits"]
+    attendance_weights: dict[str, float] = {}
+    for key in ("diligence_attendance_weight", "engagement_attendance_weight"):
+        _check(
+            key in traits_config,
+            f"generator behavior.student_traits missing '{key}'",
+        )
+        weight = traits_config[key]
+        _check(
+            _is_number(weight) and weight >= 0,
+            f"generator behavior.student_traits.{key} must be a non-negative number",
+        )
+        attendance_weights[key] = float(weight)
+
+    _check(
         "generator" in configs
         and "course_difficulty" in configs.get("generator", {}),
         "configs missing generator course_difficulty configuration",
@@ -212,6 +233,10 @@ def generate_attendance(
     if records is None:
         records = generate_academic_records(run, students)
 
+    traits = generate_behavioral_traits(run, students)
+    diligence_mean = traits_config["diligence"]["mean"]
+    engagement_mean = traits_config["engagement"]["mean"]
+
     student_school: dict[str, str] = {}
     for student in students:
         school_name = student["school"]
@@ -258,10 +283,18 @@ def generate_attendance(
             + record["midterm_marks"]
             + record["endterm_marks"]
         ) / 3
+        student_traits = traits[student_id]
+        trait_shift = (
+            attendance_weights["diligence_attendance_weight"]
+            * (student_traits["diligence"] - diligence_mean)
+            + attendance_weights["engagement_attendance_weight"]
+            * (student_traits["engagement"] - engagement_mean)
+        )
         probability = (
             base_probability * multiplier
             - difficulty * attendance_drag
             + alignment_weight * (aggregate - 50.0) / 50.0
+            + trait_shift
         )
         noise = rng.normal(0.0, weekly_noise_std, size=len(weeks))
         probabilities = np.clip(

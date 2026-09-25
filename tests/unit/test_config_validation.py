@@ -145,6 +145,27 @@ def test_generator_trait_mean_out_of_range_raises() -> None:
         validate_generator(configs["generator"], configs["hierarchy"])
 
 
+def test_generator_observation_noise_out_of_range_raises() -> None:
+    configs = _load_all()
+    configs["generator"]["behavior"]["student_traits"]["observation_noise_std"] = -0.1
+    with pytest.raises(ConfigurationError, match="observation_noise_std"):
+        validate_generator(configs["generator"], configs["hierarchy"])
+
+
+def test_generator_missing_trait_weight_raises() -> None:
+    configs = _load_all()
+    del configs["generator"]["behavior"]["student_traits"]["ability_marks_weight"]
+    with pytest.raises(ConfigurationError, match="ability_marks_weight"):
+        validate_generator(configs["generator"], configs["hierarchy"])
+
+
+def test_generator_negative_trait_weight_raises() -> None:
+    configs = _load_all()
+    configs["generator"]["behavior"]["student_traits"]["diligence_late_weight"] = -1.0
+    with pytest.raises(ConfigurationError, match="diligence_late_weight"):
+        validate_generator(configs["generator"], configs["hierarchy"])
+
+
 def test_generator_decliner_rate_out_of_range_raises() -> None:
     configs = _load_all()
     configs["generator"]["behavior"]["decliners"]["rate"] = 1.5

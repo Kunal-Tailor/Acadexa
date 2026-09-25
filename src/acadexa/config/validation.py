@@ -220,6 +220,34 @@ def validate_generator(config: dict[str, Any], hierarchy: dict[str, Any]) -> Non
             f"generator.behavior.student_traits.{trait}.std must be in (0, 1]",
         )
 
+    traits = behavior["student_traits"]
+    _check(
+        "observation_noise_std" in traits,
+        "generator.behavior.student_traits: missing 'observation_noise_std'",
+    )
+    _check(
+        isinstance(traits["observation_noise_std"], (int, float))
+        and not isinstance(traits["observation_noise_std"], bool)
+        and traits["observation_noise_std"] >= 0.0,
+        "generator.behavior.student_traits.observation_noise_std must be >= 0",
+    )
+    for weight_name in (
+        "ability_marks_weight",
+        "diligence_attendance_weight",
+        "engagement_attendance_weight",
+        "diligence_late_weight",
+    ):
+        _check(
+            weight_name in traits,
+            f"generator.behavior.student_traits: missing '{weight_name}'",
+        )
+        _check(
+            isinstance(traits[weight_name], (int, float))
+            and not isinstance(traits[weight_name], bool)
+            and traits[weight_name] >= 0.0,
+            f"generator.behavior.student_traits.{weight_name} must be >= 0",
+        )
+
     decliners = behavior["decliners"]
     _require_keys(decliners, ("rate",), "generator.behavior.decliners")
     _check(

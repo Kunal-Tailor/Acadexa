@@ -36,7 +36,13 @@ sol = 800
 ability = { mean = 0.65, std = 0.15 }
 diligence = { mean = 0.60, std = 0.18 }
 engagement = { mean = 0.55, std = 0.20 }
-observation_noise_std = 0.10   # tunable: controlled noise on generated outcomes
+observation_noise_std = 0.10   # tunable: controlled noise added to latent traits
+# Influence weights: outcome shifts per unit of trait above its mean
+# (behavioral model, task 4.7). All tunable engineering parameters.
+ability_marks_weight = 24.0             # marks points per unit of ability (records)
+diligence_attendance_weight = 0.13      # weekly attendance probability per unit of diligence
+engagement_attendance_weight = 0.10     # weekly attendance probability per unit of engagement
+diligence_late_weight = 0.4             # relative late-probability reduction per unit of diligence
 
 # ── Decliner population (docs/memory.md §6: ~8%) ───────
 # Engagement fades during the semester; marks drop a few weeks later.

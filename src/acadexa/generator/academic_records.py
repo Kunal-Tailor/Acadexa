@@ -27,15 +27,18 @@ configuration, none hard-coded):
   expected marks down by ``difficulty × max_score_drag`` points —
   the documented confounder (F-B03, memory.md §7).
 - A record-level latent score is drawn from ``baseline_mean`` with
-  ``record_std`` noise, minus the difficulty drag; each marks
-  component adds ``component_std`` noise and is clipped to 0–100.
+  ``record_std`` noise, plus ``ability_marks_weight × (ability −
+  configured mean)`` from the hidden behavioral traits (task 4.7),
+  minus the difficulty drag; each marks component adds
+  ``component_std`` noise and is clipped to 0–100.
 - ``final_grade`` is the letter band of the unweighted mean of the
   three components, from ``behavior.grade_scale`` (below the lowest
   band: ``F``).
 
-Student-level traits, decliner behavior and school-profile shifts are
-added by later tasks (4.7/4.8); course documents do not receive
-``difficulty``/``semester_applicability`` fields here.
+Decliner behavior and school-profile marks shifts are not applied
+here (school profiles model LMS/attendance/quiz/late behavior);
+course documents do not receive ``difficulty``/
+``semester_applicability`` fields.
 """
 
 from __future__ import annotations
@@ -44,6 +47,7 @@ from typing import Any
 
 import numpy as np
 
+from acadexa.generator.behavioral_model import generate_behavioral_traits
 from acadexa.generator.courses import assign_course_difficulty
 from acadexa.generator.foundation import GeneratorError, GeneratorRun
 from acadexa.generator.students import generate_students
@@ -198,6 +202,24 @@ def generate_academic_records(
         )
 
     _check(
+        "student_traits" in behavior,
+        "configs missing generator behavior.student_traits",
+    )
+    traits_config = behavior["student_traits"]
+    _check(
+        "ability_marks_weight" in traits_config,
+        "generator behavior.student_traits missing 'ability_marks_weight'",
+    )
+    ability_weight = traits_config["ability_marks_weight"]
+    _check(
+        isinstance(ability_weight, (int, float))
+        and not isinstance(ability_weight, bool)
+        and ability_weight >= 0,
+        "generator behavior.student_traits.ability_marks_weight "
+        "must be a non-negative number",
+    )
+
+    _check(
         "academic_periods" in configs
         and "semesters" in configs.get("academic_periods", {}),
         "configs missing academic_periods semesters",
@@ -218,6 +240,9 @@ def generate_academic_records(
 
     if students is None:
         students = generate_students(run)
+
+    traits = generate_behavioral_traits(run, students)
+    ability_mean = traits_config["ability"]["mean"]
 
     school_names = {student["school"] for student in students} | {
         course["school"] for course in courses
@@ -257,6 +282,10 @@ def generate_academic_records(
             f"student '{student['student_id']}': unknown school '{school_name}'",
         )
         own_pool, elective_pool = pools[school_name]
+        student_traits = traits[student["student_id"]]
+        ability_shift = ability_weight * (
+            student_traits["ability"] - ability_mean
+        )
         own_remaining = [own_pool[int(i)] for i in rng.permutation(len(own_pool))]
         elective_remaining = [
             elective_pool[int(i)] for i in rng.permutation(len(elective_pool))
@@ -276,7 +305,7 @@ def generate_academic_records(
                 ],
                 dtype=float,
             )
-            latent = rng.normal(baseline - drag, record_std)
+            latent = rng.normal(baseline - drag + ability_shift, record_std)
             components = latent[:, None] + rng.normal(
                 0.0, component_std, size=(len(enrolled), 3)
             )
