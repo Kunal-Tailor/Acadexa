@@ -205,7 +205,7 @@ Build the large event generator and analytical ground truth without yet scaling 
 - [x] 5.2 — Implement timestamp generation with weekly and semester rhythms while preserving valid student/course/semester context.
   Commit: `Update - 5.2 - implement LMS temporal behavior`
 
-- [ ] 5.3 — Implement chunked LMS generation so large event volumes are written incrementally instead of accumulated in driver/Python memory.
+- [x] 5.3 — Implement chunked LMS generation so large event volumes are written incrementally instead of accumulated in driver/Python memory.
   Commit: `Update - 5.3 - implement chunked LMS generation`
 
 - [ ] 5.4 — Implement Parquet output for LMS events with a small development-scale dataset only. Validate that it can be read back successfully.

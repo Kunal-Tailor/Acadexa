@@ -1,4 +1,4 @@
-"""Synthetic LMS event generation and temporal behavior simulation (F-B07, F-B08).
+"""Synthetic LMS event generation and chunked streaming (F-B07, F-B08, task 5.3).
 
 Generates timestamped LMS activity events using only the approved
 event types and configuration-driven distributions (rules.md §14).
@@ -28,6 +28,14 @@ Temporal behavior model (F-B08, memory.md §6, original_idea §7.1):
     the student's latent ``engagement`` trait (task 4.7) and the
     school's ``lms_activity`` multiplier.
 
+Chunked generation (rules.md §8.4, architecture.md §24, task 5.3):
+- Large event datasets are generated and yielded in memory-bounded
+  chunks via :func:`generate_lms_events_chunks`, so callers (such as
+  the Parquet writer in task 5.4) can write each chunk incrementally
+  and release memory rather than accumulating ~70M records in Python RAM.
+- :func:`generate_lms_events` is a convenience wrapper for small-scale
+  tests and development workflows.
+
 Event structure (per LMS_EVENTS_SCHEMA):
 - timestamp: datetime within semester bounds (timeField for MongoDB time-series)
 - meta: time-series metaField with student_id, course_id, school
@@ -42,6 +50,7 @@ All generation is seeded and reproducible through the dedicated
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from datetime import date, datetime, time, timedelta
 from typing import Any
 
@@ -96,17 +105,19 @@ def _is_number(value: Any) -> bool:
     return isinstance(value, (int, float)) and not isinstance(value, bool)
 
 
-def generate_lms_events(
+def generate_lms_events_chunks(
     run: GeneratorRun,
     students: list[dict[str, Any]] | None = None,
     records: list[dict[str, Any]] | None = None,
     coursework: list[dict[str, Any]] | None = None,
-) -> list[dict[str, Any]]:
-    """Generate timestamped LMS events with weekly and semester rhythms (F-B07, F-B08).
+    chunk_size: int | None = None,
+) -> Iterator[list[dict[str, Any]]]:
+    """Generate timestamped LMS events in memory-bounded chunks (rules.md §8.4, task 5.3).
 
     Simulates temporal rhythms (weekend reductions, mid-semester dips,
     pre-deadline and pre-exam spikes, and decliner engagement fades)
-    while preserving valid student, course, semester, and school context.
+    while yielding events in discrete chunks of at most ``chunk_size``
+    records. This prevents Python driver out-of-memory errors on large datasets.
 
     Args:
         run: Seeded generator run providing LMS configuration, hierarchy,
@@ -117,14 +128,18 @@ def generate_lms_events(
             enrollments. When omitted, they are generated.
         coursework: Optional previously generated coursework rows. When
             omitted, course item schedules are computed from configuration.
+        chunk_size: Maximum number of events per yielded chunk. When omitted,
+            reads ``[lms_events].chunk_size`` from configuration (default 100,000).
 
-    Returns:
-        List of dicts representing LMS events conforming to the
-        ``lms_events`` schema contract.
+    Yields:
+        Lists of dicts representing LMS events conforming to the
+        ``lms_events`` schema contract, each containing at most ``chunk_size``
+        events (except possibly the final chunk).
 
     Raises:
         GeneratorError: if required configuration is missing or
-            inconsistent, or if enrollment references invalid entities.
+            inconsistent, or if enrollment references invalid entities, or
+            if ``chunk_size`` is not a positive integer.
     """
     configs = run.configs
     _check(
@@ -155,6 +170,18 @@ def generate_lms_events(
         and not isinstance(courses_per_semester, bool)
         and courses_per_semester > 0,
         "generator scale.courses_per_student_per_semester must be a positive integer",
+    )
+
+    # Resolve chunk size from argument or configuration
+    if chunk_size is None:
+        lms_cfg = configs.get("generator", {}).get("lms_events", {})
+        if not lms_cfg:
+            lms_cfg = configs.get("lms_events", {})
+        chunk_size = lms_cfg.get("chunk_size", 100_000)
+
+    _check(
+        isinstance(chunk_size, int) and not isinstance(chunk_size, bool) and chunk_size > 0,
+        "generator lms_events chunk_size must be a positive integer",
     )
 
     _check(
@@ -329,16 +356,16 @@ def generate_lms_events(
     items_cache: dict[tuple[str, str], set[date]] = {}
     if coursework is not None:
         for item in coursework:
-            # coursework rows don't carry semester_id directly, but we can index by course_id
             pass
 
     rng = run.child_rng("lms_events")
-    events: list[dict[str, Any]] = []
     session_counter = 0
 
     # Teaching days per semester (2 semesters per academic year)
     teaching_days_per_sem = teaching_days_year / 2.0
     base_events_per_enrollment = (events_per_day / courses_per_semester) * teaching_days_per_sem
+
+    chunk_buffer: list[dict[str, Any]] = []
 
     for record in records:
         student_id = record["student_id"]
@@ -449,7 +476,7 @@ def generate_lms_events(
                 elif act_type == "PDF_VIEW":
                     duration_sec = int(rng.integers(30, 3600))
 
-                events.append(
+                chunk_buffer.append(
                     {
                         "timestamp": current_dt,
                         "meta": {
@@ -464,4 +491,43 @@ def generate_lms_events(
                     }
                 )
 
+        # Yield any filled chunks from buffer
+        while len(chunk_buffer) >= chunk_size:
+            yield chunk_buffer[:chunk_size]
+            chunk_buffer = chunk_buffer[chunk_size:]
+
+    # Yield remaining buffered events
+    if chunk_buffer:
+        yield chunk_buffer
+        chunk_buffer = []
+
+
+def generate_lms_events(
+    run: GeneratorRun,
+    students: list[dict[str, Any]] | None = None,
+    records: list[dict[str, Any]] | None = None,
+    coursework: list[dict[str, Any]] | None = None,
+) -> list[dict[str, Any]]:
+    """Generate all LMS events as a single list (convenience wrapper).
+
+    For large datasets, use :func:`generate_lms_events_chunks` to avoid
+    accumulating event records in memory (rules.md §8.4, architecture.md §24, task 5.3).
+
+    Args:
+        run: Seeded generator run providing LMS configuration, hierarchy,
+            rhythms, coursework, and academic-period configuration.
+        students: Previously generated student documents (needed for
+            school lookup and traits). When omitted, they are generated.
+        records: Previously generated academic records, which define
+            enrollments. When omitted, they are generated.
+        coursework: Optional previously generated coursework rows. When
+            omitted, course item schedules are computed from configuration.
+
+    Returns:
+        List of dicts representing LMS events conforming to the
+        ``lms_events`` schema contract.
+    """
+    events: list[dict[str, Any]] = []
+    for chunk in generate_lms_events_chunks(run, students, records, coursework):
+        events.extend(chunk)
     return events

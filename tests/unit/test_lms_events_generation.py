@@ -16,6 +16,7 @@ from acadexa.generator import (
     generate_coursework,
     generate_decliner_flags,
     generate_lms_events,
+    generate_lms_events_chunks,
     generate_students,
 )
 from acadexa.generator.coursework import _build_course_items
@@ -563,3 +564,136 @@ def test_record_with_unknown_semester_raises(
     broken_record["semester_id"] = "S99"
     with pytest.raises(GeneratorError, match="unknown semester"):
         generate_lms_events(run, students, records + [broken_record])
+
+
+# ── Chunked generation tests (task 5.3) ──────────────────
+
+
+def test_generate_lms_events_chunks_yields_correct_total_count(
+    small_chain: tuple[GeneratorRun, list[dict], list[dict]],
+) -> None:
+    run, students, records = small_chain
+    # Use a small slice of records for fast chunk testing
+    test_records = records[:24]
+    unbuffered = generate_lms_events(run, students, test_records)
+
+    chunks = list(
+        generate_lms_events_chunks(run, students, test_records, chunk_size=1000)
+    )
+    assert len(chunks) > 1
+    total_chunked = sum(len(c) for c in chunks)
+    assert total_chunked == len(unbuffered)
+
+
+def test_chunk_sizes_conform_to_parameter(
+    small_chain: tuple[GeneratorRun, list[dict], list[dict]],
+) -> None:
+    run, students, records = small_chain
+    test_records = records[:24]
+    chunk_size = 1500
+
+    chunks = list(
+        generate_lms_events_chunks(run, students, test_records, chunk_size=chunk_size)
+    )
+    assert len(chunks) > 1
+
+    # Every chunk except the last must have exactly chunk_size items
+    for chunk in chunks[:-1]:
+        assert len(chunk) == chunk_size
+
+    # The last chunk must have at most chunk_size items and at least 1 item
+    assert 0 < len(chunks[-1]) <= chunk_size
+
+
+def test_chunked_output_identical_to_unbuffered(
+    small_chain: tuple[GeneratorRun, list[dict], list[dict]],
+) -> None:
+    run, students, records = small_chain
+    test_records = records[:12]
+
+    # Deterministic generation from fresh runs with identical seeds
+    run1 = GeneratorRun(run.configs)
+    unbuffered = generate_lms_events(run1, students, test_records)
+
+    run2 = GeneratorRun(run.configs)
+    chunks = list(
+        generate_lms_events_chunks(run2, students, test_records, chunk_size=800)
+    )
+    reassembled = [event for chunk in chunks for event in chunk]
+
+    assert reassembled == unbuffered
+
+
+def test_each_chunk_conforms_to_schema(
+    small_chain: tuple[GeneratorRun, list[dict], list[dict]],
+) -> None:
+    run, students, records = small_chain
+    test_records = records[:12]
+
+    for chunk in generate_lms_events_chunks(
+        run, students, test_records, chunk_size=1000
+    ):
+        validate_records(chunk, LMS_EVENTS_SCHEMA)
+
+
+def test_session_ids_unique_and_monotonic_across_chunks(
+    small_chain: tuple[GeneratorRun, list[dict], list[dict]],
+) -> None:
+    run, students, records = small_chain
+    test_records = records[:24]
+
+    chunks = list(
+        generate_lms_events_chunks(run, students, test_records, chunk_size=1000)
+    )
+
+    seen_session_ids: set[str] = set()
+    prev_session_num = 0
+
+    for chunk in chunks:
+        chunk_session_ids = [e["session_id"] for e in chunk]
+        # In each chunk, session numbers must be non-decreasing
+        for sid in chunk_session_ids:
+            num = int(sid.replace("SES", ""))
+            assert num >= prev_session_num
+            prev_session_num = num
+        seen_session_ids.update(chunk_session_ids)
+
+    # Global session counter increased properly
+    assert len(seen_session_ids) > 10
+
+
+def test_configured_chunk_size_is_respected(small_configs: dict) -> None:
+    custom_configs = copy.deepcopy(small_configs)
+    custom_configs["generator"]["lms_events"]["chunk_size"] = 1200
+
+    run = GeneratorRun(custom_configs)
+    students = generate_students(run)
+    records = generate_academic_records(run, students)[:24]
+
+    chunks = list(generate_lms_events_chunks(run, students, records))
+    assert len(chunks) > 1
+    assert len(chunks[0]) == 1200
+
+
+def test_empty_records_yields_no_chunks(small_configs: dict) -> None:
+    run = GeneratorRun(small_configs)
+    students = generate_students(run)
+    chunks = list(generate_lms_events_chunks(run, students, records=[]))
+    assert chunks == []
+
+
+def test_invalid_chunk_size_raises(small_chain: tuple[GeneratorRun, list[dict], list[dict]]) -> None:
+    run, students, records = small_chain
+
+    with pytest.raises(GeneratorError, match="chunk_size must be a positive integer"):
+        list(generate_lms_events_chunks(run, students, records[:6], chunk_size=0))
+
+    with pytest.raises(GeneratorError, match="chunk_size must be a positive integer"):
+        list(generate_lms_events_chunks(run, students, records[:6], chunk_size=-100))
+
+    with pytest.raises(GeneratorError, match="chunk_size must be a positive integer"):
+        list(generate_lms_events_chunks(run, students, records[:6], chunk_size="5000"))  # type: ignore
+
+    with pytest.raises(GeneratorError, match="chunk_size must be a positive integer"):
+        list(generate_lms_events_chunks(run, students, records[:6], chunk_size=True))  # type: ignore
+

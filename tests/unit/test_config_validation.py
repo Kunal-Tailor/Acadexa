@@ -238,6 +238,13 @@ def test_generator_unknown_school_profile_raises() -> None:
         validate_generator(configs["generator"], configs["hierarchy"])
 
 
+def test_generator_invalid_lms_chunk_size_raises() -> None:
+    configs = _load_all()
+    configs["generator"]["lms_events"]["chunk_size"] = -50
+    with pytest.raises(ConfigurationError, match="chunk_size must be a positive integer"):
+        validate_generator(configs["generator"], configs["hierarchy"])
+
+
 # ── Risk: exactly five approved signals ─────────────────
 
 

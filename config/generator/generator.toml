@@ -141,7 +141,12 @@ hard_share = 0.25
 max_score_drag = 12        # tunable: max marks penalty at hardest level (points)
 attendance_drag = 0.08     # tunable: max attendance probability penalty at hardest level
 
-# ── LMS event generation (F-B07) ───────────────────────────
+# ── LMS event generation (F-B07, F-B08) ───────────────────────────
+# Chunked generation (task 5.3) yields events in bounded chunks to avoid
+# accumulating large event volumes in driver/Python memory.
+[lms_events]
+chunk_size = 100000
+
 # Event type distribution determines the probability of each approved
 # event type. All event types must sum to 1.0. If not specified,
 # a reasonable default distribution is used.

@@ -197,6 +197,13 @@ def validate_generator(config: dict[str, Any], hierarchy: dict[str, Any]) -> Non
             f"lms_events.event_type_distribution must sum to 1.0, got {total}",
         )
 
+    if "chunk_size" in lms_events:
+        chunk_size = lms_events["chunk_size"]
+        _check(
+            isinstance(chunk_size, int) and not isinstance(chunk_size, bool) and chunk_size > 0,
+            "generator.lms_events.chunk_size must be a positive integer",
+        )
+
     scale = config["scale"]
     _require_keys(
         scale,
