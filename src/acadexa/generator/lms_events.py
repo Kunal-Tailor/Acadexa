@@ -50,11 +50,15 @@ All generation is seeded and reproducible through the dedicated
 
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Iterable, Iterator, Sequence
 from datetime import date, datetime, time, timedelta
+from pathlib import Path
+import shutil
 from typing import Any
 
 import numpy as np
+import pyarrow as pa
+import pyarrow.parquet as pq
 
 from acadexa.generator.academic_records import generate_academic_records
 from acadexa.generator.behavioral_model import generate_behavioral_traits
@@ -62,7 +66,8 @@ from acadexa.generator.coursework import _build_course_items
 from acadexa.generator.decliners import generate_decliner_flags
 from acadexa.generator.foundation import GeneratorError, GeneratorRun
 from acadexa.generator.students import generate_students
-from acadexa.validation.schema import LMS_EVENT_TYPES
+from acadexa.validation.schema import LMS_EVENTS_SCHEMA, LMS_EVENT_TYPES
+from acadexa.validation.validators import SchemaError, validate_record
 
 _LMS_SCALE_KEYS = (
     "lms_events_per_student_per_day",
@@ -93,6 +98,40 @@ _HOURLY_WEIGHTS = np.array(
     dtype=float,
 )
 _HOURLY_WEIGHTS /= _HOURLY_WEIGHTS.sum()
+
+DEFAULT_LMS_PARQUET_PATH: Path = Path("data/raw/lms_events")
+
+LMS_PARQUET_META_TYPE = pa.struct(
+    [
+        pa.field("student_id", pa.string(), nullable=False),
+        pa.field("course_id", pa.string(), nullable=False),
+        pa.field("school", pa.string(), nullable=False),
+    ]
+)
+
+LMS_PARQUET_SCHEMA = pa.schema(
+    [
+        pa.field("timestamp", pa.timestamp("us"), nullable=False),
+        pa.field("meta", LMS_PARQUET_META_TYPE, nullable=False),
+        pa.field("activity_type", pa.string(), nullable=False),
+        pa.field("resource_id", pa.string(), nullable=True),
+        pa.field("duration_sec", pa.int64(), nullable=True),
+        pa.field("session_id", pa.string(), nullable=False),
+    ]
+)
+
+LMS_PARQUET_PARTITION_SCHEMA = pa.schema(
+    [
+        pa.field("timestamp", pa.timestamp("us"), nullable=False),
+        pa.field("meta", LMS_PARQUET_META_TYPE, nullable=False),
+        pa.field("activity_type", pa.string(), nullable=False),
+        pa.field("resource_id", pa.string(), nullable=True),
+        pa.field("duration_sec", pa.int64(), nullable=True),
+        pa.field("session_id", pa.string(), nullable=False),
+        pa.field("year", pa.int32(), nullable=False),
+        pa.field("month", pa.int32(), nullable=False),
+    ]
+)
 
 
 def _check(condition: bool, message: str) -> None:
@@ -531,3 +570,333 @@ def generate_lms_events(
     for chunk in generate_lms_events_chunks(run, students, records, coursework):
         events.extend(chunk)
     return events
+
+
+def write_lms_events_to_parquet(
+    output_path: str | Path | None = None,
+    run: GeneratorRun | None = None,
+    *,
+    chunks: Iterable[list[dict[str, Any]]] | None = None,
+    events: list[dict[str, Any]] | None = None,
+    students: list[dict[str, Any]] | None = None,
+    records: list[dict[str, Any]] | None = None,
+    coursework: list[dict[str, Any]] | None = None,
+    chunk_size: int | None = None,
+    partition_cols: Sequence[str] | None = None,
+    compression: str = "snappy",
+    overwrite: bool = True,
+) -> int:
+    """Write generated LMS events to Parquet in memory-bounded chunks (task 5.4).
+
+    Streams chunks of LMS events incrementally into Parquet files, ensuring
+    low memory consumption during dataset generation (rules.md §8.4, §15).
+
+    Supports:
+    - Single Parquet file: when ``output_path`` ends with ``.parquet``.
+    - Partitioned dataset: when ``output_path`` is a directory (defaulting to
+      partitioning by ``("year", "month")`` per rules.md §15 and folder_structure.md §21).
+
+    Args:
+        output_path: Target file path or directory. When omitted, defaults to
+            ``DEFAULT_LMS_PARQUET_PATH`` (data/raw/lms_events).
+        run: Seeded GeneratorRun to generate events from.
+        chunks: Optional pre-existing chunk iterator to stream from.
+        events: Optional list of event dictionaries.
+        students: Pre-generated student documents passed to generator run.
+        records: Pre-generated academic records passed to generator run.
+        coursework: Pre-generated coursework items passed to generator run.
+        chunk_size: Maximum records per chunk.
+        partition_cols: Column names to partition by for directory datasets.
+            Defaults to ``("year", "month")`` for directory outputs.
+            Must be None when writing to a single ``.parquet`` file.
+        compression: Parquet compression codec (default ``"snappy"``).
+        overwrite: When True, overwrites existing file or existing dataset files.
+
+    Returns:
+        Total number of LMS event records written.
+
+    Raises:
+        GeneratorError: on invalid argument combinations.
+    """
+    target = Path(output_path) if output_path is not None else DEFAULT_LMS_PARQUET_PATH
+    is_single_file = target.suffix == ".parquet"
+
+    if is_single_file and partition_cols is not None:
+        raise GeneratorError(
+            "partition_cols cannot be specified when writing to a single .parquet file."
+        )
+
+    # Determine chunk stream
+    if chunks is not None:
+        stream: Iterable[list[dict[str, Any]]] = chunks
+    elif events is not None:
+        if chunk_size is None or chunk_size <= 0:
+            stream = [events] if events else []
+        else:
+            def _slice_events() -> Iterator[list[dict[str, Any]]]:
+                for i in range(0, len(events), chunk_size):
+                    yield events[i : i + chunk_size]
+            stream = _slice_events()
+    elif run is not None:
+        stream = generate_lms_events_chunks(
+            run=run,
+            students=students,
+            records=records,
+            coursework=coursework,
+            chunk_size=chunk_size,
+        )
+    else:
+        raise GeneratorError("One of 'run', 'chunks', or 'events' must be provided.")
+
+    total_written = 0
+
+    if is_single_file:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if overwrite and target.exists():
+            target.unlink()
+
+        writer: pq.ParquetWriter | None = None
+        try:
+            for chunk in stream:
+                if not chunk:
+                    continue
+                table = pa.Table.from_pylist(chunk, schema=LMS_PARQUET_SCHEMA)
+                if writer is None:
+                    writer = pq.ParquetWriter(
+                        str(target),
+                        schema=LMS_PARQUET_SCHEMA,
+                        compression=compression,
+                    )
+                writer.write_table(table)
+                total_written += len(chunk)
+        finally:
+            if writer is not None:
+                writer.close()
+            elif not target.exists():
+                empty_table = pa.Table.from_pylist([], schema=LMS_PARQUET_SCHEMA)
+                pq.write_table(empty_table, str(target), compression=compression)
+    else:
+        target.mkdir(parents=True, exist_ok=True)
+        if overwrite and target.exists():
+            for child in target.iterdir():
+                if child.name == ".gitkeep":
+                    continue
+                if child.is_dir():
+                    shutil.rmtree(child)
+                elif child.is_file():
+                    child.unlink()
+
+        effective_partitions = (
+            ("year", "month") if partition_cols is None else tuple(partition_cols)
+        )
+
+        for chunk in stream:
+            if not chunk:
+                continue
+            if effective_partitions:
+                enriched_chunk: list[dict[str, Any]] = []
+                for row in chunk:
+                    new_row = dict(row)
+                    ts: datetime = row["timestamp"]
+                    if "year" in effective_partitions and "year" not in new_row:
+                        new_row["year"] = ts.year
+                    if "month" in effective_partitions and "month" not in new_row:
+                        new_row["month"] = ts.month
+                    enriched_chunk.append(new_row)
+
+                fields = list(LMS_PARQUET_SCHEMA)
+                for col in effective_partitions:
+                    if col not in LMS_PARQUET_SCHEMA.names:
+                        fields.append(pa.field(col, pa.int32(), nullable=False))
+                chunk_schema = pa.schema(fields)
+                table = pa.Table.from_pylist(enriched_chunk, schema=chunk_schema)
+                pq.write_to_dataset(
+                    table,
+                    root_path=str(target),
+                    partition_cols=list(effective_partitions),
+                    compression=compression,
+                    existing_data_behavior="overwrite_or_ignore",
+                )
+            else:
+                table = pa.Table.from_pylist(chunk, schema=LMS_PARQUET_SCHEMA)
+                pq.write_to_dataset(
+                    table,
+                    root_path=str(target),
+                    compression=compression,
+                    existing_data_behavior="overwrite_or_ignore",
+                )
+            total_written += len(chunk)
+
+    return total_written
+
+
+def read_lms_events_from_parquet(
+    input_path: str | Path | None = None,
+    *,
+    as_dicts: bool = False,
+    columns: Sequence[str] | None = None,
+) -> pa.Table | list[dict[str, Any]]:
+    """Read LMS events from a Parquet file or partitioned dataset directory.
+
+    Args:
+        input_path: Path to a Parquet file or directory. Defaults to
+            ``DEFAULT_LMS_PARQUET_PATH`` (data/raw/lms_events).
+        as_dicts: When True, return records as a list of Python dicts.
+            When False, return a ``pyarrow.Table``.
+        columns: Optional sequence of column names to project.
+
+    Returns:
+        A ``pyarrow.Table`` or list of record dicts.
+
+    Raises:
+        FileNotFoundError: if ``input_path`` does not exist.
+    """
+    target = Path(input_path) if input_path is not None else DEFAULT_LMS_PARQUET_PATH
+    if not target.exists():
+        raise FileNotFoundError(f"Parquet path does not exist: {target}")
+
+    col_list = list(columns) if columns is not None else None
+    table = pq.read_table(str(target), columns=col_list)
+    if as_dicts:
+        return table.to_pylist()
+    return table
+
+
+def validate_lms_events_parquet(
+    input_path: str | Path | None = None,
+    *,
+    sample_size: int | None = None,
+) -> dict[str, Any]:
+    """Validate an LMS event Parquet dataset against the canonical schema.
+
+    Verifies dataset existence, non-zero record count, required schema columns,
+    nested ``meta`` struct composition, and validates record rows against
+    ``LMS_EVENTS_SCHEMA`` (rules.md §14, §15).
+
+    Args:
+        input_path: Path to a Parquet file or partitioned directory.
+            Defaults to ``DEFAULT_LMS_PARQUET_PATH``.
+        sample_size: Maximum number of records to validate against
+            ``LMS_EVENTS_SCHEMA``. When None, validates every record.
+
+    Returns:
+        Validation report dictionary with keys:
+        - ``valid``: bool (True on complete success)
+        - ``record_count``: int
+        - ``columns``: list of column names
+        - ``sample_checked``: number of records validated against schema
+
+    Raises:
+        FileNotFoundError: if ``input_path`` does not exist.
+        SchemaError: if the dataset is empty, missing required columns, has
+            invalid nested meta schema, or fails record validation.
+    """
+    target = Path(input_path) if input_path is not None else DEFAULT_LMS_PARQUET_PATH
+    if not target.exists():
+        raise FileNotFoundError(f"Parquet path does not exist: {target}")
+
+    table = read_lms_events_from_parquet(target)
+    record_count = len(table)
+    if record_count == 0:
+        raise SchemaError(f"Parquet dataset at {target} contains 0 records.")
+
+    expected_canonical_fields = {
+        "timestamp",
+        "meta",
+        "activity_type",
+        "resource_id",
+        "duration_sec",
+        "session_id",
+    }
+    actual_fields = set(table.column_names)
+    missing = expected_canonical_fields - actual_fields
+    if missing:
+        raise SchemaError(
+            f"Parquet dataset at {target} is missing required columns: {sorted(missing)}"
+        )
+
+    # Validate meta struct
+    meta_field = table.schema.field("meta")
+    if not pa.types.is_struct(meta_field.type):
+        raise SchemaError(f"Field 'meta' must be a struct, got {meta_field.type}")
+
+    meta_subfields = {f.name for f in meta_field.type}
+    expected_meta = {"student_id", "course_id", "school"}
+    missing_meta = expected_meta - meta_subfields
+    if missing_meta:
+        raise SchemaError(
+            f"Field 'meta' is missing required struct fields: {sorted(missing_meta)}"
+        )
+
+    # Validate rows against LMS_EVENTS_SCHEMA
+    sample_count = record_count if sample_size is None else min(sample_size, record_count)
+    if sample_count > 0:
+        canonical_cols = [
+            "timestamp",
+            "meta",
+            "activity_type",
+            "resource_id",
+            "duration_sec",
+            "session_id",
+        ]
+        sample_tbl = table.select(canonical_cols).slice(0, sample_count)
+        for row in sample_tbl.to_pylist():
+            validate_record(row, LMS_EVENTS_SCHEMA)
+
+    return {
+        "valid": True,
+        "record_count": record_count,
+        "columns": table.column_names,
+        "sample_checked": sample_count,
+    }
+
+
+def generate_development_lms_parquet(
+    output_path: str | Path | None = None,
+    *,
+    run: GeneratorRun | None = None,
+    target_students: int = 36,
+    chunk_size: int = 1000,
+    partition_cols: Sequence[str] | None = None,
+) -> int:
+    """Generate a small development-scale LMS event dataset to Parquet (task 5.4).
+
+    Convenience entry point for local development and integration tests. When
+    ``run`` is omitted, a seeded GeneratorRun is initialized using the project
+    configuration scaled down to ``target_students``. Events are streamed
+    in chunks directly into Parquet to maintain a constant memory profile.
+
+    Args:
+        output_path: Output Parquet file or directory. Defaults to
+            ``DEFAULT_LMS_PARQUET_PATH`` (data/raw/lms_events).
+        run: Optional existing GeneratorRun.
+        target_students: Student cohort size when building a default run (default 36).
+        chunk_size: Maximum records per chunk stream (default 1000).
+        partition_cols: Partition columns for directory output (default ("year", "month")).
+
+    Returns:
+        Total number of LMS events written to Parquet.
+    """
+    if run is None:
+        import copy
+        from acadexa.config import validate_project_config
+
+        configs = copy.deepcopy(validate_project_config())
+        scale = configs["generator"]["scale"]
+        schools = scale["school_population"]
+        per_school = max(1, target_students // len(schools))
+        scale["school_population"] = {s: per_school for s in schools}
+        actual_total = per_school * len(schools)
+        scale["target_students"] = actual_total
+        run = GeneratorRun(configs)
+
+    students = generate_students(run)
+    records = generate_academic_records(run, students)
+    return write_lms_events_to_parquet(
+        output_path=output_path,
+        run=run,
+        students=students,
+        records=records,
+        chunk_size=chunk_size,
+        partition_cols=partition_cols,
+    )

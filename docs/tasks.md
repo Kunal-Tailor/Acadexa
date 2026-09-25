@@ -208,7 +208,7 @@ Build the large event generator and analytical ground truth without yet scaling 
 - [x] 5.3 — Implement chunked LMS generation so large event volumes are written incrementally instead of accumulated in driver/Python memory.
   Commit: `Update - 5.3 - implement chunked LMS generation`
 
-- [ ] 5.4 — Implement Parquet output for LMS events with a small development-scale dataset only. Validate that it can be read back successfully.
+- [x] 5.4 — Implement Parquet output for LMS events with a small development-scale dataset only. Validate that it can be read back successfully.
   Commit: `Update - 5.4 - write development LMS data to Parquet`
 
 - [ ] 5.5 — Implement the ground-truth registry describing planted relationships, decliner behavior and the decoy relationship. Ground truth must be generated before analytical results are observed.
