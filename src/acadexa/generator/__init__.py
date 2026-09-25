@@ -43,6 +43,11 @@ from acadexa.generator.manifests import (
     save_generation_manifest,
     save_injection_manifest,
 )
+from acadexa.generator.orchestrator import (
+    GenerationResult,
+    configure_run_for_scale,
+    generate_dataset,
+)
 from acadexa.generator.quality_injection import (
     DEFAULT_INJECTION_RATES,
     INJECTION_RATE_KEYS,
@@ -75,6 +80,7 @@ __all__ = [
     "DEFAULT_LMS_PARQUET_PATH",
     "DEFAULT_MANIFEST_DIR",
     "GenerationManifest",
+    "GenerationResult",
     "GeneratorError",
     "GeneratorRun",
     "GeneratorRunMetadata",
@@ -89,10 +95,12 @@ __all__ = [
     "build_generation_manifest",
     "build_injection_manifest",
     "build_manifests",
+    "configure_run_for_scale",
     "generate_academic_records",
     "generate_attendance",
     "generate_behavioral_traits",
     "generate_coursework",
+    "generate_dataset",
     "generate_decliner_flags",
     "generate_development_lms_parquet",
     "generate_ground_truth_registry",

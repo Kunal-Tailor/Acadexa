@@ -1,0 +1,136 @@
+{
+  "seed": 42,
+  "generation_timestamp": "2026-09-25T16:55:01.545653+00:00",
+  "planted_relationships": [
+    {
+      "id": "attendance_marks",
+      "name": "Attendance to Marks",
+      "independent_variable": "attendance_rate",
+      "dependent_variable": "final_marks",
+      "relationship_type": "planted",
+      "expected_direction": "positive",
+      "expected_strength": "moderate",
+      "description": "Higher student attendance is associated with higher marks.",
+      "mechanism": "Diligence trait increases attendance probability via diligence_attendance_weight; ability trait increases marks via ability_marks_weight; diligence and ability are positively correlated latent traits."
+    },
+    {
+      "id": "lms_engagement_marks",
+      "name": "LMS Engagement to Marks",
+      "independent_variable": "lms_events",
+      "dependent_variable": "final_marks",
+      "relationship_type": "planted",
+      "expected_direction": "positive",
+      "expected_strength": "moderate_school_dependent",
+      "description": "Higher LMS event count is associated with higher marks, with strength varying by school.",
+      "mechanism": "Engagement trait scales base event frequency and attendance; school lms_activity multipliers (CET highest at 1.40, SOL lowest at 0.85) modulate event volume; engagement correlates with ability."
+    },
+    {
+      "id": "late_submissions_marks",
+      "name": "Late Submission Rate to Marks",
+      "independent_variable": "late_submission_rate",
+      "dependent_variable": "final_marks",
+      "relationship_type": "planted",
+      "expected_direction": "negative",
+      "expected_strength": "moderate",
+      "description": "Higher rate of late coursework submissions is associated with lower marks.",
+      "mechanism": "Diligence trait reduces late submission probability via diligence_late_weight; higher diligence correlates with higher ability and higher marks."
+    },
+    {
+      "id": "quiz_attempts_marks",
+      "name": "Quiz Attempts to Marks",
+      "independent_variable": "quiz_attempts",
+      "dependent_variable": "final_marks",
+      "relationship_type": "planted",
+      "expected_direction": "positive",
+      "expected_strength": "moderate_school_dependent",
+      "description": "Higher quiz activity and attempts are associated with higher marks.",
+      "mechanism": "Diligence and school quiz_activity multipliers drive assessment engagement and multiple attempts; diligent students achieve higher marks."
+    },
+    {
+      "id": "course_difficulty_confounder",
+      "name": "Course Difficulty Confounder",
+      "independent_variable": "course_difficulty",
+      "dependent_variable": "course_marks_and_attendance",
+      "relationship_type": "confounder",
+      "expected_direction": "negative",
+      "expected_strength": "moderate",
+      "description": "Course difficulty acts as a confounding factor shifting marks and attendance jointly across courses.",
+      "mechanism": "Course difficulty level applies downward shifts to marks (-8 / -16) and attendance (-0.05 / -0.10); within-course z-scoring in J4 is required to isolate true student traits from course difficulty effects."
+    }
+  ],
+  "decoy_relationship": {
+    "id": "decoy_forum_marks",
+    "name": "Forum Activity to Marks (Decoy)",
+    "independent_variable": "forum_events",
+    "dependent_variable": "final_marks",
+    "relationship_type": "decoy",
+    "expected_direction": "none",
+    "expected_strength": "none",
+    "description": "No intentionally planted relationship between forum activity and marks; serves as a negative control for recovery testing.",
+    "mechanism": "Forum posts and replies are generated as general LMS activity without a specific coupling to ability or diligence, so recovery analytics must confirm no significant association."
+  },
+  "decliner_behavior": {
+    "configured_rate": 0.08,
+    "start_week": 5,
+    "weekly_engagement_decay": 0.07,
+    "marks_decline_lag_weeks": 3,
+    "component_weeks": {
+      "internal": 4,
+      "midterm": 9,
+      "endterm": 15
+    },
+    "marks_weekly_decline": 2.0,
+    "score_weekly_decay": 0.04,
+    "total_students": 36,
+    "decliners_count": 1,
+    "actual_decliner_rate": 0.0278,
+    "decliner_student_ids": [
+      "STU000015"
+    ]
+  },
+  "decliner_flags": {
+    "STU000001": false,
+    "STU000002": false,
+    "STU000003": false,
+    "STU000004": false,
+    "STU000005": false,
+    "STU000006": false,
+    "STU000007": false,
+    "STU000008": false,
+    "STU000009": false,
+    "STU000010": false,
+    "STU000011": false,
+    "STU000012": false,
+    "STU000013": false,
+    "STU000014": false,
+    "STU000015": true,
+    "STU000016": false,
+    "STU000017": false,
+    "STU000018": false,
+    "STU000019": false,
+    "STU000020": false,
+    "STU000021": false,
+    "STU000022": false,
+    "STU000023": false,
+    "STU000024": false,
+    "STU000025": false,
+    "STU000026": false,
+    "STU000027": false,
+    "STU000028": false,
+    "STU000029": false,
+    "STU000030": false,
+    "STU000031": false,
+    "STU000032": false,
+    "STU000033": false,
+    "STU000034": false,
+    "STU000035": false,
+    "STU000036": false
+  },
+  "metadata": {
+    "registry_version": "1.0",
+    "description": "Synthetic ground-truth registry established prior to analytical observation.",
+    "analytical_interpretation": "Acadexa measures statistical association, not causation (rules.md \u00a78, memory.md \u00a78).",
+    "planted_count": 5,
+    "decoy_count": 1
+  }
+}

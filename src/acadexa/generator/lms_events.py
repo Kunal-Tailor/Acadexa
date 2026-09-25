@@ -690,26 +690,51 @@ def write_lms_events_to_parquet(
             ("year", "month") if partition_cols is None else tuple(partition_cols)
         )
 
+        def _coerce_ts(val: Any) -> datetime:
+            if isinstance(val, datetime):
+                return val
+            if isinstance(val, str):
+                for fmt in (
+                    "%Y-%m-%d %H:%M:%S",
+                    "%Y/%m/%d %H:%M:%S",
+                    "%d-%m-%Y %H:%M:%S",
+                    "%Y-%m-%dT%H:%M:%SZ",
+                    "%Y-%m-%dT%H:%M:%S",
+                ):
+                    try:
+                        return datetime.strptime(val, fmt)
+                    except ValueError:
+                        pass
+                try:
+                    return datetime.fromisoformat(val.replace("Z", "+00:00"))
+                except Exception:
+                    pass
+            return val
+
         for chunk in stream:
             if not chunk:
                 continue
-            if effective_partitions:
-                enriched_chunk: list[dict[str, Any]] = []
-                for row in chunk:
-                    new_row = dict(row)
-                    ts: datetime = row["timestamp"]
-                    if "year" in effective_partitions and "year" not in new_row:
-                        new_row["year"] = ts.year
-                    if "month" in effective_partitions and "month" not in new_row:
-                        new_row["month"] = ts.month
-                    enriched_chunk.append(new_row)
 
+            clean_chunk: list[dict[str, Any]] = []
+            for row in chunk:
+                new_row = dict(row)
+                if isinstance(new_row.get("timestamp"), str):
+                    new_row["timestamp"] = _coerce_ts(new_row["timestamp"])
+                ts = new_row["timestamp"]
+                if effective_partitions:
+                    if "year" in effective_partitions and "year" not in new_row:
+                        new_row["year"] = ts.year if hasattr(ts, "year") else 2026
+                    if "month" in effective_partitions and "month" not in new_row:
+                        new_row["month"] = ts.month if hasattr(ts, "month") else 1
+                clean_chunk.append(new_row)
+
+            if effective_partitions:
                 fields = list(LMS_PARQUET_SCHEMA)
                 for col in effective_partitions:
                     if col not in LMS_PARQUET_SCHEMA.names:
                         fields.append(pa.field(col, pa.int32(), nullable=False))
                 chunk_schema = pa.schema(fields)
-                table = pa.Table.from_pylist(enriched_chunk, schema=chunk_schema)
+                table = pa.Table.from_pylist(clean_chunk, schema=chunk_schema)
                 pq.write_to_dataset(
                     table,
                     root_path=str(target),
@@ -718,7 +743,7 @@ def write_lms_events_to_parquet(
                     existing_data_behavior="overwrite_or_ignore",
                 )
             else:
-                table = pa.Table.from_pylist(chunk, schema=LMS_PARQUET_SCHEMA)
+                table = pa.Table.from_pylist(clean_chunk, schema=LMS_PARQUET_SCHEMA)
                 pq.write_to_dataset(
                     table,
                     root_path=str(target),

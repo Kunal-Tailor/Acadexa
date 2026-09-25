@@ -220,7 +220,7 @@ Build the large event generator and analytical ground truth without yet scaling 
 - [x] 5.7 — Implement the generation/injection manifest recording seed, configuration, target counts, actual counts and injected issue counts.
   Commit: `Update - 5.7 - implement generation manifests`
 
-- [ ] 5.8 — Implement `scripts/generate_data.py` as the single development-scale generator entry point and verify that a small dataset can be generated from a clean configuration.
+- [x] 5.8 — Implement `scripts/generate_data.py` as the single development-scale generator entry point and verify that a small dataset can be generated from a clean configuration.
   Commit: `Update - 5.8 - wire development data generation entry point`
 
 **Checkpoint:** A reproducible small synthetic dataset exists, including all core entities, LMS events, planted relationships and controlled quality issues.
