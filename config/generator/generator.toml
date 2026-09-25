@@ -141,6 +141,23 @@ hard_share = 0.25
 max_score_drag = 12        # tunable: max marks penalty at hardest level (points)
 attendance_drag = 0.08     # tunable: max attendance probability penalty at hardest level
 
+# ── LMS event generation (F-B07) ───────────────────────────
+# Event type distribution determines the probability of each approved
+# event type. All event types must sum to 1.0. If not specified,
+# a reasonable default distribution is used.
+[lms_events.event_type_distribution]
+LOGIN = 0.12
+LOGOUT = 0.12
+VIDEO_VIEW = 0.18
+VIDEO_COMPLETE = 0.08
+PDF_VIEW = 0.12
+RESOURCE_DOWNLOAD = 0.10
+QUIZ_ATTEMPT = 0.08
+ASSIGNMENT_VIEW = 0.10
+ASSIGNMENT_SUBMISSION = 0.06
+COURSE_PAGE_VIEW = 0.03
+FORUM_POST = 0.01
+
 # ── Data-quality injection rates (docs/memory.md §12) ──
 # Approximate rates; exact injected counts go to the injection manifest.
 # Key identifiers must never be nulled (rules.md §10.1).

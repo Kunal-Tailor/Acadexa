@@ -172,15 +172,40 @@ def validate_generator(config: dict[str, Any], hierarchy: dict[str, Any]) -> Non
         "generator.generator: seed must be an integer",
     )
 
+    # Validate LMS event distribution if present
+    lms_events = config.get("lms_events", {})
+    if "event_type_distribution" in lms_events:
+        dist = lms_events["event_type_distribution"]
+        _check(
+            isinstance(dist, dict),
+            "lms_events.event_type_distribution must be a mapping",
+        )
+        from acadexa.validation.schema import LMS_EVENT_TYPES
+        for event_type, prob in dist.items():
+            _check(
+                event_type in LMS_EVENT_TYPES,
+                f"lms_events.event_type_distribution: unknown event type '{event_type}'",
+            )
+            _check(
+                isinstance(prob, (int, float)) and not isinstance(prob, bool)
+                and 0.0 <= prob <= 1.0,
+                f"lms_events.event_type_distribution.{event_type} must be in [0, 1]",
+            )
+        total = sum(dist.values())
+        _check(
+            0.99 <= total <= 1.01,  # Allow small floating-point tolerance
+            f"lms_events.event_type_distribution must sum to 1.0, got {total}",
+        )
+
     scale = config["scale"]
     _require_keys(
         scale,
         ("target_students", "target_courses", "target_lms_events",
-         "lms_events_per_student_per_day"),
+         "lms_events_per_student_per_day", "teaching_days_per_academic_year"),
         "generator.scale",
     )
     for key in ("target_students", "target_courses", "target_lms_events",
-                "lms_events_per_student_per_day"):
+                "lms_events_per_student_per_day", "teaching_days_per_academic_year"):
         _check(
             isinstance(scale[key], int) and scale[key] > 0,
             f"generator.scale.{key}: must be a positive integer",
@@ -431,19 +456,21 @@ def validate_project_config() -> dict[str, dict[str, Any]]:
     hierarchy = load_config_file(config_path("university", "hierarchy.toml"))
     courses = load_config_file(config_path("university", "courses.toml"))
     academic_periods = load_config_file(config_path("university", "academic_periods.toml"))
-    generator = load_config_file(config_path("generator", "generator.toml"))
+    generator_config = load_config_file(config_path("generator", "generator.toml"))
     risk = load_config_file(config_path("risk", "risk_signals.toml"))
 
     validate_hierarchy(hierarchy)
     validate_courses(courses, hierarchy)
     validate_academic_periods(academic_periods)
-    validate_generator(generator, hierarchy)
+    validate_generator(generator_config, hierarchy)
     validate_risk(risk)
 
+    # Return the entire generator config file contents, which includes
+    # [generator], [scale], [behavior], [lms_events], etc. at the top level
     return {
         "hierarchy": hierarchy,
         "courses": courses,
         "academic_periods": academic_periods,
-        "generator": generator,
+        **generator_config,  # Unpack all top-level sections from generator.toml
         "risk": risk,
     }

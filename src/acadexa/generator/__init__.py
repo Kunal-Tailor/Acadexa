@@ -11,6 +11,7 @@ from acadexa.generator.foundation import (
     GeneratorRun,
     GeneratorRunMetadata,
 )
+from acadexa.generator.lms_events import generate_lms_events
 from acadexa.generator.students import generate_students
 from acadexa.generator.university import (
     UniversityHierarchy,
@@ -28,6 +29,7 @@ __all__ = [
     "generate_behavioral_traits",
     "generate_coursework",
     "generate_decliner_flags",
+    "generate_lms_events",
     "generate_students",
     "generate_university_hierarchy",
 ]
