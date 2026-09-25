@@ -199,10 +199,10 @@ Build a reproducible generator before attempting the full dataset.
 
 Build the large event generator and analytical ground truth without yet scaling to the full target.
 
-- [ ] 5.1 — Implement LMS event-type generation using only the approved event types and configuration-driven distributions.
+- [x] 5.1 — Implement LMS event-type generation using only the approved event types and configuration-driven distributions.
   Commit: `Update - 5.1 - implement LMS event generation`
 
-- [ ] 5.2 — Implement timestamp generation with weekly and semester rhythms while preserving valid student/course/semester context.
+- [x] 5.2 — Implement timestamp generation with weekly and semester rhythms while preserving valid student/course/semester context.
   Commit: `Update - 5.2 - implement LMS temporal behavior`
 
 - [ ] 5.3 — Implement chunked LMS generation so large event volumes are written incrementally instead of accumulated in driver/Python memory.

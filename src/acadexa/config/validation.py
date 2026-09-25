@@ -334,10 +334,22 @@ def validate_generator(config: dict[str, Any], hierarchy: dict[str, Any]) -> Non
         "generator.behavior.decliners.score_weekly_decay must be in [0, 1)",
     )
 
+    _require_keys(
+        behavior["rhythms"],
+        (
+            "weekend_event_factor",
+            "mid_semester_dip_factor",
+            "pre_deadline_spike_factor",
+            "pre_exam_spike_factor",
+        ),
+        "generator.behavior.rhythms",
+    )
     for factor_name, factor in behavior["rhythms"].items():
         _check(
-            isinstance(factor, (int, float)) and factor > 0,
-            f"generator.behavior.rhythms.{factor_name}: must be > 0",
+            isinstance(factor, (int, float))
+            and not isinstance(factor, bool)
+            and factor > 0,
+            f"generator.behavior.rhythms.{factor_name}: must be a positive number",
         )
 
     for sid, profile in config.get("school_profiles", {}).items():
@@ -465,12 +477,10 @@ def validate_project_config() -> dict[str, dict[str, Any]]:
     validate_generator(generator_config, hierarchy)
     validate_risk(risk)
 
-    # Return the entire generator config file contents, which includes
-    # [generator], [scale], [behavior], [lms_events], etc. at the top level
     return {
         "hierarchy": hierarchy,
         "courses": courses,
         "academic_periods": academic_periods,
-        **generator_config,  # Unpack all top-level sections from generator.toml
+        "generator": generator_config,
         "risk": risk,
     }
