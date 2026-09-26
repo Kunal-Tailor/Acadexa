@@ -245,7 +245,7 @@ Make the generated development dataset queryable in MongoDB.
 - [x] 6.4 — Implement loading of the defined development LMS serving slice into MongoDB. Keep the full LMS Parquet dataset outside MongoDB.
   Commit: `Update - 6.4 - load LMS serving slice`
 
-- [ ] 6.5 — Add indexes based on documented query patterns for student, course, semester, hierarchy and LMS access.
+- [x] 6.5 — Add indexes based on documented query patterns for student, course, semester, hierarchy and LMS access.
   Commit: `Update - 6.5 - add MongoDB query indexes`
 
 - [ ] 6.6 — Implement representative MongoDB aggregation demonstrations required by the project: `$match`, `$group`, `$project`, `$sort`, `$lookup`, `$unwind`, `$setWindowFields` and `$facet` where applicable.

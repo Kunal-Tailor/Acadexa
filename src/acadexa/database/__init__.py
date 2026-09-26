@@ -27,6 +27,15 @@ from acadexa.database.collections import (
     init_database,
     verify_database_collections,
 )
+from acadexa.database.indexes import (
+    COLLECTION_INDEX_DEFINITIONS,
+    IndexError as MongoIndexError,
+    IndexSummary,
+    create_database_indexes,
+    drop_database_indexes,
+    explain_query_plan,
+    list_database_indexes,
+)
 from acadexa.database.loader import (
     DEFAULT_LMS_SLICE_SCHOOLS,
     DEFAULT_LMS_SLICE_SEMESTER,
@@ -43,6 +52,7 @@ from acadexa.database.loader import (
 
 __all__ = [
     "ALL_MANAGED_COLLECTIONS",
+    "COLLECTION_INDEX_DEFINITIONS",
     "COLLECTION_METADATA",
     "CollectionLoadStatus",
     "CORE_COLLECTIONS",
@@ -52,6 +62,7 @@ __all__ = [
     "DEFAULT_MONGODB_DATABASE",
     "DEFAULT_MONGODB_URI",
     "GOLD_COLLECTIONS",
+    "IndexSummary",
     "LMSServingSliceSpec",
     "LMSSliceLoadResult",
     "LMS_TIMESERIES_SPEC",
@@ -60,13 +71,18 @@ __all__ = [
     "MongoConfigError",
     "MongoConnectionError",
     "MongoError",
+    "MongoIndexError",
     "TIMESERIES_COLLECTIONS",
     "check_connection",
     "close_mongo_client",
+    "create_database_indexes",
+    "drop_database_indexes",
     "drop_managed_collections",
+    "explain_query_plan",
     "get_database",
     "get_mongo_client",
     "init_database",
+    "list_database_indexes",
     "load_core_academic_data",
     "load_core_collection",
     "load_lms_serving_slice",
