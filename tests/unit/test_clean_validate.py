@@ -346,3 +346,24 @@ def test_quality_report_serialization(tmp_path: Path) -> None:
     assert loaded["total_injected"] == 10
     assert loaded["total_dropped"] == 10
     assert "attendance" in loaded["datasets"]
+
+
+def test_no_large_collect_or_driver_iteration_in_j1() -> None:
+    """Explicitly verify no large collect() or driver iteration exists in J1 (task 7.6, rules.md §17.3)."""
+    import ast
+    import inspect
+    import acadexa.processing.jobs.clean_validate as j1_mod
+
+    source_file = Path(inspect.getfile(j1_mod))
+    tree = ast.parse(source_file.read_text(encoding="utf-8"))
+
+    # Verify no forbidden DataFrame collect or conversion methods on large datasets
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
+            called_method = node.func.attr
+            assert called_method not in (
+                "collect",
+                "toPandas",
+                "toArray",
+            ), f"Forbidden driver-side collect/toPandas call '{called_method}' found on line {node.lineno} in {source_file.name}"
+

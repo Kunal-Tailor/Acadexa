@@ -276,10 +276,10 @@ Establish Spark processing and the first two pipeline jobs.
 - [x] 7.4 — Implement J1 quality reporting so injected/detected/corrected/dropped/remaining counts are measurable.
   Commit: `Update - 7.4 - add Spark data quality reporting`
 
-- [ ] 7.5 — Implement J2 event aggregation for weekly student/course LMS activity, active days and approved activity categories.
+- [x] 7.5 — Implement J2 event aggregation for weekly student/course LMS activity, active days and approved activity categories.
   Commit: `Update - 7.5 - implement Spark LMS aggregation job`
 
-- [ ] 7.6 — Add unit/integration tests for J1 and J2 using small fixtures; explicitly verify no large `collect()` or unnecessary driver-side iteration is introduced.
+- [x] 7.6 — Add unit/integration tests for J1 and J2 using small fixtures; explicitly verify no large `collect()` or unnecessary driver-side iteration is introduced.
   Commit: `Update - 7.6 - test Spark cleaning and event aggregation`
 
 **Checkpoint:** Raw development data can be cleaned and transformed through the first Spark stages.

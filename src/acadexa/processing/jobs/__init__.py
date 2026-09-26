@@ -29,8 +29,16 @@ from acadexa.processing.jobs.clean_validate import (
     load_injection_manifest_counts,
     run_j1_clean_and_validate,
 )
+from acadexa.processing.jobs.event_aggregation import (
+    APPROVED_ACTIVITY_CATEGORIES,
+    J2Config,
+    J2Result,
+    aggregate_weekly_lms_events,
+    run_j2_event_aggregation,
+)
 
 __all__ = [
+    # J1 Clean and Validate
     "INJECTION_CATEGORIES",
     "DatasetQualityMetrics",
     "IssueMetric",
@@ -45,4 +53,10 @@ __all__ = [
     "clean_students",
     "load_injection_manifest_counts",
     "run_j1_clean_and_validate",
+    # J2 Event Aggregation
+    "APPROVED_ACTIVITY_CATEGORIES",
+    "J2Config",
+    "J2Result",
+    "aggregate_weekly_lms_events",
+    "run_j2_event_aggregation",
 ]
