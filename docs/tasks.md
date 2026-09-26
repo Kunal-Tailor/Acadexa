@@ -267,7 +267,7 @@ Establish Spark processing and the first two pipeline jobs.
 - [x] 7.1 — Configure PySpark local mode and verify Spark can start within the documented local environment.
   Commit: `Update - 7.1 - configure local PySpark runtime`
 
-- [ ] 7.2 — Configure the MongoDB Spark integration and verify a small development collection can be read into a Spark DataFrame.
+- [x] 7.2 — Configure the MongoDB Spark integration and verify a small development collection can be read into a Spark DataFrame.
   Commit: `Update - 7.2 - configure Spark MongoDB integration`
 
 - [ ] 7.3 — Implement J1 clean/validate for the development dataset: duplicates, null handling, ID normalization, timestamp issues, orphan detection and range validation.
