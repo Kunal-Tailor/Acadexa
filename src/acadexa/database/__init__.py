@@ -1,5 +1,15 @@
 """MongoDB operational and serving data layer (rules.md §7, §16)."""
 
+from acadexa.database.aggregations import (
+    AggregationError,
+    get_attendance_weekly_trends,
+    get_course_cohort_multi_facet,
+    get_course_performance_summary,
+    get_coursework_completion_overview,
+    get_lms_activity_timeline,
+    get_student_academic_profile,
+    run_aggregation,
+)
 from acadexa.database.client import (
     DEFAULT_MONGODB_DATABASE,
     DEFAULT_MONGODB_URI,
@@ -52,6 +62,7 @@ from acadexa.database.loader import (
 
 __all__ = [
     "ALL_MANAGED_COLLECTIONS",
+    "AggregationError",
     "COLLECTION_INDEX_DEFINITIONS",
     "COLLECTION_METADATA",
     "CollectionLoadStatus",
@@ -79,8 +90,14 @@ __all__ = [
     "drop_database_indexes",
     "drop_managed_collections",
     "explain_query_plan",
+    "get_attendance_weekly_trends",
+    "get_course_cohort_multi_facet",
+    "get_course_performance_summary",
+    "get_coursework_completion_overview",
     "get_database",
+    "get_lms_activity_timeline",
     "get_mongo_client",
+    "get_student_academic_profile",
     "init_database",
     "list_database_indexes",
     "load_core_academic_data",
@@ -90,6 +107,7 @@ __all__ = [
     "mongo_client_context",
     "mongo_database_context",
     "ping_mongodb",
+    "run_aggregation",
     "stream_lms_slice_records",
     "verify_database_collections",
 ]

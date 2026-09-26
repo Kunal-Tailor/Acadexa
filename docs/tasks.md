@@ -248,7 +248,7 @@ Make the generated development dataset queryable in MongoDB.
 - [x] 6.5 — Add indexes based on documented query patterns for student, course, semester, hierarchy and LMS access.
   Commit: `Update - 6.5 - add MongoDB query indexes`
 
-- [ ] 6.6 — Implement representative MongoDB aggregation demonstrations required by the project: `$match`, `$group`, `$project`, `$sort`, `$lookup`, `$unwind`, `$setWindowFields` and `$facet` where applicable.
+- [x] 6.6 — Implement representative MongoDB aggregation demonstrations required by the project: `$match`, `$group`, `$project`, `$sort`, `$lookup`, `$unwind`, `$setWindowFields` and `$facet` where applicable.
   Commit: `Update - 6.6 - implement MongoDB analytical aggregations`
 
 - [ ] 6.7 — Implement `scripts/load_mongodb.py` as the reproducible development database-loading entry point and verify counts against generated manifests.
