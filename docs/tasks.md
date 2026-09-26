@@ -282,6 +282,9 @@ Establish Spark processing and the first two pipeline jobs.
 - [x] 7.6 — Add unit/integration tests for J1 and J2 using small fixtures; explicitly verify no large `collect()` or unnecessary driver-side iteration is introduced.
   Commit: `Update - 7.6 - test Spark cleaning and event aggregation`
 
+- [x] 7.7 — Update `docs/IDE_Context.md` containing the complete session context: every executed task from 5.1 to 7.6 with decisions and rationale, data volumes, calibration data, failure modes and solutions, and instructions for Phase 8 resumption. Documentation only — no code changes.
+  Commit: `Update - 7.7 - add IDE context documentation for Phases 5 to 7`
+
 **Checkpoint:** Raw development data can be cleaned and transformed through the first Spark stages.
 
 ---
