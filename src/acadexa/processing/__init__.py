@@ -47,6 +47,22 @@ from acadexa.processing.spark_session import (
     stop_spark_session,
     verify_spark_runtime,
 )
+from acadexa.processing.jobs import (
+    INJECTION_CATEGORIES,
+    DatasetQualityMetrics,
+    IssueMetric,
+    J1Config,
+    J1QualityReport,
+    J1Result,
+    clean_academic_records,
+    clean_attendance,
+    clean_courses,
+    clean_coursework,
+    clean_lms_events,
+    clean_students,
+    load_injection_manifest_counts,
+    run_j1_clean_and_validate,
+)
 
 __all__ = [
     # Spark session lifecycle
@@ -73,4 +89,20 @@ __all__ = [
     "read_mongo_collection",
     "verify_spark_mongo_read",
     "write_mongo_collection",
+    # J1 Clean and Validate job
+    "INJECTION_CATEGORIES",
+    "DatasetQualityMetrics",
+    "IssueMetric",
+    "J1Config",
+    "J1QualityReport",
+    "J1Result",
+    "clean_academic_records",
+    "clean_attendance",
+    "clean_courses",
+    "clean_coursework",
+    "clean_lms_events",
+    "clean_students",
+    "load_injection_manifest_counts",
+    "run_j1_clean_and_validate",
 ]
+

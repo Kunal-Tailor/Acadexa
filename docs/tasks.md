@@ -270,10 +270,10 @@ Establish Spark processing and the first two pipeline jobs.
 - [x] 7.2 — Configure the MongoDB Spark integration and verify a small development collection can be read into a Spark DataFrame.
   Commit: `Update - 7.2 - configure Spark MongoDB integration`
 
-- [ ] 7.3 — Implement J1 clean/validate for the development dataset: duplicates, null handling, ID normalization, timestamp issues, orphan detection and range validation.
+- [x] 7.3 — Implement J1 clean/validate for the development dataset: duplicates, null handling, ID normalization, timestamp issues, orphan detection and range validation.
   Commit: `Update - 7.3 - implement Spark clean and validate job`
 
-- [ ] 7.4 — Implement J1 quality reporting so injected/detected/corrected/dropped/remaining counts are measurable.
+- [x] 7.4 — Implement J1 quality reporting so injected/detected/corrected/dropped/remaining counts are measurable.
   Commit: `Update - 7.4 - add Spark data quality reporting`
 
 - [ ] 7.5 — Implement J2 event aggregation for weekly student/course LMS activity, active days and approved activity categories.
