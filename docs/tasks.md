@@ -236,7 +236,7 @@ Make the generated development dataset queryable in MongoDB.
 - [x] 6.1 — Implement MongoDB configuration/connection handling with credentials coming from environment configuration.
   Commit: `Update - 6.1 - implement MongoDB connection layer`
 
-- [ ] 6.2 — Implement database initialization for the core collections and gold collection placeholders. Do not populate gold data yet.
+- [x] 6.2 — Implement database initialization for the core collections and gold collection placeholders. Do not populate gold data yet.
   Commit: `Update - 6.2 - initialize MongoDB collections`
 
 - [ ] 6.3 — Implement loading of `students`, `courses`, `academic_records`, `attendance` and `coursework` into MongoDB with validation of inserted counts.
