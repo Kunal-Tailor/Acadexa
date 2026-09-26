@@ -239,7 +239,7 @@ Make the generated development dataset queryable in MongoDB.
 - [x] 6.2 — Implement database initialization for the core collections and gold collection placeholders. Do not populate gold data yet.
   Commit: `Update - 6.2 - initialize MongoDB collections`
 
-- [ ] 6.3 — Implement loading of `students`, `courses`, `academic_records`, `attendance` and `coursework` into MongoDB with validation of inserted counts.
+- [x] 6.3 — Implement loading of `students`, `courses`, `academic_records`, `attendance` and `coursework` into MongoDB with validation of inserted counts.
   Commit: `Update - 6.3 - load core academic collections`
 
 - [ ] 6.4 — Implement loading of the defined development LMS serving slice into MongoDB. Keep the full LMS Parquet dataset outside MongoDB.

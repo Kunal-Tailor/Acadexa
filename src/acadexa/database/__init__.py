@@ -27,15 +27,25 @@ from acadexa.database.collections import (
     init_database,
     verify_database_collections,
 )
+from acadexa.database.loader import (
+    CollectionLoadStatus,
+    CoreLoadResult,
+    LoadValidationError,
+    load_core_academic_data,
+    load_core_collection,
+)
 
 __all__ = [
     "ALL_MANAGED_COLLECTIONS",
     "COLLECTION_METADATA",
+    "CollectionLoadStatus",
     "CORE_COLLECTIONS",
+    "CoreLoadResult",
     "DEFAULT_MONGODB_DATABASE",
     "DEFAULT_MONGODB_URI",
     "GOLD_COLLECTIONS",
     "LMS_TIMESERIES_SPEC",
+    "LoadValidationError",
     "MongoDBConfig",
     "MongoConfigError",
     "MongoConnectionError",
@@ -47,6 +57,8 @@ __all__ = [
     "get_database",
     "get_mongo_client",
     "init_database",
+    "load_core_academic_data",
+    "load_core_collection",
     "mask_mongo_uri",
     "mongo_client_context",
     "mongo_database_context",
