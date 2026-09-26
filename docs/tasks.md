@@ -242,7 +242,7 @@ Make the generated development dataset queryable in MongoDB.
 - [x] 6.3 — Implement loading of `students`, `courses`, `academic_records`, `attendance` and `coursework` into MongoDB with validation of inserted counts.
   Commit: `Update - 6.3 - load core academic collections`
 
-- [ ] 6.4 — Implement loading of the defined development LMS serving slice into MongoDB. Keep the full LMS Parquet dataset outside MongoDB.
+- [x] 6.4 — Implement loading of the defined development LMS serving slice into MongoDB. Keep the full LMS Parquet dataset outside MongoDB.
   Commit: `Update - 6.4 - load LMS serving slice`
 
 - [ ] 6.5 — Add indexes based on documented query patterns for student, course, semester, hierarchy and LMS access.

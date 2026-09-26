@@ -28,11 +28,17 @@ from acadexa.database.collections import (
     verify_database_collections,
 )
 from acadexa.database.loader import (
+    DEFAULT_LMS_SLICE_SCHOOLS,
+    DEFAULT_LMS_SLICE_SEMESTER,
     CollectionLoadStatus,
     CoreLoadResult,
+    LMSServingSliceSpec,
+    LMSSliceLoadResult,
     LoadValidationError,
     load_core_academic_data,
     load_core_collection,
+    load_lms_serving_slice,
+    stream_lms_slice_records,
 )
 
 __all__ = [
@@ -41,9 +47,13 @@ __all__ = [
     "CollectionLoadStatus",
     "CORE_COLLECTIONS",
     "CoreLoadResult",
+    "DEFAULT_LMS_SLICE_SCHOOLS",
+    "DEFAULT_LMS_SLICE_SEMESTER",
     "DEFAULT_MONGODB_DATABASE",
     "DEFAULT_MONGODB_URI",
     "GOLD_COLLECTIONS",
+    "LMSServingSliceSpec",
+    "LMSSliceLoadResult",
     "LMS_TIMESERIES_SPEC",
     "LoadValidationError",
     "MongoDBConfig",
@@ -59,9 +69,11 @@ __all__ = [
     "init_database",
     "load_core_academic_data",
     "load_core_collection",
+    "load_lms_serving_slice",
     "mask_mongo_uri",
     "mongo_client_context",
     "mongo_database_context",
     "ping_mongodb",
+    "stream_lms_slice_records",
     "verify_database_collections",
 ]
