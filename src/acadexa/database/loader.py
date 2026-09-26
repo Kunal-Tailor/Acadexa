@@ -811,3 +811,160 @@ def load_lms_serving_slice(
         duration_sec=duration_sec,
     )
 
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Development Database Loading Entry Workflow (Task 6.7, Rules.md §9, §16)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+@dataclass(frozen=True)
+class DatabaseLoadSummary:
+    """Complete summary of a full development database loading and verification run."""
+
+    database: str
+    core_result: CoreLoadResult
+    lms_result: LMSSliceLoadResult | None
+    indexes: dict[str, list[str]]
+    manifest_path: Path | None
+    manifest_verified: bool
+    total_documents: int
+    duration_sec: float
+
+    def as_dict(self) -> dict[str, Any]:
+        """Return serializable dictionary representation."""
+        return {
+            "database": self.database,
+            "core_result": self.core_result.as_dict(),
+            "lms_result": self.lms_result.as_dict() if self.lms_result is not None else None,
+            "indexes": self.indexes,
+            "manifest_path": str(self.manifest_path) if self.manifest_path is not None else None,
+            "manifest_verified": self.manifest_verified,
+            "total_documents": self.total_documents,
+            "duration_sec": self.duration_sec,
+        }
+
+
+def load_development_database(
+    database: Database | None = None,
+    config: MongoDBConfig | None = None,
+    *,
+    data_dir: Path | str | None = None,
+    lms_parquet_path: Path | str | None = None,
+    manifest_path: Path | str | None = None,
+    spec: LMSServingSliceSpec | None = None,
+    batch_size: int = 2000,
+    clear_existing: bool = True,
+    strict_validation: bool = True,
+    load_lms: bool = True,
+    create_indexes: bool = True,
+) -> DatabaseLoadSummary:
+    """Load core collections and LMS serving slice into MongoDB and verify counts (task 6.7).
+
+    Executes the full development-scale database loading workflow:
+    1. Connects to MongoDB using environment or supplied configuration.
+    2. Initializes core collections, time-series LMS collection, and gold placeholders.
+    3. Loads the 5 core collections with count verification against generation manifests.
+    4. Loads the LMS operational serving slice (latest semester, schools CET & SOM) from Parquet.
+    5. Creates documented query indexes across collections.
+    6. Produces a comprehensive verification report.
+
+    Args:
+        database: Optional pymongo Database instance.
+        config: Optional MongoDBConfig.
+        data_dir: Directory containing core collection JSON files (defaults to 'data/generated').
+        lms_parquet_path: Path to raw LMS Parquet dataset (defaults to 'data/raw/lms_events').
+        manifest_path: Path to generation manifest for verification (defaults to 'data/manifests/generation_manifest.json').
+        spec: Optional LMS serving slice specification.
+        batch_size: Batch size for insertions.
+        clear_existing: If True, clears existing documents before loading.
+        strict_validation: If True, raises LoadValidationError on count mismatch.
+        load_lms: If True, loads the LMS operational slice.
+        create_indexes: If True, creates documented query indexes after loading.
+
+    Returns:
+        DatabaseLoadSummary with full metrics and verification status.
+
+    Raises:
+        MongoConnectionError: if database cannot be reached.
+        LoadValidationError: if any count validation fails.
+    """
+    start_time = time.perf_counter()
+    cfg = config
+    db = database if database is not None else get_database(cfg)
+
+    # 1. Verify connectivity and initialize database collections
+    init_database(database=db, config=cfg, create_gold_placeholders=True)
+
+    # 2. Resolve paths
+    effective_data_dir = Path(data_dir) if data_dir is not None else Path("data/generated")
+    effective_lms_path = Path(lms_parquet_path) if lms_parquet_path is not None else Path("data/raw/lms_events")
+    effective_manifest_path = (
+        Path(manifest_path)
+        if manifest_path is not None
+        else Path("data/manifests/generation_manifest.json")
+    )
+
+    manifest_verified = False
+    resolved_manifest: Path | None = None
+    if effective_manifest_path.is_file():
+        resolved_manifest = effective_manifest_path
+        manifest_verified = True
+    elif strict_validation and manifest_path is not None:
+        raise LoadValidationError(f"Generation manifest file not found: {effective_manifest_path}")
+
+    # 3. Load 5 Core Academic Collections
+    core_result = load_core_academic_data(
+        database=db,
+        config=cfg,
+        data_dir=effective_data_dir,
+        manifest_path=resolved_manifest,
+        batch_size=batch_size,
+        clear_existing=clear_existing,
+        strict_validation=strict_validation,
+        ensure_initialized=False,
+    )
+
+    # 4. Load LMS Operational Serving Slice
+    lms_result: LMSSliceLoadResult | None = None
+    if load_lms:
+        if not effective_lms_path.exists():
+            if strict_validation:
+                raise LoadValidationError(f"LMS Parquet dataset not found at {effective_lms_path}")
+        else:
+            lms_result = load_lms_serving_slice(
+                database=db,
+                config=cfg,
+                parquet_path=effective_lms_path,
+                spec=spec,
+                batch_size=batch_size,
+                clear_existing=clear_existing,
+                strict_validation=strict_validation,
+                ensure_initialized=False,
+            )
+
+    # 5. Create Documented Query Indexes
+    indexes_created: dict[str, list[str]] = {}
+    if create_indexes:
+        from acadexa.database.indexes import create_database_indexes
+
+        indexes_created = create_database_indexes(
+            database=db,
+            config=cfg,
+            ensure_collections=False,
+        )
+
+    # 6. Total documents
+    total_docs = core_result.total_inserted + (lms_result.inserted_count if lms_result else 0)
+    duration_sec = round(time.perf_counter() - start_time, 3)
+
+    return DatabaseLoadSummary(
+        database=db.name,
+        core_result=core_result,
+        lms_result=lms_result,
+        indexes=indexes_created,
+        manifest_path=resolved_manifest,
+        manifest_verified=manifest_verified,
+        total_documents=total_docs,
+        duration_sec=duration_sec,
+    )
+

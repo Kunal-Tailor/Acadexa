@@ -251,7 +251,7 @@ Make the generated development dataset queryable in MongoDB.
 - [x] 6.6 — Implement representative MongoDB aggregation demonstrations required by the project: `$match`, `$group`, `$project`, `$sort`, `$lookup`, `$unwind`, `$setWindowFields` and `$facet` where applicable.
   Commit: `Update - 6.6 - implement MongoDB analytical aggregations`
 
-- [ ] 6.7 — Implement `scripts/load_mongodb.py` as the reproducible development database-loading entry point and verify counts against generated manifests.
+- [x] 6.7 — Implement `scripts/load_mongodb.py` as the reproducible development database-loading entry point and verify counts against generated manifests.
   Commit: `Update - 6.7 - wire MongoDB loading entry point`
 
 **Checkpoint:** Development data is stored in the intended MongoDB/Parquet split and representative MongoDB operations work.
