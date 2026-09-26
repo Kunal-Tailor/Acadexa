@@ -233,7 +233,7 @@ Build the large event generator and analytical ground truth without yet scaling 
 
 Make the generated development dataset queryable in MongoDB.
 
-- [ ] 6.1 — Implement MongoDB configuration/connection handling with credentials coming from environment configuration.
+- [x] 6.1 — Implement MongoDB configuration/connection handling with credentials coming from environment configuration.
   Commit: `Update - 6.1 - implement MongoDB connection layer`
 
 - [ ] 6.2 — Implement database initialization for the core collections and gold collection placeholders. Do not populate gold data yet.
