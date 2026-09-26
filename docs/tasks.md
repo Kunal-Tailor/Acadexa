@@ -264,7 +264,7 @@ Make the generated development dataset queryable in MongoDB.
 
 Establish Spark processing and the first two pipeline jobs.
 
-- [ ] 7.1 — Configure PySpark local mode and verify Spark can start within the documented local environment.
+- [x] 7.1 — Configure PySpark local mode and verify Spark can start within the documented local environment.
   Commit: `Update - 7.1 - configure local PySpark runtime`
 
 - [ ] 7.2 — Configure the MongoDB Spark integration and verify a small development collection can be read into a Spark DataFrame.
