@@ -20,6 +20,7 @@ Exports:
 - J1 Clean and Validate job
 - J2 LMS Event Aggregation job
 - J3 Integrated Student Feature Table job
+- J4 Correlation Analytics job
 """
 
 from __future__ import annotations
@@ -62,6 +63,8 @@ from acadexa.processing.jobs import (
     J2Result,
     J3Config,
     J3Result,
+    J4Config,
+    J4Result,
     aggregate_attendance_features,
     aggregate_coursework_features,
     aggregate_lms_features,
@@ -78,6 +81,7 @@ from acadexa.processing.jobs import (
     run_j1_clean_and_validate,
     run_j2_event_aggregation,
     run_j3_feature_table,
+    run_j4_correlation,
 )
 
 __all__ = [
@@ -135,4 +139,8 @@ __all__ = [
     "build_integrated_student_features",
     "build_student_semester_features",
     "run_j3_feature_table",
+    # J4 Correlation Analytics job
+    "J4Config",
+    "J4Result",
+    "run_j4_correlation",
 ]

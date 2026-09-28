@@ -46,6 +46,11 @@ from acadexa.processing.jobs.feature_table import (
     build_student_semester_features,
     run_j3_feature_table,
 )
+from acadexa.processing.jobs.correlation import (
+    J4Config,
+    J4Result,
+    run_j4_correlation,
+)
 
 __all__ = [
     # J1 Clean and Validate
@@ -78,4 +83,8 @@ __all__ = [
     "build_integrated_student_features",
     "build_student_semester_features",
     "run_j3_feature_table",
+    # J4 Correlation
+    "J4Config",
+    "J4Result",
+    "run_j4_correlation",
 ]

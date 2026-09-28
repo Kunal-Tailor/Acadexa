@@ -301,10 +301,10 @@ Build the analytical core from validated Spark outputs.
 - [x] 8.2 — Implement attendance, coursework, LMS and academic derived features required by the feature contract.
   Commit: `Update - 8.2 - implement academic and engagement features`
 
-- [ ] 8.3 — Implement within-course normalization required for cross-factor analysis.
+- [x] 8.3 — Implement within-course normalization required for cross-factor analysis.
   Commit: `Update - 8.3 - implement within-course normalization`
 
-- [ ] 8.4 — Implement J4 Spearman correlation analysis for the approved planted relationships and the decoy relationship.
+- [x] 8.4 — Implement J4 Spearman correlation analysis for the approved planted relationships and the decoy relationship.
   Commit: `Update - 8.4 - implement correlation analytics`
 
 - [ ] 8.5 — Add optional Pearson correlation output without replacing Spearman as the default method.
