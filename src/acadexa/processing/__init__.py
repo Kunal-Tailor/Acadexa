@@ -22,6 +22,7 @@ Exports:
 - J3 Integrated Student Feature Table job
 - J4 Correlation Analytics job
 - J5 Temporal Trend Detection job
+- J6 Risk Signals job
 """
 
 from __future__ import annotations
@@ -68,6 +69,8 @@ from acadexa.processing.jobs import (
     J4Result,
     J5Config,
     J5Result,
+    J6Config,
+    J6Result,
     aggregate_attendance_features,
     aggregate_coursework_features,
     aggregate_lms_features,
@@ -86,6 +89,7 @@ from acadexa.processing.jobs import (
     run_j3_feature_table,
     run_j4_correlation,
     run_j5_trend_detection,
+    run_j6_risk_signals,
 )
 
 __all__ = [
@@ -151,4 +155,8 @@ __all__ = [
     "J5Config",
     "J5Result",
     "run_j5_trend_detection",
+    # J6 Risk Signals job
+    "J6Config",
+    "J6Result",
+    "run_j6_risk_signals",
 ]

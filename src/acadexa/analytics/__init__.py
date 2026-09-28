@@ -23,6 +23,11 @@ from acadexa.analytics.normalization import (
     DEFAULT_NORMALIZATION_METRICS,
     normalize_within_course,
 )
+from acadexa.analytics.risk import (
+    RiskSignalThresholds,
+    build_student_risk_indicators,
+    evaluate_student_course_risk_signals,
+)
 from acadexa.analytics.trends import (
     DEFAULT_LMS_COMPARISON_RATIO,
     DEFAULT_MARKS_DROP_THRESHOLD,
@@ -60,4 +65,8 @@ __all__ = [
     "compute_coursework_marks_trends",
     "compute_lms_four_week_trends",
     "integrate_temporal_trends",
+    # Risk Signals
+    "RiskSignalThresholds",
+    "evaluate_student_course_risk_signals",
+    "build_student_risk_indicators",
 ]

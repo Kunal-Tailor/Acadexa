@@ -313,10 +313,10 @@ Build the analytical core from validated Spark outputs.
 - [x] 8.6 — Implement J5 four-week trend detection for LMS engagement and marks where applicable.
   Commit: `Update - 8.6 - implement temporal trend detection`
 
-- [ ] 8.7 — Implement J6 attendance, LMS decline, late-submission, marks-decline and quiz-activity risk signals exactly from configuration.
+- [x] 8.7 — Implement J6 attendance, LMS decline, late-submission, marks-decline and quiz-activity risk signals exactly from configuration.
   Commit: `Update - 8.7 - implement five-rule risk signals`
 
-- [ ] 8.8 — Add explainability fields to risk outputs so each triggered signal can be traced to its underlying metric/value.
+- [x] 8.8 — Add explainability fields to risk outputs so each triggered signal can be traced to its underlying metric/value.
   Commit: `Update - 8.8 - add risk signal explanations`
 
 **Checkpoint:** The development dataset produces integrated features, associations, trends and the five-rule signal count.

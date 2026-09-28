@@ -56,6 +56,11 @@ from acadexa.processing.jobs.trend_detection import (
     J5Result,
     run_j5_trend_detection,
 )
+from acadexa.processing.jobs.risk_signals import (
+    J6Config,
+    J6Result,
+    run_j6_risk_signals,
+)
 
 __all__ = [
     # J1 Clean and Validate
@@ -96,4 +101,8 @@ __all__ = [
     "J5Config",
     "J5Result",
     "run_j5_trend_detection",
+    # J6 Risk Signals
+    "J6Config",
+    "J6Result",
+    "run_j6_risk_signals",
 ]
