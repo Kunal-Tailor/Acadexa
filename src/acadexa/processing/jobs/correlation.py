@@ -43,6 +43,7 @@ class J4Config:
     group_by_col: str = "school"
     partition_by_course: tuple[str, ...] = ("course_id", "semester_id")
     relationships: Sequence[dict[str, Any]] = APPROVED_CORRELATION_RELATIONSHIPS
+    include_pearson: bool = True
 
 
 @dataclass
@@ -81,20 +82,30 @@ def run_j4_correlation(
         features_df, partition_cols=cfg.partition_by_course
     )
 
-    # 3. Compute overall Spearman correlations for planted and decoy relationships
-    logger.info("Evaluating overall Spearman rank correlations across %d relationships", len(cfg.relationships))
+    # 3. Compute overall Spearman (and optional Pearson) correlations
+    logger.info(
+        "Evaluating overall correlations across %d relationships (include_pearson=%s)",
+        len(cfg.relationships),
+        cfg.include_pearson,
+    )
     overall_df = evaluate_planted_and_decoy_correlations(
         df=norm_features_df,
         relationships=cfg.relationships,
         group_by_col=None,
+        include_pearson=cfg.include_pearson,
     )
 
-    # 4. Compute school-stratified Spearman correlations
-    logger.info("Evaluating school-stratified Spearman rank correlations (grouped by %s)", cfg.group_by_col)
+    # 4. Compute school-stratified correlations
+    logger.info(
+        "Evaluating school-stratified correlations (grouped by %s, include_pearson=%s)",
+        cfg.group_by_col,
+        cfg.include_pearson,
+    )
     school_df = evaluate_planted_and_decoy_correlations(
         df=norm_features_df,
         relationships=cfg.relationships,
         group_by_col=cfg.group_by_col,
+        include_pearson=cfg.include_pearson,
     )
 
     total_evaluated = len(cfg.relationships)

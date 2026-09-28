@@ -180,20 +180,64 @@ def compute_spearman_correlation(
     )
 
 
+def compute_pearson_correlation(
+    df: DataFrame,
+    col_x: str,
+    col_y: str,
+    group_by_col: str | None = None,
+) -> DataFrame:
+    """Compute distributed Pearson correlation between two continuous columns (Task 8.5).
+
+    Args:
+        df: Input DataFrame containing observations.
+        col_x: First variable column name.
+        col_y: Second variable column name.
+        group_by_col: Optional column name for stratified correlation (e.g. 'school').
+
+    Returns:
+        DataFrame containing Pearson correlation:
+        - If group_by_col is None: [pearson_corr, sample_size]
+        - If group_by_col is present: [group_col, pearson_corr, sample_size]
+    """
+    valid_df = df.filter(F.col(col_x).isNotNull() & F.col(col_y).isNotNull())
+
+    if group_by_col:
+        return (
+            valid_df.groupBy(group_by_col)
+            .agg(
+                F.coalesce(F.corr(col_x, col_y), F.lit(0.0))
+                .cast("double")
+                .alias("pearson_corr"),
+                F.count("*").cast("int").alias("sample_size"),
+            )
+            .orderBy(group_by_col)
+        )
+
+    return valid_df.agg(
+        F.coalesce(F.corr(col_x, col_y), F.lit(0.0))
+        .cast("double")
+        .alias("pearson_corr"),
+        F.count("*").cast("int").alias("sample_size"),
+    )
+
+
 def evaluate_planted_and_decoy_correlations(
     df: DataFrame,
     relationships: Sequence[dict[str, Any]] = APPROVED_CORRELATION_RELATIONSHIPS,
     group_by_col: str | None = None,
+    include_pearson: bool = False,
 ) -> DataFrame:
     """Evaluate Spearman correlations for all configured planted and decoy relationships.
 
     Computes both raw metric correlations and within-course normalized (z-scored) correlations
     to observe relationship recovery with and without the course difficulty confounder.
+    Optionally includes Pearson correlation metrics alongside default Spearman (Task 8.5).
 
     Args:
         df: DataFrame containing both raw and normalized metrics.
         relationships: Sequence of relationship specifications to evaluate.
         group_by_col: Optional stratification column (e.g. 'school').
+        include_pearson: When True, adds pearson_raw and pearson_normalized columns (default: False).
 
     Returns:
         Consolidated DataFrame with correlation evaluations across relationships.
@@ -216,7 +260,7 @@ def evaluate_planted_and_decoy_correlations(
             logger.warning("Skipping correlation %s: columns %s or %s missing", rel_id, x_raw, y_raw)
             continue
 
-        # 1. Compute raw Spearman correlation
+        # 1. Compute raw Spearman correlation (primary method)
         raw_corr_df = compute_spearman_correlation(df, x_raw, y_raw, group_by_col)
         raw_corr_df = raw_corr_df.withColumnRenamed("spearman_corr", "spearman_raw")
 
@@ -240,7 +284,38 @@ def evaluate_planted_and_decoy_correlations(
                 "spearman_normalized", F.lit(None).cast("double")
             )
 
-        # 3. Add relationship metadata
+        # 3. Optional Pearson correlation alongside Spearman (Task 8.5)
+        if include_pearson:
+            p_raw_df = compute_pearson_correlation(df, x_raw, y_raw, group_by_col)
+            p_raw_df = p_raw_df.withColumnRenamed("pearson_corr", "pearson_raw")
+
+            if group_by_col:
+                combined = combined.join(
+                    p_raw_df.select(group_by_col, "pearson_raw"),
+                    on=group_by_col,
+                    how="left",
+                )
+            else:
+                combined = combined.crossJoin(p_raw_df.select("pearson_raw"))
+
+            if x_norm and y_norm and x_norm in df.columns and y_norm in df.columns:
+                p_norm_df = compute_pearson_correlation(df, x_norm, y_norm, group_by_col)
+                p_norm_df = p_norm_df.withColumnRenamed("pearson_corr", "pearson_normalized")
+
+                if group_by_col:
+                    combined = combined.join(
+                        p_norm_df.select(group_by_col, "pearson_normalized"),
+                        on=group_by_col,
+                        how="left",
+                    )
+                else:
+                    combined = combined.crossJoin(p_norm_df.select("pearson_normalized"))
+            else:
+                combined = combined.withColumn(
+                    "pearson_normalized", F.lit(None).cast("double")
+                )
+
+        # 4. Add relationship metadata
         combined = (
             combined.withColumn("relationship_id", F.lit(rel_id))
             .withColumn("relationship_name", F.lit(rel_name))
@@ -274,10 +349,15 @@ def evaluate_planted_and_decoy_correlations(
         "dependent_variable",
         "spearman_raw",
         "spearman_normalized",
+    ]
+    if include_pearson:
+        first_cols.extend(["pearson_raw", "pearson_normalized"])
+
+    first_cols.extend([
         "expected_direction",
         "expected_strength",
         "sample_size",
-    ]
+    ])
     actual_cols = [c for c in first_cols if c in consolidated.columns]
     remaining = [c for c in consolidated.columns if c not in actual_cols]
 

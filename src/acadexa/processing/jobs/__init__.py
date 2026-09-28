@@ -51,6 +51,11 @@ from acadexa.processing.jobs.correlation import (
     J4Result,
     run_j4_correlation,
 )
+from acadexa.processing.jobs.trend_detection import (
+    J5Config,
+    J5Result,
+    run_j5_trend_detection,
+)
 
 __all__ = [
     # J1 Clean and Validate
@@ -87,4 +92,8 @@ __all__ = [
     "J4Config",
     "J4Result",
     "run_j4_correlation",
+    # J5 Trend Detection
+    "J5Config",
+    "J5Result",
+    "run_j5_trend_detection",
 ]

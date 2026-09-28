@@ -307,10 +307,10 @@ Build the analytical core from validated Spark outputs.
 - [x] 8.4 — Implement J4 Spearman correlation analysis for the approved planted relationships and the decoy relationship.
   Commit: `Update - 8.4 - implement correlation analytics`
 
-- [ ] 8.5 — Add optional Pearson correlation output without replacing Spearman as the default method.
+- [x] 8.5 — Add optional Pearson correlation output without replacing Spearman as the default method.
   Commit: `Update - 8.5 - add optional Pearson analysis`
 
-- [ ] 8.6 — Implement J5 four-week trend detection for LMS engagement and marks where applicable.
+- [x] 8.6 — Implement J5 four-week trend detection for LMS engagement and marks where applicable.
   Commit: `Update - 8.6 - implement temporal trend detection`
 
 - [ ] 8.7 — Implement J6 attendance, LMS decline, late-submission, marks-decline and quiz-activity risk signals exactly from configuration.

@@ -5,6 +5,7 @@ from __future__ import annotations
 from acadexa.analytics.correlation import (
     APPROVED_CORRELATION_RELATIONSHIPS,
     assign_fractional_ranks,
+    compute_pearson_correlation,
     compute_spearman_correlation,
     evaluate_planted_and_decoy_correlations,
     interpret_spearman_association,
@@ -22,6 +23,15 @@ from acadexa.analytics.normalization import (
     DEFAULT_NORMALIZATION_METRICS,
     normalize_within_course,
 )
+from acadexa.analytics.trends import (
+    DEFAULT_LMS_COMPARISON_RATIO,
+    DEFAULT_MARKS_DROP_THRESHOLD,
+    DEFAULT_RECENT_GRADED_ITEMS,
+    DEFAULT_WINDOW_WEEKS,
+    compute_coursework_marks_trends,
+    compute_lms_four_week_trends,
+    integrate_temporal_trends,
+)
 
 __all__ = [
     # Metrics
@@ -38,7 +48,16 @@ __all__ = [
     # Correlation
     "APPROVED_CORRELATION_RELATIONSHIPS",
     "assign_fractional_ranks",
+    "compute_pearson_correlation",
     "compute_spearman_correlation",
     "evaluate_planted_and_decoy_correlations",
     "interpret_spearman_association",
+    # Trends
+    "DEFAULT_LMS_COMPARISON_RATIO",
+    "DEFAULT_MARKS_DROP_THRESHOLD",
+    "DEFAULT_RECENT_GRADED_ITEMS",
+    "DEFAULT_WINDOW_WEEKS",
+    "compute_coursework_marks_trends",
+    "compute_lms_four_week_trends",
+    "integrate_temporal_trends",
 ]
