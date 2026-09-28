@@ -36,6 +36,16 @@ from acadexa.processing.jobs.event_aggregation import (
     aggregate_weekly_lms_events,
     run_j2_event_aggregation,
 )
+from acadexa.processing.jobs.feature_table import (
+    J3Config,
+    J3Result,
+    aggregate_attendance_features,
+    aggregate_coursework_features,
+    aggregate_lms_features,
+    build_integrated_student_features,
+    build_student_semester_features,
+    run_j3_feature_table,
+)
 
 __all__ = [
     # J1 Clean and Validate
@@ -59,4 +69,13 @@ __all__ = [
     "J2Result",
     "aggregate_weekly_lms_events",
     "run_j2_event_aggregation",
+    # J3 Feature Table
+    "J3Config",
+    "J3Result",
+    "aggregate_attendance_features",
+    "aggregate_coursework_features",
+    "aggregate_lms_features",
+    "build_integrated_student_features",
+    "build_student_semester_features",
+    "run_j3_feature_table",
 ]

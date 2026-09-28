@@ -17,6 +17,9 @@ Exports:
   - :func:`read_mongo_collection`: Reads a MongoDB collection into a Spark DataFrame.
   - :func:`write_mongo_collection`: Writes a Spark DataFrame into a MongoDB collection.
   - :func:`verify_spark_mongo_read`: Verifies reading development collections into Spark.
+- J1 Clean and Validate job
+- J2 LMS Event Aggregation job
+- J3 Integrated Student Feature Table job
 """
 
 from __future__ import annotations
@@ -48,12 +51,23 @@ from acadexa.processing.spark_session import (
     verify_spark_runtime,
 )
 from acadexa.processing.jobs import (
+    APPROVED_ACTIVITY_CATEGORIES,
     INJECTION_CATEGORIES,
     DatasetQualityMetrics,
     IssueMetric,
     J1Config,
     J1QualityReport,
     J1Result,
+    J2Config,
+    J2Result,
+    J3Config,
+    J3Result,
+    aggregate_attendance_features,
+    aggregate_coursework_features,
+    aggregate_lms_features,
+    aggregate_weekly_lms_events,
+    build_integrated_student_features,
+    build_student_semester_features,
     clean_academic_records,
     clean_attendance,
     clean_courses,
@@ -62,13 +76,8 @@ from acadexa.processing.jobs import (
     clean_students,
     load_injection_manifest_counts,
     run_j1_clean_and_validate,
-)
-from acadexa.processing.jobs.event_aggregation import (
-    APPROVED_ACTIVITY_CATEGORIES,
-    J2Config,
-    J2Result,
-    aggregate_weekly_lms_events,
     run_j2_event_aggregation,
+    run_j3_feature_table,
 )
 
 __all__ = [
@@ -117,6 +126,13 @@ __all__ = [
     "J2Result",
     "aggregate_weekly_lms_events",
     "run_j2_event_aggregation",
+    # J3 Feature Table job
+    "J3Config",
+    "J3Result",
+    "aggregate_attendance_features",
+    "aggregate_coursework_features",
+    "aggregate_lms_features",
+    "build_integrated_student_features",
+    "build_student_semester_features",
+    "run_j3_feature_table",
 ]
-
-

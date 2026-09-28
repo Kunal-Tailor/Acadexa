@@ -295,10 +295,10 @@ Establish Spark processing and the first two pipeline jobs.
 
 Build the analytical core from validated Spark outputs.
 
-- [ ] 8.1 — Implement J3 integrated student feature construction by joining academic records, attendance, coursework and LMS features at the documented grain.
+- [x] 8.1 — Implement J3 integrated student feature construction by joining academic records, attendance, coursework and LMS features at the documented grain.
   Commit: `Update - 8.1 - implement integrated student feature table`
 
-- [ ] 8.2 — Implement attendance, coursework, LMS and academic derived features required by the feature contract.
+- [x] 8.2 — Implement attendance, coursework, LMS and academic derived features required by the feature contract.
   Commit: `Update - 8.2 - implement academic and engagement features`
 
 - [ ] 8.3 — Implement within-course normalization required for cross-factor analysis.
