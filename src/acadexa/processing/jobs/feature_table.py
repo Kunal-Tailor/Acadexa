@@ -641,7 +641,7 @@ def build_student_semester_features(feature_table_df: DataFrame) -> DataFrame:
         DataFrame conforming to the student_features gold collection schema:
         [student_id, semester_id, attendance_mean, engagement_count, late_submission_rate, score_trend].
     """
-    rollup = feature_table_df.groupBy("student_id", "semester_id").agg(
+    agg_exprs = [
         # Mean derived attendance percentage across enrolled courses
         F.round(F.avg("attendance_percentage"), 2)
         .cast("double")
@@ -667,9 +667,19 @@ def build_student_semester_features(feature_table_df: DataFrame) -> DataFrame:
         F.coalesce(F.round(F.avg("academic_score"), 2), F.lit(0.0))
         .cast("double")
         .alias("avg_academic_score"),
-        F.first("student_school", ignorenulls=True).alias("student_school"),
-        F.first("student_department", ignorenulls=True).alias("student_department"),
-    )
+    ]
+
+    if "student_school" in feature_table_df.columns:
+        agg_exprs.append(F.first("student_school", ignorenulls=True).alias("student_school"))
+    elif "school" in feature_table_df.columns:
+        agg_exprs.append(F.first("school", ignorenulls=True).alias("student_school"))
+
+    if "student_department" in feature_table_df.columns:
+        agg_exprs.append(F.first("student_department", ignorenulls=True).alias("student_department"))
+    elif "department" in feature_table_df.columns:
+        agg_exprs.append(F.first("department", ignorenulls=True).alias("student_department"))
+
+    rollup = feature_table_df.groupBy("student_id", "semester_id").agg(*agg_exprs)
 
     return rollup.orderBy("student_id", "semester_id")
 

@@ -23,6 +23,7 @@ Exports:
 - J4 Correlation Analytics job
 - J5 Temporal Trend Detection job
 - J6 Risk Signals job
+- J7 Gold Data Publication job
 """
 
 from __future__ import annotations
@@ -71,11 +72,15 @@ from acadexa.processing.jobs import (
     J5Result,
     J6Config,
     J6Result,
+    J7Config,
+    J7Result,
     aggregate_attendance_features,
     aggregate_coursework_features,
     aggregate_lms_features,
     aggregate_weekly_lms_events,
+    build_course_metrics,
     build_integrated_student_features,
+    build_school_summary,
     build_student_semester_features,
     clean_academic_records,
     clean_attendance,
@@ -84,12 +89,16 @@ from acadexa.processing.jobs import (
     clean_lms_events,
     clean_students,
     load_injection_manifest_counts,
+    publish_course_metrics,
+    publish_school_summary,
+    publish_student_features,
     run_j1_clean_and_validate,
     run_j2_event_aggregation,
     run_j3_feature_table,
     run_j4_correlation,
     run_j5_trend_detection,
     run_j6_risk_signals,
+    run_j7_publish_gold,
 )
 
 __all__ = [
@@ -159,4 +168,13 @@ __all__ = [
     "J6Config",
     "J6Result",
     "run_j6_risk_signals",
+    # J7 Gold Data Publication job
+    "J7Config",
+    "J7Result",
+    "build_course_metrics",
+    "build_school_summary",
+    "publish_course_metrics",
+    "publish_school_summary",
+    "publish_student_features",
+    "run_j7_publish_gold",
 ]

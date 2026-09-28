@@ -329,10 +329,10 @@ Build the analytical core from validated Spark outputs.
 
 Create the serving layer and one reproducible pipeline command.
 
-- [ ] 9.1 — Implement J7 publication of `student_features` to MongoDB.
+- [x] 9.1 — Implement J7 publication of `student_features` to MongoDB.
   Commit: `Update - 9.1 - publish student features`
 
-- [ ] 9.2 — Implement J7 publication of `course_metrics` and `school_summary`.
+- [x] 9.2 — Implement J7 publication of `course_metrics` and `school_summary`.
   Commit: `Update - 9.2 - publish course and school metrics`
 
 - [ ] 9.3 — Implement publication of `risk_indicators` with signal breakdown and run metadata.

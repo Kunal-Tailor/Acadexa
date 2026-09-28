@@ -61,6 +61,16 @@ from acadexa.processing.jobs.risk_signals import (
     J6Result,
     run_j6_risk_signals,
 )
+from acadexa.processing.jobs.publish_gold import (
+    J7Config,
+    J7Result,
+    build_course_metrics,
+    build_school_summary,
+    publish_course_metrics,
+    publish_school_summary,
+    publish_student_features,
+    run_j7_publish_gold,
+)
 
 __all__ = [
     # J1 Clean and Validate
@@ -105,4 +115,13 @@ __all__ = [
     "J6Config",
     "J6Result",
     "run_j6_risk_signals",
+    # J7 Publish Gold Data
+    "J7Config",
+    "J7Result",
+    "build_course_metrics",
+    "build_school_summary",
+    "publish_course_metrics",
+    "publish_school_summary",
+    "publish_student_features",
+    "run_j7_publish_gold",
 ]
