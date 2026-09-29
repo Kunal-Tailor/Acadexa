@@ -431,7 +431,7 @@ Build each analytical view as one reviewable page-level task.
 - [x] 12.3 — Build Course view with enrollment, marks, attendance, coursework, LMS engagement, trend and association information.
   Commit: `Update - 12.3 - build course analytics`
 
-- [ ] 12.4 — Build Student view with integrated academic, attendance, coursework, LMS, trend and five-rule signal breakdown.
+- [x] 12.4 — Build Student view with integrated academic, attendance, coursework, LMS, trend and five-rule signal breakdown.
   Commit: `Update - 12.4 - build student intelligence view`
 
 - [ ] 12.5 — Build Analysis view with correlation, trend analysis and methodology/explainability sections.
