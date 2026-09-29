@@ -434,7 +434,7 @@ Build each analytical view as one reviewable page-level task.
 - [x] 12.4 — Build Student view with integrated academic, attendance, coursework, LMS, trend and five-rule signal breakdown.
   Commit: `Update - 12.4 - build student intelligence view`
 
-- [ ] 12.5 — Build Analysis view with correlation, trend analysis and methodology/explainability sections.
+- [x] 12.5 — Build Analysis view with correlation, trend analysis and methodology/explainability sections.
   Commit: `Update - 12.5 - build analytical analysis view`
 
 - [ ] 12.6 — Build Data Quality view showing injected/detected/corrected/dropped/remaining issues from actual pipeline output.
