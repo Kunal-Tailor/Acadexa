@@ -369,7 +369,7 @@ Prove the complete architecture before building the polished dashboard or genera
 - [x] 10.3 — Validate that risk-rule boundary cases behave correctly, including 75% attendance, 50% LMS comparison, 30% late submissions and 10-point marks decline boundaries.
   Commit: `Update - 10.3 - validate risk signal boundaries`
 
-- [ ] 10.4 — Validate reproducibility by running the same development configuration/seed twice and comparing deterministic outputs/manifest characteristics.
+- [x] 10.4 — Validate reproducibility by running the same development configuration/seed twice and comparing deterministic outputs/manifest characteristics.
   Commit: `Update - 10.4 - verify generator reproducibility`
 
 - [ ] 10.5 — Run a local resource/performance smoke test and document actual development-scale runtime and memory observations. Do not optimize prematurely.
