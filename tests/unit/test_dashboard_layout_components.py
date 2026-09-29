@@ -424,5 +424,5 @@ def test_shell_restricts_nav_and_filters_for_faculty() -> None:
         "Analysis",
     ]
     assert at.header[0].value == "Courses"
-    assert [s.label for s in at.selectbox] == ["Academic year", "Semester"]
+    assert [s.label for s in at.selectbox] == ["Academic year", "Semester", "Course"]
     assert any("CSA101" in c.value for c in at.caption)

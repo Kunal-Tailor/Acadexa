@@ -428,7 +428,7 @@ Build each analytical view as one reviewable page-level task.
 - [x] 12.2 — Build School/Department views with scoped KPIs, course breakdown, trends and risk distribution.
   Commit: `Update - 12.2 - build school and department analytics`
 
-- [ ] 12.3 — Build Course view with enrollment, marks, attendance, coursework, LMS engagement, trend and association information.
+- [x] 12.3 — Build Course view with enrollment, marks, attendance, coursework, LMS engagement, trend and association information.
   Commit: `Update - 12.3 - build course analytics`
 
 - [ ] 12.4 — Build Student view with integrated academic, attendance, coursework, LMS, trend and five-rule signal breakdown.
