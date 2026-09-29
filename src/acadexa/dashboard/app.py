@@ -21,6 +21,7 @@ from acadexa.dashboard.auth import AuthConfigError, User
 from acadexa.dashboard.config import DashboardConfig
 from acadexa.dashboard.data_access import DashboardDataAccess
 from acadexa.dashboard.pages import university as university_page
+from acadexa.dashboard.pages import school as school_page
 
 
 @st.cache_resource
@@ -90,6 +91,8 @@ def render_shell(user: User, data: DashboardDataAccess) -> None:
 
     if page_key == "overview":
         university_page.render_university_page(scope, selections, data)
+    elif page_key == "schools":
+        school_page.render_school_page(scope, selections, data)
     else:
         components.empty_state(
             f"{page_title} analytics arrive in Phase 12 "

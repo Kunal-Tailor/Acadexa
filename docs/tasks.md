@@ -425,7 +425,7 @@ Build each analytical view as one reviewable page-level task.
 - [x] 12.1 — Build the University Overview page using actual gold data: university KPIs, school comparison, academic/attendance/LMS overview, trend summary and risk summary.
   Commit: `Update - 12.1 - build university overview`
 
-- [ ] 12.2 — Build School/Department views with scoped KPIs, course breakdown, trends and risk distribution.
+- [x] 12.2 — Build School/Department views with scoped KPIs, course breakdown, trends and risk distribution.
   Commit: `Update - 12.2 - build school and department analytics`
 
 - [ ] 12.3 — Build Course view with enrollment, marks, attendance, coursework, LMS engagement, trend and association information.
