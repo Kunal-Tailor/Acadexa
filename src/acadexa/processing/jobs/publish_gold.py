@@ -1,4 +1,4 @@
-"""Spark gold analytical collections publication job - J7 (tasks 9.1 & 9.2, rules.md §18, §19).
+"""Spark gold analytical collections publication job - J7 (tasks 9.1-9.4, rules.md §18, §19).
 
 Job Responsibilities (F-D07, architecture.md §12, §13):
 1. Load integrated student features from J3.
@@ -8,7 +8,9 @@ Job Responsibilities (F-D07, architecture.md §12, §13):
 5. Publish `course_metrics` to MongoDB and Parquet (Task 9.2).
 6. Aggregate school and department summary for `school_summary` conforming to SCHOOL_SUMMARY_SCHEMA (Task 9.2).
 7. Publish `school_summary` to MongoDB and Parquet (Task 9.2).
-8. Strictly adhere to rules.md §17.3: zero driver-side collect/toPandas calls.
+8. Publish `risk_indicators` with signal breakdown and run metadata conforming to RISK_INDICATORS_SCHEMA (Task 9.3).
+9. Add validation after publication to confirm counts, grain and required fields of all gold collections (Task 9.4).
+10. Strictly adhere to rules.md §17.3: zero driver-side collect/toPandas calls.
 """
 
 from __future__ import annotations
@@ -24,6 +26,13 @@ from pyspark.sql.window import Window
 
 from acadexa.processing.jobs.feature_table import build_student_semester_features
 from acadexa.processing.mongo import write_mongo_collection
+from acadexa.validation.gold import (
+    GOLD_COLLECTIONS,
+    GOLD_SCHEMAS,
+    GoldCollectionValidationResult,
+    GoldValidationError,
+    validate_gold_collections,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +42,7 @@ class J7Config:
     """Configuration for Spark J7 gold publication job."""
 
     student_features_path: Path = Path("data/processed/student_features")
+    risk_indicators_path: Path = Path("data/processed/risk_indicators")
     mongo_uri: str | None = None
     mongo_database: str | None = None
     write_mode: str = "overwrite"
@@ -43,6 +53,11 @@ class J7Config:
     publish_student_features: bool = True
     publish_course_metrics: bool = True
     publish_school_summary: bool = True
+    publish_risk_indicators: bool = True
+    # Post-publication validation (Task 9.4)
+    validate_after_publication: bool = True
+    fail_on_validation_error: bool = True
+    evaluation_week_start: str | None = "2026-04-20"
 
 
 @dataclass
@@ -52,10 +67,14 @@ class J7Result:
     student_features: DataFrame | None = None
     course_metrics: DataFrame | None = None
     school_summary: DataFrame | None = None
+    risk_indicators: DataFrame | None = None
     student_features_count: int = 0
     course_metrics_count: int = 0
     school_summary_count: int = 0
+    risk_indicators_count: int = 0
     published_collections: list[str] = field(default_factory=list)
+    risk_signal_breakdown: dict[str, Any] = field(default_factory=dict)
+    validation_report: dict[str, GoldCollectionValidationResult] = field(default_factory=dict)
 
 
 def build_course_metrics(feature_table_df: DataFrame) -> DataFrame:
@@ -292,25 +311,119 @@ def publish_school_summary(
     return school_summary_df, total_count
 
 
+def publish_risk_indicators(
+    spark: SparkSession,
+    risk_indicators_df: DataFrame,
+    config: J7Config | None = None,
+) -> tuple[DataFrame, int, dict[str, Any]]:
+    """Publish risk_indicators to MongoDB and Parquet with signal breakdown and run metadata (Task 9.3).
+
+    Grain: student_id x week_start.
+    Schema: RISK_INDICATORS_SCHEMA.
+
+    Args:
+        spark: Active SparkSession.
+        risk_indicators_df: DataFrame containing student risk indicators.
+        config: Optional J7 configuration.
+
+    Returns:
+        tuple[DataFrame, int, dict[str, Any]]: Published DataFrame, row count, and signal breakdown dict.
+    """
+    cfg = config or J7Config()
+    df = risk_indicators_df
+
+    # 1. Ensure run metadata (computed_at timestamp)
+    if "computed_at" not in df.columns:
+        df = df.withColumn("computed_at", F.current_timestamp())
+
+    # 2. Ensure week_start is present per grain
+    if "week_start" not in df.columns:
+        week_val = cfg.evaluation_week_start or "2026-04-20"
+        df = df.withColumn("week_start", F.to_date(F.lit(week_val)))
+
+    # 3. Ensure signal_count is computed
+    if "signal_count" not in df.columns:
+        sig_expr = (
+            F.when(F.col("low_attendance") == True, 1).otherwise(0)
+            + F.when(F.col("lms_decline") == True, 1).otherwise(0)
+            + F.when(F.col("late_submissions") == True, 1).otherwise(0)
+            + F.when(F.col("marks_decline") == True, 1).otherwise(0)
+            + F.when(F.col("low_quiz_activity") == True, 1).otherwise(0)
+        )
+        df = df.withColumn("signal_count", sig_expr.cast("int"))
+
+    # 4. Compute signal breakdown summary in a single distributed Spark aggregation
+    agg_exprs = [
+        F.count("*").alias("total_students"),
+        F.sum(F.when(F.col("signal_count") > 0, 1).otherwise(0)).alias("flagged_students"),
+        F.sum(F.when(F.col("signal_count") >= 3, 1).otherwise(0)).alias("high_risk_students"),
+    ]
+    for i in range(6):
+        agg_exprs.append(
+            F.sum(F.when(F.col("signal_count") == i, 1).otherwise(0)).alias(f"sig_{i}")
+        )
+    for flag in ["low_attendance", "lms_decline", "late_submissions", "marks_decline", "low_quiz_activity"]:
+        agg_exprs.append(
+            F.sum(F.when(F.col(flag) == True, 1).otherwise(0)).alias(f"flag_{flag}")
+        )
+
+    summary_row = df.agg(*agg_exprs).first()
+    total_count = int(summary_row["total_students"] or 0)
+    flagged_count = int(summary_row["flagged_students"] or 0)
+    high_risk_count = int(summary_row["high_risk_students"] or 0)
+    counts_by_signal = {i: int(summary_row[f"sig_{i}"] or 0) for i in range(6)}
+    flag_counts = {
+        flag: int(summary_row[f"flag_{flag}"] or 0)
+        for flag in ["low_attendance", "lms_decline", "late_submissions", "marks_decline", "low_quiz_activity"]
+    }
+    breakdown: dict[str, Any] = {
+        "total_students": total_count,
+        "flagged_students": flagged_count,
+        "high_risk_students": high_risk_count,
+        "signal_count_distribution": counts_by_signal,
+        "flag_counts": flag_counts,
+    }
+
+    # 5. Save to Parquet
+    if cfg.save_parquet:
+        out_path = Path(cfg.parquet_base_path) / "risk_indicators"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        df.write.mode(cfg.write_mode).parquet(str(out_path))
+        logger.info("Saved risk_indicators to Parquet at %s (%d rows)", out_path, total_count)
+
+    # 6. Publish to MongoDB
+    if cfg.publish_to_mongo:
+        write_mongo_collection(
+            df,
+            collection_name="risk_indicators",
+            database=cfg.mongo_database,
+            uri=cfg.mongo_uri,
+            mode=cfg.write_mode,
+        )
+        logger.info("Published %d records to MongoDB collection 'risk_indicators'", total_count)
+
+    return df, total_count, breakdown
+
+
 def run_j7_publish_gold(
     spark: SparkSession,
     config: J7Config | None = None,
+    feature_table_df: DataFrame | None = None,
+    risk_indicators_df: DataFrame | None = None,
 ) -> J7Result:
-    """Execute Spark J7 gold data publication job.
+    """Execute Spark J7 gold data publication job with post-publication validation (Tasks 9.1-9.4).
 
     Args:
         spark: Active SparkSession.
         config: Optional J7 configuration.
+        feature_table_df: Optional pre-loaded feature table DataFrame.
+        risk_indicators_df: Optional pre-computed risk indicators DataFrame.
 
     Returns:
-        J7Result containing published DataFrames, row counts, and target collections.
+        J7Result containing published DataFrames, row counts, breakdown, and validation report.
     """
     cfg = config or J7Config()
     logger.info("Starting J7 Gold Data Publication")
-
-    # Read feature table
-    feat_path = Path(cfg.student_features_path)
-    feature_table_df = spark.read.parquet(str(feat_path))
 
     published: list[str] = []
     sf_df = None
@@ -319,36 +432,91 @@ def run_j7_publish_gold(
     cm_count = 0
     ss_df = None
     ss_count = 0
+    ri_df = None
+    ri_count = 0
+    ri_breakdown: dict[str, Any] = {}
+
+    # Read feature table if any feature-table-derived collection is enabled
+    needs_feat_df = cfg.publish_student_features or cfg.publish_course_metrics or cfg.publish_school_summary
+    ft_df = feature_table_df
+    if needs_feat_df and ft_df is None:
+        feat_path = Path(cfg.student_features_path)
+        ft_df = spark.read.parquet(str(feat_path))
 
     # 1. Publish student_features (Task 9.1)
-    if cfg.publish_student_features:
-        sf_df, sf_count = publish_student_features(spark, feature_table_df, cfg)
+    if cfg.publish_student_features and ft_df is not None:
+        sf_df, sf_count = publish_student_features(spark, ft_df, cfg)
         published.append("student_features")
 
     # 2. Publish course_metrics (Task 9.2)
-    if cfg.publish_course_metrics:
-        cm_df, cm_count = publish_course_metrics(spark, feature_table_df, cfg)
+    if cfg.publish_course_metrics and ft_df is not None:
+        cm_df, cm_count = publish_course_metrics(spark, ft_df, cfg)
         published.append("course_metrics")
 
     # 3. Publish school_summary (Task 9.2)
-    if cfg.publish_school_summary:
-        ss_df, ss_count = publish_school_summary(spark, feature_table_df, cfg)
+    if cfg.publish_school_summary and ft_df is not None:
+        ss_df, ss_count = publish_school_summary(spark, ft_df, cfg)
         published.append("school_summary")
 
+    # 4. Publish risk_indicators (Task 9.3)
+    if cfg.publish_risk_indicators:
+        ri_input = risk_indicators_df
+        if ri_input is None:
+            ri_path = Path(cfg.risk_indicators_path)
+            if ri_path.exists():
+                ri_input = spark.read.parquet(str(ri_path))
+            else:
+                logger.warning(
+                    "Risk indicators path not found (%s) and no risk_indicators_df provided. "
+                    "Skipping risk_indicators publication.",
+                    ri_path,
+                )
+        if ri_input is not None:
+            ri_df, ri_count, ri_breakdown = publish_risk_indicators(spark, ri_input, cfg)
+            published.append("risk_indicators")
+
+    # 5. Post-publication validation (Task 9.4)
+    validation_report: dict[str, GoldCollectionValidationResult] = {}
+    if cfg.validate_after_publication:
+        dfs_to_validate: dict[str, DataFrame] = {}
+        if sf_df is not None:
+            dfs_to_validate["student_features"] = sf_df
+        if cm_df is not None:
+            dfs_to_validate["course_metrics"] = cm_df
+        if ss_df is not None:
+            dfs_to_validate["school_summary"] = ss_df
+        if ri_df is not None:
+            dfs_to_validate["risk_indicators"] = ri_df
+
+        validation_report = validate_gold_collections(
+            dfs=dfs_to_validate,
+            fail_fast=cfg.fail_on_validation_error,
+        )
+        logger.info(
+            "Gold validation complete across %d collections: %s",
+            len(validation_report),
+            [r.summary() for r in validation_report.values()],
+        )
+
     logger.info(
-        "J7 complete. Published collections: %s (student_features: %d, course_metrics: %d, school_summary: %d)",
+        "J7 complete. Published: %s (SF: %d, CM: %d, SS: %d, RI: %d)",
         published,
         sf_count,
         cm_count,
         ss_count,
+        ri_count,
     )
 
     return J7Result(
         student_features=sf_df,
         course_metrics=cm_df,
         school_summary=ss_df,
+        risk_indicators=ri_df,
         student_features_count=sf_count,
         course_metrics_count=cm_count,
         school_summary_count=ss_count,
+        risk_indicators_count=ri_count,
         published_collections=published,
+        risk_signal_breakdown=ri_breakdown,
+        validation_report=validation_report,
     )

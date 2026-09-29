@@ -24,6 +24,15 @@ from acadexa.validation.validators import (
     validate_record,
     validate_records,
 )
+from acadexa.validation.gold import (
+    GOLD_COLLECTIONS,
+    GOLD_SCHEMAS,
+    GoldCollectionValidationResult,
+    GoldValidationError,
+    validate_gold_collections,
+    validate_gold_dataframe,
+    validate_gold_mongodb,
+)
 
 __all__ = [
     "ACADEMIC_RECORDS_SCHEMA",
@@ -33,6 +42,10 @@ __all__ = [
     "COURSES_SCHEMA",
     "COURSE_METRICS_SCHEMA",
     "COURSEWORK_SCHEMA",
+    "GOLD_COLLECTIONS",
+    "GOLD_SCHEMAS",
+    "GoldCollectionValidationResult",
+    "GoldValidationError",
     "LMS_EVENTS_SCHEMA",
     "LMS_EVENT_TYPES",
     "RISK_INDICATORS_SCHEMA",
@@ -44,6 +57,10 @@ __all__ = [
     "STUDENT_ID_PATTERN",
     "STUDENTS_SCHEMA",
     "SchemaError",
+    "validate_gold_collections",
+    "validate_gold_dataframe",
+    "validate_gold_mongodb",
     "validate_record",
     "validate_records",
 ]
+

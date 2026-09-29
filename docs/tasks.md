@@ -335,10 +335,10 @@ Create the serving layer and one reproducible pipeline command.
 - [x] 9.2 — Implement J7 publication of `course_metrics` and `school_summary`.
   Commit: `Update - 9.2 - publish course and school metrics`
 
-- [ ] 9.3 — Implement publication of `risk_indicators` with signal breakdown and run metadata.
+- [x] 9.3 — Implement publication of `risk_indicators` with signal breakdown and run metadata.
   Commit: `Update - 9.3 - publish risk indicators`
 
-- [ ] 9.4 — Add validation after publication to confirm counts, grain and required fields of all gold collections.
+- [x] 9.4 — Add validation after publication to confirm counts, grain and required fields of all gold collections.
   Commit: `Update - 9.4 - validate gold collections`
 
 - [ ] 9.5 — Implement `scripts/run_pipeline.py` to execute the development Spark pipeline in the documented order: J1 → J2 → J3 → J4/J5/J6 → J7.
