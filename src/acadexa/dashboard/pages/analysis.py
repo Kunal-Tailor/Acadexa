@@ -298,17 +298,45 @@ def fetch_analysis_data(
     )
 
 
-def _correlation_section(correlations: tuple[CorrelationResult, ...]) -> None:
-    """Render the ranked association table with interpretations."""
-    rows = [
+def correlation_table_rows(
+    correlations: tuple[CorrelationResult, ...],
+) -> list[dict[str, Any]]:
+    """Ranked association table rows with uniformly string coefficients.
+
+    Coefficients render as fixed-precision strings (missing as "—") so the
+    column stays Arrow-safe instead of mixing floats and strings.
+    """
+    return [
         {
             "Relationship": c.name,
-            "Spearman ρ": c.spearman_rho if c.spearman_rho is not None else "—",
+            "Spearman ρ": f"{c.spearman_rho:.3f}" if c.spearman_rho is not None else "—",
             "Sample": c.sample_size,
             "Interpretation": c.interpretation,
         }
         for c in correlations
     ]
+
+
+def recovery_table_rows(
+    entries: tuple[dict[str, Any], ...],
+) -> list[dict[str, Any]]:
+    """Recovery comparison table rows with uniformly string coefficients."""
+    return [
+        {
+            "Relationship": e["relationship_id"],
+            "Expected": e["expected_direction"],
+            "Observed ρ": f"{e['observed_corr']:.3f}"
+            if e["observed_corr"] is not None
+            else "—",
+            "Status": e["status"],
+        }
+        for e in entries
+    ]
+
+
+def _correlation_section(correlations: tuple[CorrelationResult, ...]) -> None:
+    """Render the ranked association table with interpretations."""
+    rows = correlation_table_rows(correlations)
     if not rows or all(c.spearman_rho is None for c in correlations):
         components.empty_state("No correlation data is available for this selection.")
         return
@@ -390,17 +418,7 @@ def _recovery_section(
         return
 
     def _body() -> None:
-        st.dataframe(
-            [
-                {
-                    "Relationship": e["relationship_id"],
-                    "Expected": e["expected_direction"],
-                    "Observed ρ": e["observed_corr"] if e["observed_corr"] is not None else "—",
-                    "Status": e["status"],
-                }
-                for e in entries
-            ]
-        )
+        st.dataframe(recovery_table_rows(entries))
         st.caption(
             f"Recovered {summary.get('recovered', 0)} of {summary.get('planted', 0)} "
             f"planted associations · decoy clean: {summary.get('decoy_clean', 0)} · "

@@ -443,7 +443,7 @@ Build each analytical view as one reviewable page-level task.
 - [x] 12.7 — Add the synthetic-data disclosure and non-causal/risk methodology notices to the appropriate dashboard locations.
   Commit: `Update - 12.7 - add analytical disclosure and methodology notices`
 
-- [ ] 12.8 — Perform one cross-dashboard usability/accessibility/error-state pass without adding new features.
+- [x] 12.8 — Perform one cross-dashboard usability/accessibility/error-state pass without adding new features.
   Commit: `Update - 12.8 - dashboard usability and accessibility pass`
 
 **Checkpoint:** The MVP dashboard operates on real generated/gold data and supports the documented roles and hierarchy.
