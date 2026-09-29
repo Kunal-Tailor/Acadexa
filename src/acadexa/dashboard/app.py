@@ -1,20 +1,21 @@
-"""Acadexa Streamlit application entry point (Task 11.1).
+"""Acadexa Streamlit application entry point (Tasks 11.1, 11.4).
 
 Run with::
 
     streamlit run src/acadexa/dashboard/app.py
 
-Shows the dummy login screen when logged out and a basic authenticated
-shell (sidebar identity + scope, serving-layer status, logout) when logged
-in. All permission decisions go through :mod:`acadexa.dashboard.permissions`;
-analytical pages arrive in later tasks (11.4+).
+Shows the dummy login screen when logged out and the shared-layout
+authenticated shell (sidebar navigation, page header, breadcrumbs, global
+filters, serving-layer status, logout) when logged in. All permission
+decisions go through :mod:`acadexa.dashboard.permissions`; analytical page
+content arrives in Phase 12.
 """
 
 from __future__ import annotations
 
 import streamlit as st
 
-from acadexa.dashboard import auth, permissions, session
+from acadexa.dashboard import auth, components, layout, permissions, session
 from acadexa.dashboard.auth import AuthConfigError, User
 from acadexa.dashboard.config import DashboardConfig
 from acadexa.dashboard.data_access import DashboardDataAccess
@@ -53,37 +54,42 @@ def render_login(users: dict[str, User]) -> None:
             st.rerun()
 
 
-def render_shell(user: User, data: DashboardDataAccess, config: DashboardConfig) -> None:
-    """Render the basic authenticated shell: identity, scope, data status."""
+def render_shell(user: User, data: DashboardDataAccess) -> None:
+    """Render the shared-layout shell: nav, header, filters, data status."""
     scope = permissions.resolve_scope(user)
-
+    page_key = layout.render_sidebar_nav(user)
     with st.sidebar:
-        st.markdown(f"**{user.display_name}**")
-        st.caption(user.role)
-        st.caption(permissions.describe_scope(scope))
         if st.button("Log out", key="acadexa_logout_button"):
             session.logout(st.session_state)
             st.rerun()
 
-    st.title(config.app_title)
-    st.caption(f"{config.app_subtitle} · signed in as {user.display_name} ({user.role})")
+    page_title = layout.nav_title(page_key)
+    context = layout.academic_context_label(layout.read_filter_selections(scope))
+    layout.render_header(page_title, user, context)
+    layout.render_breadcrumbs(layout.build_breadcrumbs(page_title, scope))
+    layout.render_global_filters(scope)
+
     st.subheader("Serving-layer status")
     status = data.gold_status()
     failures = {name: info["error"] for name, info in status.items() if info["error"]}
     if failures:
-        st.warning(
+        components.status_badge(
+            "warning",
             "Dashboard data is unavailable — showing a controlled error state. "
-            "No fallback values are displayed."
+            "No fallback values are displayed.",
         )
         for name, error in failures.items():
             st.caption(f"{name}: {error}")
     else:
-        st.success("Gold collections reachable.")
+        components.status_badge("ok", "Gold collections reachable.")
         for name, info in status.items():
             st.caption(f"{name}: {info['count']} documents")
 
-    st.subheader("Pages")
-    st.caption("Analytical pages arrive in later tasks (11.4 and Phase 12).")
+    if page_key != "overview":
+        components.empty_state(
+            f"{page_title} analytics arrive in Phase 12 "
+            f"(current scope: {permissions.describe_scope(scope)})."
+        )
 
 
 def main() -> None:
@@ -103,7 +109,7 @@ def main() -> None:
 
     data = DashboardDataAccess(config)
     try:
-        render_shell(user, data, config)
+        render_shell(user, data)
     finally:
         data.close()
 

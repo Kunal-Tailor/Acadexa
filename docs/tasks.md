@@ -408,10 +408,10 @@ Build the dashboard against real gold/serving data, not permanent mock values.
 - [x] 11.3 — Implement centralized role/scope resolution so dashboard pages do not duplicate permission logic.
   Commit: `Update - 11.3 - implement role and scope control`
 
-- [ ] 11.4 — Implement shared dashboard layout, navigation, page header, breadcrumbs and global academic filters.
+- [x] 11.4 — Implement shared dashboard layout, navigation, page header, breadcrumbs and global academic filters.
   Commit: `Update - 11.4 - implement shared dashboard layout`
 
-- [ ] 11.5 — Implement reusable KPI, analytical-card, status and risk-signal UI components following `docs/design.md`.
+- [x] 11.5 — Implement reusable KPI, analytical-card, status and risk-signal UI components following `docs/design.md`.
   Commit: `Update - 11.5 - implement shared dashboard components`
 
 ---

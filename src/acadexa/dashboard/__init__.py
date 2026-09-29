@@ -5,6 +5,22 @@ role/scope resolution and bounded MongoDB serving reads. Heavy analytics
 stay in PySpark; Streamlit consumes prepared gold/serving data.
 """
 
-from acadexa.dashboard import auth, config, data_access, permissions, session
+from acadexa.dashboard import (
+    auth,
+    components,
+    config,
+    data_access,
+    layout,
+    permissions,
+    session,
+)
 
-__all__ = ["auth", "config", "data_access", "permissions", "session"]
+__all__ = [
+    "auth",
+    "components",
+    "config",
+    "data_access",
+    "layout",
+    "permissions",
+    "session",
+]
