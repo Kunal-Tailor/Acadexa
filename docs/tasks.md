@@ -360,7 +360,7 @@ Create the serving layer and one reproducible pipeline command.
 
 Prove the complete architecture before building the polished dashboard or generating the full dataset.
 
-- [ ] 10.1 — Add end-to-end integration test covering generation → Parquet/MongoDB → Spark → gold collections using a small fixture/development dataset.
+- [x] 10.1 — Add end-to-end integration test covering generation → Parquet/MongoDB → Spark → gold collections using a small fixture/development dataset.
   Commit: `Update - 10.1 - add end-to-end MVP pipeline test`
 
 - [ ] 10.2 — Implement ground-truth recovery comparison for planted relationships and the decoy relationship.
