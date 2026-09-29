@@ -372,7 +372,7 @@ Prove the complete architecture before building the polished dashboard or genera
 - [x] 10.4 — Validate reproducibility by running the same development configuration/seed twice and comparing deterministic outputs/manifest characteristics.
   Commit: `Update - 10.4 - verify generator reproducibility`
 
-- [ ] 10.5 — Run a local resource/performance smoke test and document actual development-scale runtime and memory observations. Do not optimize prematurely.
+- [x] 10.5 — Run a local resource/performance smoke test and document actual development-scale runtime and memory observations. Do not optimize prematurely.
   Commit: `Update - 10.5 - record MVP resource baseline`
 
 **MVP CHECKPOINT:** Stop here and review the complete vertical slice.
