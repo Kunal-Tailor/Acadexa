@@ -1,0 +1,216 @@
+{
+  "manifest_version": "1.0.0",
+  "job_name": "J1_clean_and_validate",
+  "generated_at": "2026-09-29T05:30:06.578208+00:00",
+  "validation_status": "PASSED",
+  "total_injected": 7824,
+  "total_detected": 4577,
+  "total_corrected": 2136,
+  "total_dropped": 2441,
+  "total_remaining": 0,
+  "summary": {
+    "duplicate_lms_events": {
+      "injected": 2254,
+      "detected": 2193,
+      "corrected": 0,
+      "dropped": 2193,
+      "remaining": 0
+    },
+    "nulls_non_key": {
+      "injected": 1700,
+      "detected": 768,
+      "corrected": 768,
+      "dropped": 0,
+      "remaining": 0
+    },
+    "timestamp_inconsistencies": {
+      "injected": 2349,
+      "detected": 95,
+      "corrected": 95,
+      "dropped": 0,
+      "remaining": 0
+    },
+    "course_id_formatting": {
+      "injected": 1249,
+      "detected": 1249,
+      "corrected": 1249,
+      "dropped": 0,
+      "remaining": 0
+    },
+    "orphan_records": {
+      "injected": 248,
+      "detected": 248,
+      "corrected": 0,
+      "dropped": 248,
+      "remaining": 0
+    },
+    "out_of_range_values": {
+      "injected": 24,
+      "detected": 24,
+      "corrected": 24,
+      "dropped": 0,
+      "remaining": 0
+    }
+  },
+  "datasets": {
+    "students": {
+      "dataset_name": "students",
+      "input_rows": 36,
+      "output_rows": 36,
+      "issues": {}
+    },
+    "courses": {
+      "dataset_name": "courses",
+      "input_rows": 72,
+      "output_rows": 72,
+      "issues": {}
+    },
+    "attendance": {
+      "dataset_name": "attendance",
+      "input_rows": 13824,
+      "output_rows": 13811,
+      "issues": {
+        "course_id_formatting": {
+          "injected": 69,
+          "detected": 69,
+          "corrected": 69,
+          "dropped": 0,
+          "remaining": 0
+        },
+        "orphan_records": {
+          "injected": 13,
+          "detected": 13,
+          "corrected": 0,
+          "dropped": 13,
+          "remaining": 0
+        },
+        "out_of_range_values": {
+          "injected": 13,
+          "detected": 13,
+          "corrected": 13,
+          "dropped": 0,
+          "remaining": 0
+        }
+      }
+    },
+    "academic_records": {
+      "dataset_name": "academic_records",
+      "input_rows": 864,
+      "output_rows": 863,
+      "issues": {
+        "course_id_formatting": {
+          "injected": 4,
+          "detected": 4,
+          "corrected": 4,
+          "dropped": 0,
+          "remaining": 0
+        },
+        "orphan_records": {
+          "injected": 1,
+          "detected": 1,
+          "corrected": 0,
+          "dropped": 1,
+          "remaining": 0
+        },
+        "out_of_range_values": {
+          "injected": 1,
+          "detected": 1,
+          "corrected": 1,
+          "dropped": 0,
+          "remaining": 0
+        },
+        "nulls_non_key": {
+          "injected": 12,
+          "detected": 12,
+          "corrected": 12,
+          "dropped": 0,
+          "remaining": 0
+        }
+      }
+    },
+    "coursework": {
+      "dataset_name": "coursework",
+      "input_rows": 9964,
+      "output_rows": 9955,
+      "issues": {
+        "course_id_formatting": {
+          "injected": 49,
+          "detected": 49,
+          "corrected": 49,
+          "dropped": 0,
+          "remaining": 0
+        },
+        "orphan_records": {
+          "injected": 9,
+          "detected": 9,
+          "corrected": 0,
+          "dropped": 9,
+          "remaining": 0
+        },
+        "out_of_range_values": {
+          "injected": 9,
+          "detected": 9,
+          "corrected": 9,
+          "dropped": 0,
+          "remaining": 0
+        },
+        "timestamp_inconsistencies": {
+          "injected": 95,
+          "detected": 95,
+          "corrected": 95,
+          "dropped": 0,
+          "remaining": 0
+        },
+        "nulls_non_key": {
+          "injected": 143,
+          "detected": 143,
+          "corrected": 143,
+          "dropped": 0,
+          "remaining": 0
+        }
+      }
+    },
+    "lms_events": {
+      "dataset_name": "lms_events",
+      "input_rows": 227662,
+      "output_rows": 225244,
+      "issues": {
+        "duplicate_lms_events": {
+          "injected": 2254,
+          "detected": 2193,
+          "corrected": 0,
+          "dropped": 2193,
+          "remaining": 0
+        },
+        "course_id_formatting": {
+          "injected": 1127,
+          "detected": 1127,
+          "corrected": 1127,
+          "dropped": 0,
+          "remaining": 0
+        },
+        "orphan_records": {
+          "injected": 225,
+          "detected": 225,
+          "corrected": 0,
+          "dropped": 225,
+          "remaining": 0
+        },
+        "out_of_range_values": {
+          "injected": 1,
+          "detected": 1,
+          "corrected": 1,
+          "dropped": 0,
+          "remaining": 0
+        },
+        "nulls_non_key": {
+          "injected": 1545,
+          "detected": 613,
+          "corrected": 613,
+          "dropped": 0,
+          "remaining": 0
+        }
+      }
+    }
+  }
+}

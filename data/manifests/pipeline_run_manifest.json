@@ -1,0 +1,253 @@
+{
+  "manifest_version": "1.0.0",
+  "pipeline_name": "acadexa_spark_pipeline",
+  "run_id": "run_20260929_052950_7a3bbe",
+  "status": "SUCCESS",
+  "seed": 42,
+  "start_time": "2026-09-29T05:29:50.050103+00:00",
+  "end_time": "2026-09-29T05:30:36.524214+00:00",
+  "duration_sec": 46.474,
+  "configuration": {
+    "data_dir": "data",
+    "raw_data_dir": "data\\generated",
+    "cleaned_data_dir": "data\\cleaned",
+    "processed_data_dir": "data\\processed",
+    "gold_data_dir": "data\\gold",
+    "stages": [
+      "J1",
+      "J2",
+      "J3",
+      "J4",
+      "J5",
+      "J6",
+      "J7"
+    ],
+    "publish_to_mongo": true,
+    "save_parquet": true,
+    "validate_gold": true
+  },
+  "stage_outcomes": {
+    "J1": {
+      "stage_id": "J1",
+      "stage_name": "Clean and Validate",
+      "status": "SUCCESS",
+      "start_time": "2026-09-29T05:29:54.095827+00:00",
+      "end_time": "2026-09-29T05:30:10.174004+00:00",
+      "duration_sec": 16.078,
+      "output_counts": {
+        "students": 36,
+        "courses": 72,
+        "attendance": 13811,
+        "academic_records": 863,
+        "coursework": 9955,
+        "lms_events": 225244
+      },
+      "error_message": null,
+      "details": {
+        "cleaned_datasets": [
+          "students",
+          "courses",
+          "attendance",
+          "academic_records",
+          "coursework",
+          "lms_events"
+        ],
+        "total_cleaned_records": 249981
+      }
+    },
+    "J2": {
+      "stage_id": "J2",
+      "stage_name": "Event Aggregation",
+      "status": "SUCCESS",
+      "start_time": "2026-09-29T05:30:10.174004+00:00",
+      "end_time": "2026-09-29T05:30:12.304243+00:00",
+      "duration_sec": 2.13,
+      "output_counts": {
+        "lms_weekly_engagement": 13823
+      },
+      "error_message": null,
+      "details": {
+        "total_input_events": 225244,
+        "total_output_rows": 13823
+      }
+    },
+    "J3": {
+      "stage_id": "J3",
+      "stage_name": "Feature Table",
+      "status": "SUCCESS",
+      "start_time": "2026-09-29T05:30:12.304243+00:00",
+      "end_time": "2026-09-29T05:30:15.641903+00:00",
+      "duration_sec": 3.338,
+      "output_counts": {
+        "student_course_features": 864
+      },
+      "error_message": null,
+      "details": {
+        "total_students": 36,
+        "total_features_rows": 864
+      }
+    },
+    "J4": {
+      "stage_id": "J4",
+      "stage_name": "Correlation Analytics",
+      "status": "SUCCESS",
+      "start_time": "2026-09-29T05:30:15.641903+00:00",
+      "end_time": "2026-09-29T05:30:23.660223+00:00",
+      "duration_sec": 8.018,
+      "output_counts": {
+        "correlations_evaluated": 5
+      },
+      "error_message": null,
+      "details": {
+        "total_relationships_evaluated": 5
+      }
+    },
+    "J5": {
+      "stage_id": "J5",
+      "stage_name": "Trend Detection",
+      "status": "SUCCESS",
+      "start_time": "2026-09-29T05:30:23.660223+00:00",
+      "end_time": "2026-09-29T05:30:25.718738+00:00",
+      "duration_sec": 2.059,
+      "output_counts": {
+        "trend_indicators": 864
+      },
+      "error_message": null,
+      "details": {
+        "total_rows": 864,
+        "lms_decline_count": 13,
+        "marks_decline_count": 170
+      }
+    },
+    "J6": {
+      "stage_id": "J6",
+      "stage_name": "Risk Signals",
+      "status": "SUCCESS",
+      "start_time": "2026-09-29T05:30:25.718738+00:00",
+      "end_time": "2026-09-29T05:30:27.847427+00:00",
+      "duration_sec": 2.128,
+      "output_counts": {
+        "risk_indicators": 36
+      },
+      "error_message": null,
+      "details": {
+        "total_students": 36,
+        "flagged_students": 36,
+        "high_risk_students": 31,
+        "signal_counts_breakdown": {
+          "0": 0,
+          "1": 0,
+          "2": 5,
+          "3": 13,
+          "4": 15,
+          "5": 3
+        }
+      }
+    },
+    "J7": {
+      "stage_id": "J7",
+      "stage_name": "Publish Gold Data",
+      "status": "SUCCESS",
+      "start_time": "2026-09-29T05:30:27.847427+00:00",
+      "end_time": "2026-09-29T05:30:36.524214+00:00",
+      "duration_sec": 8.677,
+      "output_counts": {
+        "gold_student_features": 144,
+        "gold_course_metrics": 279,
+        "gold_school_summary": 15,
+        "gold_risk_indicators": 36
+      },
+      "error_message": null,
+      "details": {
+        "published_collections": [
+          "student_features",
+          "course_metrics",
+          "school_summary",
+          "risk_indicators"
+        ],
+        "risk_signal_breakdown": {
+          "total_students": 36,
+          "flagged_students": 36,
+          "high_risk_students": 31,
+          "signal_count_distribution": {
+            "0": 0,
+            "1": 0,
+            "2": 5,
+            "3": 13,
+            "4": 15,
+            "5": 3
+          },
+          "flag_counts": {
+            "low_attendance": 17,
+            "lms_decline": 9,
+            "late_submissions": 26,
+            "marks_decline": 36,
+            "low_quiz_activity": 36
+          }
+        },
+        "validation_report": {
+          "student_features": {
+            "is_valid": true,
+            "row_count": 144,
+            "grain_unique": true
+          },
+          "course_metrics": {
+            "is_valid": true,
+            "row_count": 279,
+            "grain_unique": true
+          },
+          "school_summary": {
+            "is_valid": true,
+            "row_count": 15,
+            "grain_unique": true
+          },
+          "risk_indicators": {
+            "is_valid": true,
+            "row_count": 36,
+            "grain_unique": true
+          }
+        }
+      }
+    }
+  },
+  "output_counts": {
+    "students": 36,
+    "courses": 72,
+    "attendance": 13811,
+    "academic_records": 863,
+    "coursework": 9955,
+    "lms_events": 225244,
+    "lms_weekly_engagement": 13823,
+    "student_course_features": 864,
+    "correlations_evaluated": 5,
+    "trend_indicators": 864,
+    "risk_indicators": 36,
+    "gold_student_features": 144,
+    "gold_course_metrics": 279,
+    "gold_school_summary": 15,
+    "gold_risk_indicators": 36
+  },
+  "gold_validation_summary": {
+    "student_features": {
+      "is_valid": true,
+      "row_count": 144,
+      "grain_unique": true
+    },
+    "course_metrics": {
+      "is_valid": true,
+      "row_count": 279,
+      "grain_unique": true
+    },
+    "school_summary": {
+      "is_valid": true,
+      "row_count": 15,
+      "grain_unique": true
+    },
+    "risk_indicators": {
+      "is_valid": true,
+      "row_count": 36,
+      "grain_unique": true
+    }
+  },
+  "error": null
+}

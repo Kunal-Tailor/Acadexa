@@ -341,10 +341,10 @@ Create the serving layer and one reproducible pipeline command.
 - [x] 9.4 — Add validation after publication to confirm counts, grain and required fields of all gold collections.
   Commit: `Update - 9.4 - validate gold collections`
 
-- [ ] 9.5 — Implement `scripts/run_pipeline.py` to execute the development Spark pipeline in the documented order: J1 → J2 → J3 → J4/J5/J6 → J7.
+- [x] 9.5 — Implement `scripts/run_pipeline.py` to execute the development Spark pipeline in the documented order: J1 → J2 → J3 → J4/J5/J6 → J7.
   Commit: `Update - 9.5 - wire end-to-end Spark pipeline`
 
-- [ ] 9.6 — Implement pipeline run metadata/logging so each run records configuration/seed, start/end status, stage outcomes and output counts.
+- [x] 9.6 — Implement pipeline run metadata/logging so each run records configuration/seed, start/end status, stage outcomes and output counts.
   Commit: `Update - 9.6 - add pipeline run metadata`
 
 **Checkpoint:** The project can run from generated development data through gold MongoDB collections using one documented pipeline command.

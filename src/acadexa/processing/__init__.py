@@ -101,6 +101,14 @@ from acadexa.processing.jobs import (
     run_j6_risk_signals,
     run_j7_publish_gold,
 )
+from acadexa.processing.pipeline import (
+    ALL_STAGES,
+    PipelineConfig,
+    PipelineResult,
+    PipelineRunMetadata,
+    StageOutcome,
+    run_pipeline,
+)
 
 __all__ = [
     # Spark session lifecycle
@@ -179,4 +187,11 @@ __all__ = [
     "publish_school_summary",
     "publish_student_features",
     "run_j7_publish_gold",
+    # Pipeline Orchestration
+    "ALL_STAGES",
+    "PipelineConfig",
+    "PipelineResult",
+    "PipelineRunMetadata",
+    "StageOutcome",
+    "run_pipeline",
 ]

@@ -265,8 +265,17 @@ def get_or_create_spark_session(config: SparkRuntimeConfig | None = None) -> Any
     if resolved_config.packages:
         builder = builder.config("spark.jars.packages", ",".join(resolved_config.packages))
 
-    if resolved_config.jars:
-        builder = builder.config("spark.jars", ",".join(resolved_config.jars))
+    jars_to_load = list(resolved_config.jars)
+    if not jars_to_load:
+        try:
+            from acadexa.processing.mongo import find_cached_mongo_jars
+
+            jars_to_load = find_cached_mongo_jars()
+        except Exception:
+            pass
+
+    if jars_to_load:
+        builder = builder.config("spark.jars", ",".join(jars_to_load))
 
     for key, value in resolved_config.extra_configs.items():
         builder = builder.config(key, value)
