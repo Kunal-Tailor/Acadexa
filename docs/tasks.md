@@ -363,7 +363,7 @@ Prove the complete architecture before building the polished dashboard or genera
 - [x] 10.1 — Add end-to-end integration test covering generation → Parquet/MongoDB → Spark → gold collections using a small fixture/development dataset.
   Commit: `Update - 10.1 - add end-to-end MVP pipeline test`
 
-- [ ] 10.2 — Implement ground-truth recovery comparison for planted relationships and the decoy relationship.
+- [x] 10.2 — Implement ground-truth recovery comparison for planted relationships and the decoy relationship.
   Commit: `Update - 10.2 - implement ground truth recovery test`
 
 - [ ] 10.3 — Validate that risk-rule boundary cases behave correctly, including 75% attendance, 50% LMS comparison, 30% late submissions and 10-point marks decline boundaries.

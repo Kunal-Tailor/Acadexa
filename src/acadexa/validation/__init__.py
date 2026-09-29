@@ -33,6 +33,18 @@ from acadexa.validation.gold import (
     validate_gold_dataframe,
     validate_gold_mongodb,
 )
+from acadexa.validation.recovery import (
+    DECOY_NULL_THRESHOLD,
+    DEFAULT_RECOVERY_REPORT_PATH,
+    RECOVERY_NEGATIVE_THRESHOLD,
+    RECOVERY_POSITIVE_THRESHOLD,
+    RecoveryEntry,
+    RecoveryReport,
+    classify_recovery,
+    compare_ground_truth_recovery,
+    evaluate_recovery_from_paths,
+    select_primary_observation,
+)
 
 __all__ = [
     "ACADEMIC_RECORDS_SCHEMA",
@@ -57,6 +69,16 @@ __all__ = [
     "STUDENT_ID_PATTERN",
     "STUDENTS_SCHEMA",
     "SchemaError",
+    "DECOY_NULL_THRESHOLD",
+    "DEFAULT_RECOVERY_REPORT_PATH",
+    "RECOVERY_NEGATIVE_THRESHOLD",
+    "RECOVERY_POSITIVE_THRESHOLD",
+    "RecoveryEntry",
+    "RecoveryReport",
+    "classify_recovery",
+    "compare_ground_truth_recovery",
+    "evaluate_recovery_from_paths",
+    "select_primary_observation",
     "validate_gold_collections",
     "validate_gold_dataframe",
     "validate_gold_mongodb",
