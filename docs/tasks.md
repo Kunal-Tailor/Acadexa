@@ -347,6 +347,9 @@ Create the serving layer and one reproducible pipeline command.
 - [x] 9.6 — Implement pipeline run metadata/logging so each run records configuration/seed, start/end status, stage outcomes and output counts.
   Commit: `Update - 9.6 - add pipeline run metadata`
 
+- [x] 9.7 — Update IDE context documentation for Phases 8 and 9.
+  Commit: `Update - 9.7 - IDE_Context data addition`
+
 **Checkpoint:** The project can run from generated development data through gold MongoDB collections using one documented pipeline command.
 
 ---

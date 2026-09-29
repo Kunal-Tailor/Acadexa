@@ -1,17 +1,17 @@
-# IDE Context — Acadexa Full Session Record (Task 0.1 → 7.7)
+# IDE Context — Acadexa Full Session Record (Task 0.1 → 9.7)
 
 **Document:** `docs/IDE_Context.md`  
 **Purpose:** Complete, self-contained, authoritative working memory and architectural context for any human developer or IDE agent resuming this codebase.  
-**Created by:** Task 4.9 (`Update - 4.9 - add IDE context documentation`), updated by Task 7.7 (`Update - 7.7 - add IDE context documentation for Phases 5 to 7`).  
-**Snapshot date:** 2026-09-26  
+**Created by:** Task 4.9 (`Update - 4.9 - add IDE context documentation`), updated by Task 7.7, and comprehensively expanded by Task 9.7 (`Update - 9.7 - IDE_Context data addition`) at Phase 9 Checkpoint.  
+**Snapshot date:** 2026-09-29  
 **Repository:** `D:\College\Secondary\Projects\acadexa`, branch `main`  
-**State at snapshot:** Tasks 0.1 → 7.6 fully committed across 46 commits; test suite **384 passed**; Task 7.7 = this file update and Phase 7 checkpoint.
+**State at snapshot:** Tasks 0.1 → 9.7 fully implemented; full test suite **438+ passed**; Phase 9 completed; ready for Phase 10 (MVP Validation Gate).
 
 > **How to use this file:**
 > Read Sections 1–4 before touching any code — they define the immutable non-negotiables, environment constraints, and working protocols.
 > Section 5 contains the complete, deep execution history (what happened, design decisions taken, why they were taken, what broke, what worked, and exact document alignments).
 > Sections 6–8 describe the current end-to-end architecture, calibration numbers, data volumes, quality metrics, and test suite breakdown.
-> Sections 9–11 cover what is working, deliberate deferrals, session failure modes and gotchas, and the exhaustive step-by-step roadmap for Phase 8.
+> Sections 9–11 cover what is working, deliberate deferrals, session failure modes and gotchas, and the exhaustive step-by-step roadmap for Phase 10.
 
 ---
 
@@ -19,7 +19,7 @@
 
 **Acadexa** = synthetic-data-only Big Data learning-analytics platform for fictional **RAS University** (6 schools, 18 departments, 40 programs, 250 courses, 12,000 target students, 2 academic years / 4 semesters, ~70M target LMS events). Final-year Big Data Technologies academic project.
 
-Pipeline Architecture:
+### Pipeline Architecture
 ```text
 Synthetic Generator (Python/NumPy)
        │
@@ -31,14 +31,26 @@ Synthetic Generator (Python/NumPy)
        │                    │
        │                    ├──► Clean Parquet (data/processed/)
        │                    │         │
-       │                    │         └──► PySpark (J2 Weekly LMS Aggregation)
+       │                    │         ├──► PySpark (J2 Weekly LMS Aggregation)
+       │                    │         │         │
+       │                    │         │         └──► Parquet (data/processed/lms_weekly_engagement/)
+       │                    │         │
+       │                    │         └──► PySpark (J3 Unified Feature Table)
        │                    │                   │
-       │                    │                   └──► Parquet (data/processed/lms_weekly_engagement/)
-       │                    ▼
-       │               [Phase 8: J3 Integrated Features, J4 Analytics, J5 Risk Signals]
+       │                    │                   ├──► Parquet (data/processed/student_course_features/)
+       │                    │                   │
+       │                    │                   ├──► PySpark (J4 Correlation Analytics & Simpson's Paradox)
+       │                    │                   ├──► PySpark (J5 Temporal Trend Detection)
+       │                    │                   └──► PySpark (J6 Five-Rule Risk Signals & Explanations)
+       │                    │                             │
+       │                    ▼                             ▼
+       │               PySpark (J7 Gold Layer Publisher & Validator)
        │                    │
        ▼                    ▼
-   MongoDB Gold Layer (Phase 9) ──► Streamlit Interactive Analytics Dashboard (Phases 11-12)
+   MongoDB Gold Layer (acadexa.student_features, course_metrics, school_summary, risk_indicators)
+       │
+       ▼
+   Streamlit Interactive Analytics Dashboard (Phases 11-12)
 ```
 
 ### Immutable Hard Rules
@@ -51,7 +63,7 @@ Synthetic Generator (Python/NumPy)
 5. **Deterministic reproducibility:** same seed + same config ⇒ byte-identical output (rules.md §8.2). All randomness flows through SHA-derived deterministic sub-streams via `GeneratorRun.child_rng("<name>")`.
 6. **Configuration-driven architecture:** zero hard-coded behavioral values; all parameters live in `config/**/*.toml`. Validation exists at two layers: `ConfigurationError` (config loading, `src/acadexa/config/validation.py`) and `GeneratorError` (runtime fail-fast).
 7. **No ML predictive modeling, no streaming/Kafka, no causal claims** ("associated with", never "causes"). Risk detection = exactly the five approved rule-based signals (rules.md §1.2).
-8. **Correlation method:** Spearman rank correlation is the primary non-linear monotonic metric; Pearson is optional (deferred to task 8.5).
+8. **Correlation method:** Spearman rank correlation is the primary non-linear monotonic metric; Pearson is optional and secondary.
 9. **LMS storage split:** full raw LMS events stay in Parquet; only a defined serving slice is loaded into MongoDB (rules.md §24, architecture.md). Never attempt to load 70M events into MongoDB.
 10. **PySpark driver safety:** absolutely NO large `.collect()`, `.toPandas()`, or `.toArray()` calls on DataFrames (rules.md §17.3, §17.5). PySpark computations must execute distributedly via DataFrame transformations.
 
@@ -66,17 +78,19 @@ Synthetic Generator (Python/NumPy)
 |---|---|
 | OS / Shell | Windows 11 (`win32`), PowerShell 5.1 |
 | Python | 3.11.9 (`C:\Program Files\Python311\python.exe`) |
-| PySpark | 3.5.x / 4.x runtime, configured for `local[*]` with Winutils dummy fallback |
+| PySpark | 3.5.x / 4.x runtime, configured for `local[2]` or `local[*]` with Winutils dummy fallback |
 | MongoDB | Local / Docker MongoDB instance running at `localhost:27017` (`acadexa` database) |
 | PyTest | 8.3.5, configured via `pytest.ini` |
-| Test suite status | **384 passed**, 1 warning (Pandas 3.0 future warning from PySpark) in ~6.5 minutes |
+| Test suite status | **438+ passed**, verified clean across all unit test modules |
 | Test execution | `$env:PYTHONPATH='d:\College\Secondary\Projects\acadexa\src'; python -m pytest tests/unit -q` |
+| Pipeline execution | `python scripts/run_pipeline.py` (executes J1 → J2 → J3 → J4/J5/J6 → J7 in ~46s on dev data) |
 | Dependencies | Managed in `requirements.txt` (minimal, strictly vetted) |
 
 ### PowerShell & Environment Gotchas
 - **Nested Quotes in PowerShell:** Nested double/single quotes in PowerShell commands frequently fail parsing. Use `.py` scripts or pass simple strings.
 - **Python Path:** `PYTHONPATH` must be explicitly set (`$env:PYTHONPATH="src"`) when invoking Python commands or pytest from the root folder.
 - **Hadoop Home on Windows:** On Windows, PySpark requires a dummy `HADOOP_HOME` or `winutils.exe` fallback to prevent initialization crashes. Handled automatically in `src/acadexa/processing/spark_session.py`.
+- **PySpark JVM Singleton Classloader:** PySpark boots a single Py4J JVM per Python process. If the JVM initializes without the MongoDB connector JAR on the classpath, subsequent sessions cannot dynamically attach it. Handled automatically in `get_or_create_spark_session()` by injecting cached Ivy JARs on session builder creation.
 - **PySpark Session Scoping:** In pytest, module-scoped Spark session fixtures must call `yield spark` and terminate with `stop_spark_session(spark)` in a `finally` block to prevent JVM context collisions across test suites.
 
 ---
@@ -86,7 +100,7 @@ Synthetic Generator (Python/NumPy)
 | File | Primary Governance & Context |
 |---|---|
 | `prd.md` | Core product requirements, scope boundaries, dataset targets, risk signals, and deliverables. |
-| `architecture.md` | System data flow, storage split (MongoDB vs Parquet), PySpark jobs (J1–J8), and serving architecture. |
+| `architecture.md` | System data flow, storage split (MongoDB vs Parquet), PySpark jobs (J1–J7), and serving architecture. |
 | `tech_stack.md` | Rationales for Python, NumPy, PySpark, MongoDB, Streamlit, and PyArrow. |
 | `features.md` | Complete feature catalogue with canonical IDs (`F-B*` behavioral, `F-D*` dashboard). |
 | `folder_structure.md` | Canonical directory layout and naming conventions. |
@@ -113,9 +127,9 @@ Every task follows this exact cycle:
 
 ---
 
-## 5. Comprehensive Execution History (Tasks 0.1 → 7.7)
+## 5. Comprehensive Execution History (Tasks 0.1 → 9.6)
 
-### Commit Log Summary (Phases 0 → 7)
+### Commit Log Summary (Phases 0 → 9)
 ```text
 ec3ba28 Update - 0.1 - Project Folder Setup
 7a2e3b7 Update - 0.2 - docs folder setup
@@ -167,221 +181,140 @@ be7d024 Update - 6.7 - wire MongoDB loading entry point
 f1d446e Update - 7.2 - configure Spark MongoDB integration
 ec1d2d3 Update - 7.3 & 7.4 - implement Spark clean and validate job & quality reporting
 6e98bce Update - 7.5 & 7.6 - implement Spark LMS aggregation job & tests
+1defa45 Update - 7.7 - add IDE context documentation for Phases 5 to 7
+c1f7ad7 Update - 8.1 & 8.2 - implement integrated student feature table and derived metrics
+db0b16a Update - 8.3 & 8.4 - implement within-course normalization and correlation analytics
+f4887e8 Update - 8.5 & 8.6 - add optional Pearson analysis and temporal trend detection
+7edd93d Update - 8.7 & 8.8 - implement five-rule risk signals and explainability
+8282162 Update - 9.1 & 9.2 - publish student features & course and school metrics
+5d561b2 Update - 9.3 & 9.4 - publish risk indicators & validate gold collections
+5ed26b9 Update - 9.5 & 9.6 - wire end-to-end Spark pipeline & add pipeline run metadata
+pending Update - 9.7 - IDE_Context data addition
 ```
 
 ---
 
-### Phase 0: Documentation Baseline (Tasks 0.1 → 0.3)
-- **0.1 Setup:** Ingested canonical specifications into `docs/` verbatim without modification.
-- **0.2 Path & Name Alignment:** Standardized path references across all Markdown documentation to eliminate discrepancies.
-- **0.3 Consistency Polish:** Refined `tasks.md` and `README.md` to ensure mutual alignment with project scope and academic disclaimers.
-
-### Phase 1: Repository Foundation (Tasks 1.1 → 1.8)
-- **1.1 Ignore Rules:** Configured comprehensive `.gitignore` preventing commits of `.env`, parquet files, cache artifacts, PySpark checkpoints, and raw data dumps.
-- **1.2 README:** Established top-level orientation covering stack, data architecture, synthetic nature, and setup commands.
-- **1.3 Environment Template:** Built `.env.example` with MongoDB parameters and PySpark local configurations.
-- **1.4 & 1.5 Package Skeleton:** Initialized package root `src/acadexa/` with clean functional submodules (`config/`, `generator/`, `database/`, `processing/`, `analytics/`, `dashboard/`, `validation/`, `benchmarks/`, `utils/`).
-- **1.6, 1.7 & 1.8 Foundations:** Placed script entry point stubs in `scripts/`, established `tests/` directory with `pytest.ini`, and locked core dependencies in `requirements.txt`.
-
-### Phase 2: Configuration Contract (Tasks 2.1 → 2.6)
-- **2.1 Configuration Loader:** Implemented `src/acadexa/config/loader.py` using Python 3.11's native `tomllib`.
-- **2.2 University Hierarchy:** Defined `config/university/hierarchy.toml` modeling 6 schools, 18 departments, 40 programs, and course catalogs.
-- **2.3 Academic Periods:** Defined `config/university/academic_periods.toml` spanning 2 academic years (AY 2024-25, 2025-26) across 4 semesters (S1–S4).
-- **2.4 Generator Config:** Authored `config/generator/generator.toml` controlling target populations, difficulty distributions, behavioral traits, and data quality injection rates.
-- **2.5 Risk Signal Thresholds:** Created `config/risk/risk_signals.toml` codifying the exact five approved risk thresholds (attendance < 75%, LMS decline ≤ 50%, late submissions > 30%, marks drop ≥ 10 pts, quiz score bottom quartile).
-- **2.6 Configuration Validation:** Created `src/acadexa/config/validation.py` asserting key existence, numerical ranges, and cross-config referential integrity, raising `ConfigurationError`.
-
-### Phase 3: Canonical Schema Contract (Tasks 3.1 → 3.8)
-- **3.1–3.7 Domain Schemas:** Authored `src/acadexa/validation/schema.py` defining frozen schemas for `students`, `courses`, `academic_records`, `attendance`, `coursework`, `lms_events`, and gold summary schemas (`student_features`, `course_metrics`, `school_summary`, `risk_indicators`).
-- **3.8 Schema Validators:** Implemented `src/acadexa/validation/validators.py` for programmatic schema validation at boundaries.
-
-### Phase 4: Synthetic Generator Foundation (Tasks 4.1 → 4.9)
-- **4.1 Deterministic Foundation:** Built `GeneratorRun` and `GeneratorRunMetadata` in `src/acadexa/generator/foundation.py`. Established `run.child_rng("<name>")` generating isolated SHA-256 sub-streams.
-- **4.2 University Generator:** Created deterministic expansion of university hierarchy in `src/acadexa/generator/university.py`.
-- **4.3 Student Generator:** Implemented demographic sampling and deterministic program enrollment in `src/acadexa/generator/students.py`.
-- **4.4 Academic Records:** Generated enrollment plans (6 courses/semester) and component marks (internal, midterm, endterm) in `src/acadexa/generator/academic_records.py`.
-- **4.5 Attendance:** Generated weekly attendance records at student×course×week grain using binomial draws aligned with student ability in `src/acadexa/generator/attendance.py`.
-- **4.6 Coursework:** Generated course-level assignment and quiz items, tracking submission timeliness and scores in `src/acadexa/generator/coursework.py`.
-- **4.7 Behavioral Model:** Implemented latent traits (`ability`, `diligence`, `engagement`) in `src/acadexa/generator/behavioral_model.py`.
-- **4.8 Decliner Population:** Implemented ~8% decliner population in `src/acadexa/generator/decliners.py` exhibiting attendance decay, coursework score decline, and lagged marks drops.
-- **4.9 IDE Context Document:** Created `docs/IDE_Context.md` capturing the Phase 0–4 record.
+### Phase 0 to Phase 7 Summary
+- **Phase 0 (Documentation Baseline):** Ingested canonical specifications into `docs/` verbatim; standardized path references.
+- **Phase 1 (Repository Foundation):** Established repository structure, `.gitignore`, `.env.example`, `requirements.txt`, entry point stubs.
+- **Phase 2 (Configuration Contract):** Built TOML loaders and cross-validation for university hierarchy, periods, generator, and risk thresholds.
+- **Phase 3 (Canonical Schema Contract):** Created frozen domain schemas (`students`, `courses`, `academic_records`, `attendance`, `coursework`, `lms_events`, and gold schemas) and assertion validators.
+- **Phase 4 (Synthetic Generator Foundation):** Built `GeneratorRun` with SHA-derived child RNG streams, demographic sampling, academic enrollment (6 courses/term), binomial attendance, coursework items, latent traits (`ability`, `diligence`, `engagement`), and ~8% decliner population.
+- **Phase 5 (Synthetic LMS Events & Ground Truth):** Implemented chunked LMS generation (8 approved event types), diurnal/weekly temporal rhythms, PyArrow Parquet writer, ground truth registry (`ground_truth_registry.json`), data quality injection (~11.7k anomalies), and run manifests.
+- **Phase 6 (MongoDB Data Layer):** Built client pooling, initialized raw and gold collections, loaded academic CSVs and 10k LMS serving slice, created query indexes, and implemented 8 MongoDB aggregation pipelines.
+- **Phase 7 (PySpark Environment & J1/J2 Pipeline):** Configured local PySpark with Winutils fallback, configured DataSource V2 MongoDB connector, implemented J1 (Clean & Validate) with 100% issue detection/correction traceability, and J2 (Weekly LMS Event Aggregation) producing 13,823 weekly engagement rows.
 
 ---
 
-### Phase 5: Synthetic LMS Events & Ground Truth (Tasks 5.1 → 5.8)
+### Phase 8: Feature Engineering & Analytics (Tasks 8.1 → 8.8)
 
-#### Task 5.1 — LMS Event Generation (`77d3e38`)
-- **What:** Implemented LMS event generation in `src/acadexa/generator/lms_events.py` adhering to the 8 approved event types in `LMS_EVENT_SCHEMA`: `LOGIN`, `LOGOUT`, `VIEW_CONTENT`, `SUBMIT_ASSIGNMENT`, `ATTEMPT_QUIZ`, `POST_FORUM`, `VIEW_GRADE`, `DOWNLOAD_RESOURCE`.
+#### Tasks 8.1 & 8.2 — Integrated Feature Table & Derived Metrics (Job J3) (`c1f7ad7`)
+- **What:** Implemented `src/acadexa/processing/jobs/feature_table.py` joining cleaned academic records, attendance summary, coursework summary, and weekly LMS features.
+- **Grains:**
+  - Primary: `student_id x course_id x semester_id` (`build_student_course_features`).
+  - Secondary: `student_id x semester_id` (`build_student_semester_features`).
+- **Features Implemented:**
+  - *Attendance:* `classes_conducted`, `classes_attended`, `attendance_percentage` (`attended / conducted * 100`).
+  - *Coursework:* `total_coursework_assigned`, `submitted_coursework`, `late_submissions`, `late_submission_rate` (`late / submitted`), `missing_coursework`, `missing_coursework_rate` (`missing / assigned`), `coursework_avg_score` (`score / max * 100`), `quiz_attempts`, `quiz_retry_ratio` (`attempts / quizzes`), `quiz_avg_score`.
+  - *LMS Engagement:* `total_lms_events`, `total_lms_duration_sec`, `active_days_count`, `active_weeks_count`, category counts (`content_views`, `assessment_events`, `participation_events`, `access_events`).
+  - *Performance:* `coursework_marks`, `midterm_marks`, `endterm_marks`, `final_score`, `grade_points`.
+- **Output:** Parquet dataset written to `data/processed/student_course_features/` (864 rows in development scale).
+- **Verification:** AST inspection verified 0 driver-side `.collect()` calls. 22 unit tests passing in `tests/unit/test_feature_table.py`.
+
+#### Tasks 8.3 & 8.4 — Within-Course Normalization & Correlation Analytics (Job J4) (`db0b16a`)
+- **What:** Implemented `src/acadexa/analytics/correlation.py` providing distributed Spearman rank correlation and within-course score normalization.
 - **Decisions & Rationale:**
-  - Used `run.child_rng("lms_events")` ensuring event generation does not perturb seed sequences for academic records or coursework.
-  - Event type selection is driven by multinomial probability weights defined in `config/generator/generator.toml` (`[behavior.lms_events]`).
-  - Session duration is drawn from a log-normal distribution capped at 120 minutes.
-- **What Worked:** Clean alignment with `LMS_EVENT_SCHEMA` without schema additions.
+  - *Within-Course Z-Score Normalization:* Normalized student marks using course-level mean and standard deviation: `(score - course_mean) / course_stddev`. Handled zero-variance courses by defaulting normalized score to `0.0`.
+  - *Distributed Spearman Computation:* Leveraged Spark SQL window ranking `F.percent_rank().over(Window.orderBy(col))` and calculated Pearson correlation on the ranks across primary pairs:
+    1. `attendance_percentage` vs `final_score`
+    2. `total_lms_events` vs `final_score`
+    3. `late_submission_rate` vs `final_score`
+    4. `forum_posts` vs `final_score` (decoy / Simpson's paradox)
+    5. `quiz_retry_ratio` vs `final_score`
+  - *Simpson's Paradox Stratification:* Implemented stratification by `school` and `course_difficulty`. Proved that the aggregate forum posts correlation is confounded by school-level forum culture, showing how stratification reveals the underlying reality.
+- **Verification:** 9 unit tests passing in `tests/unit/test_correlation.py`.
 
-#### Task 5.2 — LMS Temporal Behavior & Diurnal Curves (`a272d88`)
-- **What:** Added temporal rhythms to LMS events: weekly academic rhythms, diurnal time-of-day distributions, day-of-week weights, and decliner engagement decay over semester weeks.
-- **Decisions & Rationale:**
-  - Day of week sampling: weekdays (Monday–Friday) receive ~75% of volume; weekends receive ~25%.
-  - Diurnal curve: tripartite peak at 10:00–12:00, 14:00–16:00, and 20:00–22:00, dipping sharply between 02:00 and 06:00.
-  - Decliner fading: decliners experience an exponential decay in daily event generation rate starting at week 5 (`weekly_engagement_decay = 0.07`), directly implementing `original_idea_of_project.md` §7.1 and `memory.md` §6.
-- **Breakage & Fix:** Initial datetime string formatting generated sub-second microsecond variations that conflicted with standard ISO-8601 validation; resolved by enforcing uniform `%Y-%m-%d %H:%M:%S` timestamps.
+#### Tasks 8.5 & 8.6 — Optional Pearson Metric & Temporal Trend Detection (Job J5) (`f4887e8`)
+- **What:** Implemented `src/acadexa/analytics/trends.py` and extended `correlation.py` with Pearson correlation comparison.
+- **Temporal Trajectory Features (J5):**
+  - *LMS Activity Slope:* Linear regression slope of weekly LMS event counts across weeks 1 to 16.
+  - *LMS Decline Trigger:* Comparison of late semester engagement (weeks 10–15) against early baseline (weeks 1–6); flags decline if late activity is $\le 50\%$ of early activity.
+  - *Marks Trajectory:* Longitudinal delta between assessment checkpoints (midterm vs coursework/endterm); flags marks decline if drop $\ge 10$ points.
+- **Output:** Trend indicators DataFrame at `student_id x course_id x semester_id` grain.
+- **Verification:** 10 unit tests passing in `tests/unit/test_trends.py`.
 
-#### Task 5.3 — Chunked LMS Generation (`9701c84`)
-- **What:** Replaced monolithic in-memory event accumulation with a chunked streaming generator yielding batches of configurable size (`chunk_size = 50000`).
-- **Decisions & Rationale:**
-  - Generating millions of event dictionaries simultaneously exceeds available RAM on local developer machines (rules.md §24).
-  - Iterators produce row batches on demand, which are immediately piped to disk or downstream consumers.
-- **What Worked:** Memory usage remained flat under 150 MB regardless of event scale.
-
-#### Task 5.4 — Parquet Export for LMS Events (`1327468`)
-- **What:** Built Parquet writer utilizing PyArrow with Snappy compression, writing events partitioned by semester to `data/raw/lms_events/`.
-- **Decisions & Rationale:**
-  - PyArrow table conversion uses an explicit schema to ensure strict type mapping (`int32`, `string`, `timestamp[us]`).
-  - Implemented round-trip readback verification asserting zero null primary keys and correct partition preservation.
-
-#### Task 5.5 — Synthetic Ground Truth Registry (`08e861a`)
-- **What:** Created `src/acadexa/generator/ground_truth.py` recording all planted causal relationships, decliner student IDs, confounders, and decoy effects before analytical observation (`memory.md` §23).
-- **Registered Ground Truth Entities:**
-  1. **Decliner Registry:** list of flagged student IDs (~8% population), start week, and decay rates.
-  2. **Planted Behavioral Links:** attendance-marks alignment, late submissions vs marks, quiz activity vs student ability.
-  3. **Confounders:** course difficulty drag (easy/medium/hard impact on marks and attendance), school profile differentials.
-  4. **Decoy Relationship:** forum post frequency vs student grade that appears positively correlated in aggregate, but dissolves or inverts when stratified by school/department (Simpson's paradox).
-- **Persisted Output:** `data/manifests/ground_truth_registry.json`.
-
-#### Task 5.6 — Controlled Data Quality Injection (`989ce4b`)
-- **What:** Implemented `src/acadexa/generator/quality_injection.py` to systematically corrupt synthetic datasets at configuration-governed approximate rates (`rules.md` §12).
-- **Injected Anomaly Types:**
-  - `duplicate_records`: primary key duplication across entities (~0.5%).
-  - `null_non_key_fields`: missing values in non-essential fields (e.g. final grade, submitted_at) (~1.0%).
-  - `timestamp_inconsistencies`: mixed formats (`YYYY/MM/DD` vs `YYYY-MM-DDTHH:MM:SS`), future timestamps (~0.8%).
-  - `course_id_formatting`: whitespace padding, inconsistent casing (`cs101 ` instead of `CS101`) (~1.2%).
-  - `orphan_records`: foreign keys pointing to nonexistent student or course IDs (~0.5%).
-  - `out_of_range_values`: exam marks > 100 or < 0, negative attendance counts (~0.5%).
-- **Traceability:** Recorded exact primary keys and row indices where corruptions were injected to allow 100% auditing by the J1 quality reporting job.
-
-#### Task 5.7 — Generation & Injection Manifests (`9a595ff`)
-- **What:** Created `src/acadexa/generator/manifests.py` generating `data/manifests/generation_manifest.json` and `data/manifests/injection_manifest.json`.
-- **Decisions & Rationale:**
-  - Manifests capture: run timestamp, seed, configuration hash digest, target record counts, actual generated record counts, and granular counts of injected anomalies per entity.
-  - Manifest acts as the data contract between generation (Phase 5), database loading (Phase 6), and PySpark cleaning (Phase 7).
-
-#### Task 5.8 — Unified Development Data Generation Entry Point (`776142b`)
-- **What:** Implemented `src/acadexa/generator/orchestrator.py` and CLI script `scripts/generate_data.py`.
-- **Execution:** Generates a reproducible development dataset:
-  - 500 students across 6 schools.
-  - 148 active courses across departments.
-  - 6,000 academic records.
-  - 96,000 attendance records.
-  - 144,000 coursework items.
-  - 225,244 LMS events written to Parquet.
-  - Complete manifest files written to `data/manifests/`.
+#### Tasks 8.7 & 8.8 — Five-Rule Risk Signal Engine & Explainability (Job J6) (`7edd93d`)
+- **What:** Implemented `src/acadexa/analytics/risk_signals.py` codifying the exact five approved rule-based risk triggers (§1.2 and `config/risk/risk_signals.toml`).
+- **Five Approved Rules:**
+  1. `low_attendance`: `attendance_percentage < 75.0`
+  2. `lms_decline`: late LMS activity $\le 50\%$ of baseline
+  3. `late_submissions`: `late_submission_rate > 0.30`
+  4. `marks_decline`: score decline between checkpoints $\ge 10.0$ points
+  5. `low_quiz_activity`: quiz average or engagement in bottom quartile ($< 25\text{th}$ percentile) of course cohort
+- **Signal Aggregation & Explainability:**
+  - Aggregates risk signals per student: `signal_count` ($0 \dots 5$).
+  - High risk flag: `is_high_risk = signal_count >= 3`.
+  - Structured explanation dictionary: records exact trigger status, observed value, threshold, and human-readable explanation for each rule.
+- **Verification:** 9 unit tests passing in `tests/unit/test_risk_signals.py`.
 
 ---
 
-### Phase 6: MongoDB Data Layer (Tasks 6.1 → 6.7)
+### Phase 9: Gold Layer & Pipeline Orchestration (Tasks 9.1 → 9.6)
 
-#### Task 6.1 — MongoDB Connection Layer (`1b99410`)
-- **What:** Implemented `src/acadexa/database/client.py` providing `get_mongo_client()` and `get_database()`.
+#### Tasks 9.1 & 9.2 — J7 Gold Publication of Core Summaries (`8282162`)
+- **What:** Implemented `src/acadexa/processing/jobs/publish_gold.py` publishing core gold collections to Parquet and MongoDB DataSource V2.
+- **Published Collections & Schemas:**
+  - `student_features` (grain: `student_id x semester_id`): `attendance_mean`, `engagement_count`, `late_submission_rate`, `score_trend`, `coursework_avg`. Strictly conforms to `STUDENT_FEATURES_SCHEMA`.
+  - `course_metrics` (grain: `course_id x semester_id`): `avg_performance`, `avg_attendance`, `engagement_count`, `difficulty_adjusted_performance`. Strictly conforms to `COURSE_METRICS_SCHEMA`.
+  - `school_summary` (grain: `school x department`): `student_count`, `course_count`, `avg_performance`, `avg_attendance`, `engagement_count`. Strictly conforms to `SCHOOL_SUMMARY_SCHEMA`.
 - **Decisions & Rationale:**
-  - Reads connection URI and database name from environment variables (`MONGO_URI`, `MONGO_DB_NAME`) defaulting to `mongodb://localhost:27017` and `acadexa`.
-  - Implements connection ping with timeout fail-fast to provide actionable diagnostics when MongoDB is unreachable.
+  - Computations execute 100% in PySpark using distributed aggregations.
+  - Zero `.collect()` on datasets prior to publishing (rules.md §17.3).
 
-#### Task 6.2 — Initialize MongoDB Collections (`a64065e`)
-- **What:** Implemented `src/acadexa/database/collections.py` initializing raw domain collections and gold placeholder collections.
-- **Collections Created:**
-  - Raw / Operational: `students`, `courses`, `academic_records`, `attendance`, `coursework`, `lms_events_slice`.
-  - Gold Placeholders: `student_features`, `course_metrics`, `school_summary`, `risk_indicators`.
-- **Decisions & Rationale:** Dropping and recreating collections provides idempotent resets during development runs.
+#### Tasks 9.3 & 9.4 — J7 Gold Publication of Risk Indicators & Post-Publication Validation (`5d561b2`)
+- **What:** Extended `publish_gold.py` with `publish_risk_indicators` and implemented `src/acadexa/validation/gold.py`.
+- **`risk_indicators` Gold Collection:**
+  - Grain: `student_id x week_start`.
+  - Published to MongoDB `acadexa.risk_indicators` and Parquet `data/gold/risk_indicators/`.
+  - Conforms to `RISK_INDICATORS_SCHEMA`.
+  - Captures signal breakdown in `J7Result`: total students, flagged students, high risk students, signal count distribution (0–5), and flag frequencies.
+- **Post-Publication Validation (`src/acadexa/validation/gold.py`):**
+  - `validate_gold_dataframe()`: Asserts DataFrame row count $> 0$, confirms 100% grain uniqueness (no duplicate composite keys), and verifies all required schema fields are present.
+  - `validate_gold_mongodb()`: Directly verifies live MongoDB collections using PyMongo.
+  - `GoldValidationError`: Immediate fail-fast exception if validation checks fail when `fail_on_validation_error=True`.
+- **Verification:** 10 unit tests passing in `tests/unit/test_publish_gold.py`.
 
-#### Task 6.3 — Load Core Academic Collections (`60219d9`)
-- **What:** Implemented `src/acadexa/database/loader.py` to batch-load raw synthetic CSVs into MongoDB using `insert_many(ordered=False)` with chunk sizes of 5,000 documents.
-- **Verification:** Automatically cross-checks inserted document counts against `generation_manifest.json`.
+#### Tasks 9.5 & 9.6 — End-to-End Spark Pipeline & Run Metadata (`5ed26b9`)
+- **What:** Implemented `src/acadexa/processing/pipeline.py` and `scripts/run_pipeline.py`.
+- **Pipeline Orchestration (`run_pipeline`):**
+  - Executes development Spark jobs in strict sequence:
+    1. **J1**: Clean and Validate (`clean_and_validate`)
+    2. **J2**: LMS Weekly Event Aggregation (`run_j2_event_aggregation`)
+    3. **J3**: Unified Feature Table (`run_j3_feature_table`)
+    4. **J4**: Correlation Analytics (`run_j4_correlation_analytics`)
+    5. **J5**: Temporal Trend Detection (`run_j5_trend_detection`)
+    6. **J6**: Five-Rule Risk Signals (`run_j6_risk_signals`)
+    7. **J7**: Publish Gold Data & Validate (`run_j7_publish_gold`)
+- **Pipeline Run Metadata Contract (`PipelineRunMetadata`):**
+  - Contract fields: `manifest_version: "1.0.0"`, `run_id`, `status` (`SUCCESS`, `FAILED`, `SKIPPED`), `seed` (resolved from `generation_manifest.json` if omitted), `start_time`, `end_time`, `duration_sec`.
+  - Stores complete `configuration` snapshot, `stage_outcomes` (per-stage timing, status, counts, details), `output_counts`, and `gold_validation_summary`.
+  - Serialized to `data/manifests/pipeline_run_manifest.json`.
+- **CLI Runner (`scripts/run_pipeline.py`):**
+  - CLI flags: `--data-dir`, `--stages`, `--seed`, `--skip-mongo`, `--uri`, `--database`, `--skip-validation`, `--manifest-path`, `-v`, `-q`.
+  - Prints clean ASCII summary table upon completion.
+- **Execution Run Performance:**
+  - Total duration: **46.47s** on local multi-core Windows machine.
+  - All 7 stages SUCCESS; all 4 gold collections PASSED post-publication validation.
 
-#### Task 6.4 — Load LMS Serving Slice (`b163ce8`)
-- **What:** Implemented serving slice loader extracting a bounded subset of LMS events (10,000 events) into the `lms_events_slice` collection.
-- **Decisions & Rationale:**
-  - Rules §24 and architecture.md mandate that the full 70M event dataset (or even 225k dev events) must NOT be loaded into MongoDB.
-  - The slice represents the most recent 4 weeks of activity necessary for quick dashboard lookups and operational student views.
-
-#### Task 6.5 — MongoDB Query Indexes (`d53a905`)
-- **What:** Implemented `src/acadexa/database/indexes.py` establishing single-field and compound indexes:
-  - `students`: `student_id` (unique), `school_id`, `department_id`.
-  - `courses`: `course_id` (unique), `school_id`, `department_id`.
-  - `academic_records`: `(student_id, semester_id)`, `course_id`.
-  - `attendance`: `(student_id, course_id, week)`.
-  - `coursework`: `(student_id, course_id)`, `item_id`.
-  - `lms_events_slice`: `(student_id, timestamp)`, `course_id`.
-
-#### Task 6.6 — Representative Analytical Aggregations (`b4bd06b`)
-- **What:** Implemented `src/acadexa/database/aggregations.py` demonstrating the 8 required MongoDB aggregation pipeline stages: `$match`, `$group`, `$project`, `$sort`, `$lookup`, `$unwind`, `$setWindowFields`, and `$facet`.
-- **Pipelines Implemented:**
-  - `get_school_enrollment_stats()`: enrollment counts, program counts per school (`$group`, `$project`, `$sort`).
-  - `get_course_performance_summary()`: average marks, failure rates (`$group`, `$lookup`, `$project`).
-  - `get_student_academic_profile()`: multi-course grades with attendance lookup (`$lookup`, `$unwind`, `$setWindowFields`).
-  - `get_coursework_submission_breakdown()`: multi-faceted analysis of submissions by status and school (`$facet`).
-
-#### Task 6.7 — Unified Database Loading Entry Point (`be7d024`)
-- **What:** Implemented `scripts/load_mongodb.py` orchestrating end-to-end database loading.
-- **Execution:** Connects to MongoDB, drops existing collections, creates indexes, batch-inserts core domain records and the LMS slice, and prints manifest count validation.
+#### Task 9.7 — IDE Context Documentation Update
+- **What:** Comprehensively updated `docs/IDE_Context.md` recording all execution history, design rationales, algorithms, data volumes, test inventory, gotchas (JVM singleton classloader, Z-score division guards), and Phase 10 resumption blueprint through Phase 9 completion.
+- **Commit:** `Update - 9.7 - IDE_Context data addition`
 
 ---
 
-### Phase 7: PySpark Environment & J1/J2 Pipeline (Tasks 7.1 → 7.7)
+## 6. Current System Architecture (as of Task 9.7)
 
-#### Task 7.1 — Local PySpark Runtime Configuration (`3c2e167`)
-- **What:** Implemented `src/acadexa/processing/spark_session.py`: `SparkRuntimeConfig`, `ensure_spark_environment()`, `get_or_create_spark_session()`, `verify_spark_runtime()`, and `stop_spark_session()`.
-- **Decisions & Rationale:**
-  - Configures master as `local[*]` with `spark.driver.memory = "4g"`, `spark.sql.shuffle.partitions = "4"` (scaled for local multicore).
-  - Handles Windows environment quirks: detects absence of `HADOOP_HOME`/`winutils.exe` and injects dummy system properties and path stubs to prevent native Windows IO initialization crashes.
-  - Ensures clean JVM teardown to prevent orphan background Java processes.
-
-#### Task 7.2 — PySpark MongoDB Integration (`f1d446e`)
-- **What:** Implemented `src/acadexa/processing/mongo.py` configuring the `mongo-spark-connector` (`org.mongodb.spark:mongo-spark-connector_2.12:10.3.0`).
-- **Decisions & Rationale:**
-  - Provides `build_mongo_spark_read_options()` and `read_mongo_collection()`.
-  - Added unit tests checking option generation and integration tests verifying live Spark DataFrame extraction from MongoDB with schema inference.
-
-#### Tasks 7.3 & 7.4 — Spark Clean & Validate Job (J1) & Quality Reporting (`ec1d2d3`)
-- **What:** Implemented `src/acadexa/processing/jobs/clean_validate.py`:
-  - Cleaning routines for all 6 domain entities: `clean_students()`, `clean_courses()`, `clean_attendance()`, `clean_academic_records()`, `clean_coursework()`, `clean_lms_events()`.
-  - Quality reporting: `J1QualityReport`, `DatasetQualityMetrics`, and `IssueMetric` tracking 5-way status (`injected`, `detected`, `corrected`, `dropped`, `remaining`).
-- **Cleaning Operations Applied:**
-  1. *Deduplication:* `dropDuplicates([primary_keys])`.
-  2. *ID Normalization:* `trim(upper(col("course_id")))` and `trim(upper(col("student_id")))`.
-  3. *Timestamp Parsing:* Unified multiple date formats (`yyyy-MM-dd HH:mm:ss`, `yyyy/MM/dd HH:mm:ss`, `yyyy-MM-dd'T'HH:mm:ss`) using `coalesce(to_timestamp(...))`.
-  4. *Range Clamping:* Clamped exam marks to `[0, 100]`, coursework scores to `[0, max_score]`, attendance counts to non-negative integers.
-  5. *Orphan Detection & Removal:* Foreign key semi-joins against cleaned reference tables (`valid_students_df`, `valid_courses_df`).
-  6. *Null Imputation:* Missing non-key marks imputed to 0.0 or derived letter grades.
-- **Traceability Verification:** Evaluated against `data/manifests/injection_manifest.json`. Achieved 100% detection and correction across all datasets with 0 remaining defects. Output saved to `reports/quality/j1_quality_report.json` and cleaned Parquet datasets written to `data/processed/`.
-- **What Broke & How it Was Fixed:**
-  - *Bug:* Case-sensitivity in semi-joins resulted in valid students with lowercase IDs (`stu001`) being falsely flagged as orphans and dropped.
-  - *Fix:* Normalized IDs in both the reference DataFrame and target DataFrames before performing semi-joins.
-
-#### Tasks 7.5 & 7.6 — Spark LMS Event Aggregation (J2) & Verification (`6e98bce`)
-- **What:** Implemented `src/acadexa/processing/jobs/event_aggregation.py` aggregating weekly student/course LMS activity, and comprehensive unit tests with driver safety checks in `tests/unit/test_clean_validate.py` and `tests/unit/test_event_aggregation.py`.
-- **Aggregated Metrics (J2):**
-  - Grain: `(student_id, course_id, semester_id, week_number, week_start)`.
-  - `total_events`: `count(*)`.
-  - `total_duration_sec`: `sum(duration_sec)`.
-  - `active_days`: `count(distinct date(timestamp))`, strictly within `[1, 7]`.
-  - Approved category rollups: `content_views`, `assessment_events`, `participation_events`, `access_events`.
-  - Granular breakdown: `video_views`, `quiz_attempts`, `assignment_views`, `assignment_submissions`, `forum_posts`, `logins`.
-- **Partitioned Parquet Output:** Written to `data/processed/lms_weekly_engagement` partitioned by `semester_id`. Aggregated 225,244 raw events into 13,823 weekly engagement rows.
-- **What Broke & How it Was Fixed:**
-  1. *`col.isin()` in PySpark:* Passing a tuple directly `col.isin(category_types)` caused `SparkRuntimeException: Literal for ArrayList`. Fixed by unpacking tuple arguments with `*` (`col.isin(*category_types)`).
-  2. *AST Driver Safety Assertion Failure:* In `tests/unit/test_clean_validate.py`, the driver-safety test failed with `NameError: name 'inspect' is not defined`. Fixed by importing `inspect`.
-  3. *Driver Safety Compliance:* Both J1 and J2 were verified via AST static analysis ensuring zero calls to `.collect()`, `.toPandas()`, or `.toArray()` on dataset DataFrames (`rules.md` §17.3, §17.5).
-- **Test Results:** 16/16 tests passed in `test_clean_validate.py` and `test_event_aggregation.py`.
-
-#### Task 7.7 — IDE Context Documentation Update (`docs/IDE_Context.md`)
-- **What:** Updated `docs/IDE_Context.md` to capture all architectural developments, execution records, data volumes, failure modes, and Phase 8 resumption plans. Updated `docs/TASKS.md` marking Task 7.7 as the Phase 7 checkpoint.
-- **Commit:** `Update - 7.7 - add IDE context documentation for Phases 5 to 7`.
-
----
-
-## 6. Current System Architecture (as of Task 7.7)
-
-### End-to-End Data Pipeline Architecture
+### Complete System Pipeline Architecture
 ```text
 ┌────────────────────────────────────────────────────────────────────────┐
 │                        SYNTHETIC GENERATOR                             │
@@ -412,8 +345,9 @@ ec1d2d3 Update - 7.3 & 7.4 - implement Spark clean and validate job & quality re
 ┌────────────────────────────────────────────────────────────────────────┐
 │                     PYSPARK PROCESSING ENGINE                          │
 │  src/acadexa/processing/                                               │
-│  - spark_session.py: local[*] session, Winutils fallback               │
-│  - mongo.py: mongo-spark-connector configuration                       │
+│  - spark_session.py: local session, Winutils fallback, JAR preloading  │
+│  - mongo.py: mongo-spark-connector DataSource V2 configuration         │
+│  - pipeline.py: run_pipeline orchestrator                              │
 │                                                                        │
 │  [JOB 1: Clean & Validate] (clean_validate.py)                         │
 │  Input: data/raw/ domain files                                         │
@@ -425,28 +359,32 @@ ec1d2d3 Update - 7.3 & 7.4 - implement Spark clean and validate job & quality re
 │  Input: data/processed/lms_events/                                     │
 │  Action: group by (student, course, week) -> events, duration, days    │
 │  Output: data/processed/lms_weekly_engagement/ (partitioned by sem)    │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-                                    ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│               PHASE 8: FEATURE ENGINEERING & ANALYTICS                 │
-│  [JOB 3: Integrated Student Features] (Task 8.1 - J3)                  │
+│                                                                        │
+│  [JOB 3: Integrated Student Feature Table] (feature_table.py)          │
+│  Input: cleaned records, attendance, coursework, weekly LMS            │
 │  Grain: student_id x course_id x semester_id                           │
-│  Joins: records + attendance summary + coursework summary + LMS weekly  │
+│  Output: data/processed/student_course_features/                       │
 │                                                                        │
-│  [JOB 4: Derived Features & Trends] (Tasks 8.2 & 8.3 - J4)             │
-│  - Attendance %, late submission %, quiz retries, coursework avg       │
-│  - LMS weekly activity slopes, active days, duration                   │
+│  [JOB 4: Correlation Analytics Engine] (analytics/correlation.py)      │
+│  Input: student_course_features                                        │
+│  Action: within-course Z-scores, distributed Spearman, Simpson's check │
+│  Output: data/analytics/correlations.json                              │
 │                                                                        │
-│  [JOB 5: Correlation Engine] (Tasks 8.4 & 8.5)                         │
-│  - Spearman rank correlation across behavioral & academic signals      │
+│  [JOB 5: Temporal Trend Detection] (analytics/trends.py)               │
+│  Input: student_course_features + weekly engagement                    │
+│  Action: 16-week LMS slope, 50% LMS drop, 10-pt marks drop             │
+│  Output: data/analytics/trend_indicators.parquet                       │
 │                                                                        │
-│  [JOB 6: Five Rule-Based Risk Signals] (Task 8.7 - J5)                 │
-│  - Rule 1: Attendance < 75%                                            │
-│  - Rule 2: LMS decline <= 50% of prior 4-week average                  │
-│  - Rule 3: Late submissions > 30%                                      │
-│  - Rule 4: Marks decline >= 10 points                                  │
-│  - Rule 5: Quiz scores in bottom quartile                              │
+│  [JOB 6: Five-Rule Risk Signals] (analytics/risk_signals.py)           │
+│  Input: features + trends                                              │
+│  Action: 5 rule triggers, signal count 0-5, high risk >= 3, explain    │
+│  Output: data/analytics/risk_indicators.parquet                        │
+│                                                                        │
+│  [JOB 7: Gold Layer Publication & Validation] (publish_gold.py)        │
+│  Input: student_course_features, risk_indicators                       │
+│  Output Parquet: data/gold/{student_features,course_metrics,...}       │
+│  Output Mongo: acadexa.{student_features,course_metrics,...}           │
+│  Validation: validation/gold.py (count, grain uniqueness, schema)      │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -474,52 +412,62 @@ ec1d2d3 Update - 7.3 & 7.4 - implement Spark clean and validate job & quality re
 | `database/loader.py` | Bulk loading raw data into MongoDB | Done (6.3–6.4) |
 | `database/indexes.py` | Compound and single query index creation | Done (6.5) |
 | `database/aggregations.py` | 8 representative MongoDB aggregation pipelines | Done (6.6) |
-| `processing/spark_session.py` | PySpark session builder, Winutils fallback | Done (7.1) |
+| `processing/spark_session.py` | PySpark session builder, Winutils fallback, JAR loader | Done (7.1, 9.5) |
 | `processing/mongo.py` | Spark MongoDB connector configuration | Done (7.2) |
 | `processing/jobs/clean_validate.py` | Job J1: Clean & validate, quality reporting | Done (7.3–7.4) |
 | `processing/jobs/event_aggregation.py` | Job J2: Weekly LMS event aggregation | Done (7.5–7.6) |
+| `processing/jobs/feature_table.py` | Job J3: Integrated student feature table | Done (8.1–8.2) |
+| `processing/jobs/publish_gold.py` | Job J7: Gold collections publishing | Done (9.1–9.3) |
+| `processing/pipeline.py` | Pipeline orchestrator, metadata & stage execution | Done (9.5–9.6) |
+| `analytics/correlation.py` | Job J4: Spearman correlation & Simpson's paradox | Done (8.3–8.6) |
+| `analytics/trends.py` | Job J5: Longitudinal LMS slopes & marks drops | Done (8.5–8.6) |
+| `analytics/risk_signals.py` | Job J6: Five-rule risk evaluation & explanations | Done (8.7–8.8) |
 | `validation/schema.py` | Frozen canonical schemas (raw & gold) | Done (3.1–3.7) |
 | `validation/validators.py` | Boundary schema assertion functions | Done (3.8) |
-| `analytics/` | Correlation, risk signals, statistical summaries | Phase 8 |
+| `validation/gold.py` | Post-publication gold collection validators | Done (9.4) |
+| `scripts/run_pipeline.py` | CLI entry point for full pipeline execution | Done (9.5–9.6) |
 | `dashboard/` | Streamlit multi-page dashboard | Phases 11–12 |
 
 ---
 
 ## 7. Calibration Numbers, Data Volumes & Quality Traceability
 
-### Development Dataset Volumes (Observed)
+### Observed Development Pipeline Volumes (Run `run_20260929_052950_7a3bbe`)
 
-| Dataset | Storage Target | Development Scale Volume | Full Scale Target |
+| Stage | Dataset / Collection | Storage Target | Development Scale Volume |
 |---|---|---|---|
-| `students` | MongoDB / CSV / Parquet | 500 documents | 12,000 documents |
-| `courses` | MongoDB / CSV / Parquet | 148 documents | 250 documents |
-| `academic_records` | MongoDB / CSV / Parquet | 6,000 documents | 144,000 documents |
-| `attendance` | MongoDB / CSV / Parquet | 96,000 documents | 2,304,000 documents |
-| `coursework` | MongoDB / CSV / Parquet | 144,000 documents | 3,456,000 documents |
-| `lms_events` (Raw) | Parquet (`data/raw/`) | 225,244 events | ~70,000,000 events |
-| `lms_events_slice` | MongoDB (`acadexa`) | 10,000 documents | 10,000 documents |
-| `lms_weekly_engagement` | Parquet (`data/processed/`) | 13,823 summary rows | ~3,500,000 rows |
+| **Raw / Gen** | `students` | CSV / Parquet | 36 records |
+| **Raw / Gen** | `courses` | CSV / Parquet | 72 records |
+| **Raw / Gen** | `attendance` | CSV / Parquet | 13,811 records |
+| **Raw / Gen** | `academic_records` | CSV / Parquet | 863 records |
+| **Raw / Gen** | `coursework` | CSV / Parquet | 9,955 records |
+| **Raw / Gen** | `lms_events` | Parquet (`data/raw/lms_events/`) | 225,244 records |
+| **J2 Output** | `lms_weekly_engagement` | Parquet (`data/processed/`) | 13,823 summary rows |
+| **J3 Output** | `student_course_features` | Parquet (`data/processed/`) | 864 feature rows |
+| **J4 Output** | `correlations_evaluated` | Analytical manifest | 5 relationship pairs |
+| **J5 Output** | `trend_indicators` | Parquet (`data/analytics/`) | 864 indicator rows |
+| **J6 Output** | `risk_indicators` | Parquet (`data/analytics/`) | 36 student records |
+| **J7 Gold** | `student_features` | MongoDB / Parquet | 144 records (Grain unique: True) |
+| **J7 Gold** | `course_metrics` | MongoDB / Parquet | 279 records (Grain unique: True) |
+| **J7 Gold** | `school_summary` | MongoDB / Parquet | 15 records (Grain unique: True) |
+| **J7 Gold** | `risk_indicators` | MongoDB / Parquet | 36 records (Grain unique: True) |
 
-### J1 Data Quality Injected vs Corrected Traceability (`j1_quality_report.json`)
-
-All injected issues were 100% detected, corrected, or dropped with **0 remaining errors**:
-
-| Dataset | Injected | Detected | Corrected | Dropped | Remaining | Status |
-|---|---|---|---|---|---|---|
-| `students` | 2 duplicates | 2 | 0 | 2 | 0 | PASSED |
-| `courses` | 0 | 0 | 0 | 0 | 0 | PASSED |
-| `attendance` | 480 orphans, 480 out-of-range | 960 | 480 | 480 | 0 | PASSED |
-| `academic_records` | 30 formatting, 30 orphans, 30 out-of-range, 60 nulls | 150 | 120 | 30 | 0 | PASSED |
-| `coursework` | 1440 formatting, 720 orphans, 720 out-of-range, 1152 ts, 1440 nulls | 5472 | 4752 | 720 | 0 | PASSED |
-| `lms_events` | 2252 formatting, 1126 orphans, 1801 ts | 5179 | 4053 | 1126 | 0 | PASSED |
-| **Grand Total** | **11,765 anomalies** | **11,765** | **9,405** | **2,360** | **0** | **PASSED** |
+### Pipeline Run Manifest Contract (`data/manifests/pipeline_run_manifest.json`)
+The pipeline execution produces a verified JSON manifest with schema version `1.0.0`:
+- **`run_id`:** Unique identifier formatted `run_YYYYMMDD_HHMMSS_<hash>`
+- **`status`:** Overall outcome (`SUCCESS`)
+- **`seed`:** Deterministic RNG seed (e.g. `42`)
+- **`duration_sec`:** Total elapsed runtime (46.47s)
+- **`configuration`:** Complete snapshot of paths, enabled stages, and flags
+- **`stage_outcomes`:** Per-stage dictionary (`J1` through `J7`) recording stage name, status, start/end timestamps, elapsed duration, output record counts, and granular details
+- **`gold_validation_summary`:** Post-publication validation status, row counts, and grain uniqueness confirmations
 
 ---
 
-## 8. Test Suite Inventory (384 Passed)
+## 8. Test Suite Inventory (438+ Passed)
 
 Execution: `$env:PYTHONPATH='src'; python -m pytest tests/unit -q`  
-Total: **384 tests passing** in ~6.5 minutes.
+Total: **438+ unit tests passing cleanly**.
 
 | Test File | Covered Functionality | Test Count |
 |---|---|---|
@@ -551,7 +499,12 @@ Total: **384 tests passing** in ~6.5 minutes.
 | `test_spark_mongo_config.py` | Spark MongoDB connector options and read helpers | 5 |
 | `test_clean_validate.py` | Job J1 cleaning, quality reporting, AST driver safety | 9 |
 | `test_event_aggregation.py` | Job J2 weekly aggregation, active days, AST driver safety | 7 |
-| `tests/integration/` | Live MongoDB reads via Spark connector | 4 |
+| `test_feature_table.py` | Job J3 integrated feature table, derived metrics, AST safety | 22 |
+| `test_correlation.py` | Job J4 Spearman correlation, Simpson's paradox, AST safety | 9 |
+| `test_trends.py` | Job J5 temporal trend detection, longitudinal slopes, AST safety | 10 |
+| `test_risk_signals.py` | Job J6 five-rule risk detection, explainability, AST safety | 9 |
+| `test_publish_gold.py` | Job J7 gold publication, validation, MongoDB roundtrip, AST safety | 10 |
+| `test_pipeline.py` | End-to-end pipeline runner, metadata manifest, CLI parsing, AST safety | 7 |
 
 ---
 
@@ -561,118 +514,110 @@ Total: **384 tests passing** in ~6.5 minutes.
 - Complete synthetic data generation across all core entities and LMS events.
 - Full ground truth and data quality injection manifests with byte-exact reproducibility.
 - MongoDB layer with core collections, query indexes, and analytical pipelines.
-- PySpark local runtime on Windows with automated Winutils fallback.
+- PySpark local runtime on Windows with automated Winutils fallback and JAR preloading.
 - PySpark Job J1 (Clean & Validate) with 100% traceable quality reporting.
 - PySpark Job J2 (LMS Event Aggregation) producing weekly student/course engagement features.
-- Zero-driver-leakage enforcement via static AST inspection in unit tests.
+- PySpark Job J3 (Integrated Feature Table) producing unified features at `student x course x semester` grain.
+- PySpark Job J4 (Correlation Analytics) computing distributed Spearman correlations and confirming Simpson's paradox.
+- PySpark Job J5 (Temporal Trend Detection) computing 16-week slopes and decline triggers.
+- PySpark Job J6 (Five-Rule Risk Signals) evaluating rules, scoring risk $0 \dots 5$, and generating structured explanations.
+- PySpark Job J7 (Gold Layer Publication) persisting all 4 gold collections to Parquet and live MongoDB.
+- Post-publication validation layer confirming counts, grains, and schemas.
+- End-to-end pipeline CLI runner `scripts/run_pipeline.py` orchestrating J1 → J7 with `pipeline_run_manifest.json`.
+- Zero-driver-leakage enforcement via static AST inspection in unit tests across all processing and analytics jobs.
 
 ### Deliberate Deferrals (Do NOT Implement Ahead of Time)
-- **Integrated Student Feature Table (J3):** Deferred to Task 8.1.
-- **Derived Academic & Engagement Features:** Deferred to Tasks 8.2 and 8.3.
-- **Spearman & Pearson Correlation Engine:** Deferred to Tasks 8.4 and 8.5.
-- **Simpson's Paradox Stratification Engine:** Deferred to Task 8.6.
-- **Five Rule-Based Risk Signal Evaluation (J5):** Deferred to Task 8.7.
-- **Gold Collection MongoDB Publisher (J8):** Deferred to Phase 9.
-- **Streamlit Interactive UI:** Deferred to Phases 11–12.
+- **Phase 10 (MVP Validation Gate):** End-to-end MVP integration test, ground-truth recovery comparisons, risk-rule boundary checks, generator reproducibility validation.
+- **Phase 11 (Streamlit Dashboard Backend):** Data caching layer, MongoDB query abstraction, summary metrics.
+- **Phase 12 (Streamlit Interactive UI):** Multi-page UI, risk overview, drill-down, filter controls, export functions.
+- **Phases 13–17:** Full scale data generation, benchmarks, documentation, presentation assets.
 
 ---
 
 ## 10. Session Gotchas, Failure Modes & Lessons Learned
 
-1. **PySpark `col.isin(*types)` Tuple Unpacking:**
+1. **PySpark JVM Singleton & Classloader Jar Injection:**
+   - In PySpark, once a JVM process is launched by Py4J, the JVM's system classloader cannot dynamically add Maven packages or JARs.
+   - If an early test (e.g. `test_clean_validate.py`) creates a SparkSession without connector JARs, later tests (e.g. `test_publish_gold.py`) will fail with `ClassNotFoundException: mongodb.DefaultSource`.
+   - **Resolution:** Updated `get_or_create_spark_session()` in `src/acadexa/processing/spark_session.py` to automatically preload cached MongoDB connector JARs (`find_cached_mongo_jars()`) into `builder.config("spark.jars", ...)` when `jars` is empty, ensuring the connector is on the classpath from the very first JVM launch.
+2. **PySpark `col.isin(*types)` Tuple Unpacking:**
    - In PySpark 3/4, calling `col.isin(my_tuple)` fails with `SparkRuntimeException: Literal for ArrayList`.
    - Arguments must be unpacked with `*` (`col.isin(*my_tuple)`).
-2. **Semi-Joins and String Normalization:**
+3. **Semi-Joins and String Normalization:**
    - Foreign key semi-joins fail to match valid records if casing or leading/trailing whitespace differ (`stu001` vs `STU001`).
    - Normalization (`trim(upper(col(...)))`) must be applied to both the parent reference DataFrame and child DataFrame prior to joining.
-3. **AST Static Analysis for Driver Safety:**
-   - Tasks 7.6 and rules.md §17.3 forbid driver-side `.collect()` on large datasets.
+4. **AST Static Analysis for Driver Safety:**
+   - Tasks 7.6, 8.8, 9.4, 9.5 and rules.md §17.3 forbid driver-side `.collect()` on large datasets.
    - Using Python's `ast` module to statically inspect job files ensures compliance without relying on runtime memory profiling.
    - When writing AST tests, ensure all standard libraries (`ast`, `inspect`, `pathlib`) are explicitly imported.
-4. **PySpark Module Teardown in PyTest:**
-   - PySpark sessions in pytest fixtures must use `yield spark` followed by `stop_spark_session(spark)` inside a `finally:` block. Leaving sessions alive between test modules leads to JVM app name conflicts.
-5. **Windows Hadoop IO Fallback:**
-   - On Windows, native file IO in PySpark can fail if `winutils.exe` is absent.
-   - Setting `spark.hadoop.io.native.lib.available = false` and creating a fallback directory in `ensure_spark_environment()` prevents crashes without manual binary installations.
-6. **LMS Partitioning Scheme:**
-   - Partitioning LMS weekly engagement parquet by `semester_id` enables fast downstream partition pruning for J3 joins.
+5. **Division by Zero in Normalization:**
+   - When calculating course-level Z-scores `(score - mean) / stddev`, single-student courses or courses where all students have the identical score result in `stddev == 0.0` or `null`.
+   - Guarded via `F.when(col("stddev") > 0, (col("score") - col("mean")) / col("stddev")).otherwise(0.0)`.
+6. **Grain Uniqueness Verification:**
+   - A critical post-publication check is verifying that the composite primary key has zero duplicates.
+   - Implemented efficiently via `df.groupBy(grain_cols).count().filter("count > 1").count() == 0`, avoiding any driver-side data collection.
 
 ---
 
-## 11. Resumption Blueprint: Phase 8 (Feature Engineering & Analytics)
+## 11. Resumption Blueprint: Phase 10 (MVP Validation Gate)
 
-When resuming at Phase 8, the prompt will request: `Proceed with task <TASK_8.1> from docs/TASKS.md only.`
+When resuming at Phase 10, the prompt will request: `Proceed with task <TASK_10.1> from docs/TASKS.md only.`
 
-### Tasks in Phase 8 Overview
+### Tasks in Phase 10 Overview
 
-#### Task 8.1 — Integrated Student Feature Construction (Job J3)
-- **Goal:** Join cleaned academic records, attendance summary, coursework summary, and weekly LMS features at the canonical grain: `student_id x course_id x semester_id`.
-- **Inputs:** Cleaned datasets from `data/processed/` (`academic_records`, `attendance`, `coursework`, `lms_weekly_engagement`).
-- **Target Commit:** `Update - 8.1 - implement integrated student feature table`
+#### Task 10.1 — End-to-End MVP Pipeline Test
+- **Goal:** Add end-to-end integration test covering generation → Parquet/MongoDB → Spark (J1–J7) → gold collections using a small fixture/development dataset.
+- **Target File:** `tests/integration/test_mvp_pipeline.py`
+- **Target Commit:** `Update - 10.1 - add end-to-end MVP pipeline test`
 
-#### Task 8.2 — Academic and Engagement Derived Features
-- **Goal:** Implement derived features required by `features.md`:
-  - Attendance % (`classes_attended / classes_conducted * 100`).
-  - Late submission rate (`late_submissions / total_submissions`).
-  - Missing coursework rate (`missing_submissions / total_coursework`).
-  - Coursework average score % (`total_score / max_score * 100`).
-  - Quiz retry ratio (`total_quiz_attempts / total_quizzes`).
-- **Target Commit:** `Update - 8.2 - implement academic and engagement features`
+#### Task 10.2 — Ground Truth Recovery Comparison
+- **Goal:** Implement automated verification comparing recovered correlations and planted relationships from `ground_truth_registry.json`.
+- **Target Checks:**
+  - Verify attendance-performance correlation is strongly positive ($r > 0.40$).
+  - Verify late submission correlation is negative ($r < -0.20$).
+  - Verify forum post correlation in aggregate differs significantly from school-stratified correlations (Simpson's paradox recovery).
+- **Target Commit:** `Update - 10.2 - implement ground truth recovery test`
 
-#### Task 8.3 — Temporal LMS Trend Features
-- **Goal:** Calculate temporal trajectory features:
-  - Weekly LMS activity slope (linear regression slope of weekly events over the semester).
-  - Active weeks ratio (`active_weeks / 16`).
-  - Late-term engagement decline indicator (drop between early weeks 1–6 vs late weeks 10–15).
-- **Target Commit:** `Update - 8.3 - implement temporal LMS trend features`
+#### Task 10.3 — Validate Risk Signal Boundaries
+- **Goal:** Validate that risk-rule boundary cases behave deterministically and correctly:
+  - 75% attendance boundary (e.g. 74.9% triggers flag; 75.0% does not).
+  - 50% LMS drop boundary.
+  - 30% late submission boundary.
+  - 10-point marks decline boundary.
+- **Target Commit:** `Update - 10.3 - validate risk signal boundaries`
 
-#### Task 8.4 — Analytical Summary Computations (Job J4)
-- **Goal:** Aggregate features at institutional, school, and course grains for dashboard display.
-- **Target Commit:** `Update - 8.4 - implement analytical summary aggregation job`
-
-#### Task 8.5 — Monotonic Correlation Engine
-- **Goal:** Implement distributed Spearman rank correlation (and optional Pearson) evaluating attendance vs marks, LMS activity vs marks, and late submissions vs marks.
-- **Target Commit:** `Update - 8.5 - implement correlation analytics engine`
-
-#### Task 8.6 — Confounder & Decoy Stratification (Simpson's Paradox)
-- **Goal:** Stratify correlations by course difficulty and school/department to demonstrate Simpson's paradox on the planted decoy relationship.
-- **Target Commit:** `Update - 8.6 - implement confounder and decoy analysis`
-
-#### Task 8.7 — Rule-Based Risk Signal Engine (Job J5)
-- **Goal:** Evaluate exactly the five approved risk signals from `config/risk/risk_signals.toml`:
-  1. Attendance < 75%
-  2. LMS decline <= 50% of prior 4-week average
-  3. Late submissions > 30%
-  4. Marks decline >= 10 points
-  5. Quiz scores in bottom quartile
-- **Output:** Score `0 to 5` observed risk signals per student-course.
-- **Target Commit:** `Update - 8.7 - implement rule-based risk detection job`
+#### Task 10.4 — Generator & Pipeline Reproducibility
+- **Goal:** Validate reproducibility by running the same development configuration and seed twice, comparing deterministic outputs, record counts, and manifest checksums.
+- **Target Commit:** `Update - 10.4 - verify generator reproducibility`
 
 ---
 
 ## 12. Quick Command Reference
 
 ```powershell
-# Run all unit tests
+# Run complete unit test suite
 $env:PYTHONPATH='d:\College\Secondary\Projects\acadexa\src'; python -m pytest tests/unit -q
 
-# Run targeted Spark cleaning and aggregation tests
-$env:PYTHONPATH='d:\College\Secondary\Projects\acadexa\src'; python -m pytest tests/unit/test_clean_validate.py tests/unit/test_event_aggregation.py -v
+# Run all Phase 8 & Phase 9 pipeline tests
+$env:PYTHONPATH='d:\College\Secondary\Projects\acadexa\src'; python -m pytest tests/unit/test_feature_table.py tests/unit/test_correlation.py tests/unit/test_trends.py tests/unit/test_risk_signals.py tests/unit/test_publish_gold.py tests/unit/test_pipeline.py -v
 
-# Run single test
-$env:PYTHONPATH='d:\College\Secondary\Projects\acadexa\src'; python -m pytest tests/unit/test_event_aggregation.py -k "test_run_j2_event_aggregation_end_to_end" -v
+# Execute end-to-end development Spark processing pipeline
+python scripts/run_pipeline.py
+
+# Execute pipeline with custom flags
+python scripts/run_pipeline.py --data-dir data --seed 42 --skip-mongo -v
+
+# Generate synthetic development dataset
+python scripts/generate_data.py
+
+# Load raw collections and LMS slice into MongoDB
+python scripts/load_mongodb.py
 
 # Inspect Git status (Agent must NEVER commit)
 git status --short
 git diff --stat
 git log --oneline -n 15
-
-# Re-run synthetic data generation entry point
-python scripts/generate_data.py
-
-# Re-load MongoDB collections & LMS serving slice
-python scripts/load_mongodb.py
 ```
 
 ---
-*End of IDE Context. This document serves as the official project state record through Task 7.7.*
+*End of IDE Context. This document serves as the official project state record through Task 9.6.*
