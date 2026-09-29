@@ -11,6 +11,7 @@ from acadexa.dashboard import (
     config,
     data_access,
     layout,
+    pages,
     permissions,
     session,
 )
@@ -21,6 +22,7 @@ __all__ = [
     "config",
     "data_access",
     "layout",
+    "pages",
     "permissions",
     "session",
 ]

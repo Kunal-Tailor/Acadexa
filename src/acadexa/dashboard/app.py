@@ -8,7 +8,8 @@ Shows the dummy login screen when logged out and the shared-layout
 authenticated shell (sidebar navigation, page header, breadcrumbs, global
 filters, serving-layer status, logout) when logged in. All permission
 decisions go through :mod:`acadexa.dashboard.permissions`; analytical page
-content arrives in Phase 12.
+content lives under :mod:`acadexa.dashboard.pages` (University Overview
+first, remaining views in later Phase 12 tasks).
 """
 
 from __future__ import annotations
@@ -19,6 +20,7 @@ from acadexa.dashboard import auth, components, layout, permissions, session
 from acadexa.dashboard.auth import AuthConfigError, User
 from acadexa.dashboard.config import DashboardConfig
 from acadexa.dashboard.data_access import DashboardDataAccess
+from acadexa.dashboard.pages import university as university_page
 
 
 @st.cache_resource
@@ -64,10 +66,11 @@ def render_shell(user: User, data: DashboardDataAccess) -> None:
             st.rerun()
 
     page_title = layout.nav_title(page_key)
-    context = layout.academic_context_label(layout.read_filter_selections(scope))
+    selections = layout.read_filter_selections(scope)
+    context = layout.academic_context_label(selections)
     layout.render_header(page_title, user, context)
     layout.render_breadcrumbs(layout.build_breadcrumbs(page_title, scope))
-    layout.render_global_filters(scope)
+    selections = layout.render_global_filters(scope)
 
     st.subheader("Serving-layer status")
     status = data.gold_status()
@@ -85,7 +88,9 @@ def render_shell(user: User, data: DashboardDataAccess) -> None:
         for name, info in status.items():
             st.caption(f"{name}: {info['count']} documents")
 
-    if page_key != "overview":
+    if page_key == "overview":
+        university_page.render_university_page(scope, selections, data)
+    else:
         components.empty_state(
             f"{page_title} analytics arrive in Phase 12 "
             f"(current scope: {permissions.describe_scope(scope)})."

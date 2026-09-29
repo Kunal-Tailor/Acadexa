@@ -133,12 +133,15 @@ def build_mongo_scope_filter(
     scope: Scope,
     *,
     school_field: str = "school",
+    department_field: str = "department",
     course_field: str = "course_id",
 ) -> dict[str, Any]:
     """Build a MongoDB query filter expressing ``scope``.
 
     University scope matches everything (``{}``); school/department scopes
     match their hierarchy fields; course scopes match the assigned courses.
+    Field names vary per collection (e.g. ``student_school``), hence the
+    overrides.
     """
     if scope.level == "university":
         return {}
@@ -149,7 +152,7 @@ def build_mongo_scope_filter(
         if scope.school:
             filt[school_field] = scope.school
         if scope.department:
-            filt["department"] = scope.department
+            filt[department_field] = scope.department
         return filt
     if scope.level == "courses":
         if not scope.courses:
