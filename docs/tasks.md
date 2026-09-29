@@ -437,7 +437,7 @@ Build each analytical view as one reviewable page-level task.
 - [x] 12.5 — Build Analysis view with correlation, trend analysis and methodology/explainability sections.
   Commit: `Update - 12.5 - build analytical analysis view`
 
-- [ ] 12.6 — Build Data Quality view showing injected/detected/corrected/dropped/remaining issues from actual pipeline output.
+- [x] 12.6 — Build Data Quality view showing injected/detected/corrected/dropped/remaining issues from actual pipeline output.
   Commit: `Update - 12.6 - build data quality dashboard`
 
 - [ ] 12.7 — Add the synthetic-data disclosure and non-causal/risk methodology notices to the appropriate dashboard locations.

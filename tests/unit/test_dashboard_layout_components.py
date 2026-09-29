@@ -408,7 +408,7 @@ def test_shell_page_switch_updates_header_and_breadcrumbs() -> None:
     assert not at.exception
     assert at.header[0].value == "Data Quality"
     assert any("Data Quality" in c.value and "›" in c.value for c in at.caption)
-    assert any("Phase 12" in i.value for i in at.info)
+    assert any(s.value == "Quality overview" for s in at.subheader)
 
 
 def test_shell_restricts_nav_and_filters_for_faculty() -> None:

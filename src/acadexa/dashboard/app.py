@@ -25,6 +25,7 @@ from acadexa.dashboard.pages import school as school_page
 from acadexa.dashboard.pages import course as course_page
 from acadexa.dashboard.pages import student as student_page
 from acadexa.dashboard.pages import analysis as analysis_page
+from acadexa.dashboard.pages import data_quality as data_quality_page
 
 
 @st.cache_resource
@@ -102,6 +103,8 @@ def render_shell(user: User, data: DashboardDataAccess) -> None:
         student_page.render_student_page(scope, selections, data)
     elif page_key == "analysis":
         analysis_page.render_analysis_page(scope, selections, data)
+    elif page_key == "data_quality":
+        data_quality_page.render_data_quality_page(scope)
     else:
         components.empty_state(
             f"{page_title} analytics arrive in Phase 12 "
