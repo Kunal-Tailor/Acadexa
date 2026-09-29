@@ -1,0 +1,31 @@
+# Acadexa dashboard dummy users (docs/features.md F-A01/F-A02, docs/rules.md §24).
+#
+# Demonstration login only — not production security. No passwords are stored
+# here or anywhere else; selecting a configured user establishes a demo
+# session with the associated role and analytical scope.
+# Exactly the four approved roles are used (docs/memory.md §3):
+#   University Admin / School / Department Admin / Faculty / Academic Analyst
+
+[[users]]
+username = "admin"
+display_name = "University Administrator"
+role = "University Admin"
+
+[[users]]
+username = "cet.admin"
+display_name = "CET School Admin"
+role = "School / Department Admin"
+school = "School of Computer Engineering & Technology"
+
+[[users]]
+username = "faculty.csa"
+display_name = "CSA Faculty Member"
+role = "Faculty"
+school = "School of Computer Engineering & Technology"
+department = "Computer Science and Applications"
+courses = ["CSA101", "CSA102"]
+
+[[users]]
+username = "analyst"
+display_name = "Academic Analyst"
+role = "Academic Analyst"

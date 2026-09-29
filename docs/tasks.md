@@ -399,13 +399,13 @@ Do not begin full-scale generation until this checkpoint passes.
 
 Build the dashboard against real gold/serving data, not permanent mock values.
 
-- [ ] 11.1 — Implement Streamlit application entry point and shared configuration/data-access layer. The app should start and display a basic authenticated shell.
+- [x] 11.1 — Implement Streamlit application entry point and shared configuration/data-access layer. The app should start and display a basic authenticated shell.
   Commit: `Update - 11.1 - initialize Streamlit dashboard`
 
-- [ ] 11.2 — Implement dummy login/session state with the four approved roles: University Admin, School/Department Admin, Faculty and Academic Analyst.
+- [x] 11.2 — Implement dummy login/session state with the four approved roles: University Admin, School/Department Admin, Faculty and Academic Analyst.
   Commit: `Update - 11.2 - implement dashboard dummy authentication`
 
-- [ ] 11.3 — Implement centralized role/scope resolution so dashboard pages do not duplicate permission logic.
+- [x] 11.3 — Implement centralized role/scope resolution so dashboard pages do not duplicate permission logic.
   Commit: `Update - 11.3 - implement role and scope control`
 
 - [ ] 11.4 — Implement shared dashboard layout, navigation, page header, breadcrumbs and global academic filters.
