@@ -49,6 +49,7 @@ def render_login(users: dict[str, User]) -> None:
         "Demonstration login only — selecting a configured user establishes "
         "a demo session. Not production security."
     )
+    components.synthetic_data_notice()
     ordered = sorted(users.values(), key=lambda u: u.username)
     labels = [f"{u.display_name} ({u.role})" for u in ordered]
     choice = st.selectbox("User", labels, key="acadexa_login_choice")
@@ -69,6 +70,7 @@ def render_shell(user: User, data: DashboardDataAccess) -> None:
         if st.button("Log out", key="acadexa_logout_button"):
             session.logout(st.session_state)
             st.rerun()
+        components.synthetic_data_notice()
 
     page_title = layout.nav_title(page_key)
     selections = layout.read_filter_selections(scope)

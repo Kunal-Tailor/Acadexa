@@ -38,6 +38,15 @@ MAX_SIGNAL_COUNT: int = 5
 
 STATUS_LEVELS: tuple[str, ...] = ("ok", "info", "warning", "error")
 
+# Global synthetic-data disclosure (docs/design.md §38). Shown persistently
+# without dominating the interface; methodology notes live with the
+# analytical sections they describe (design.md §39).
+SYNTHETIC_DATA_NOTICE: str = (
+    "Acadexa uses fully synthetic academic and LMS data for demonstration, "
+    "analysis and Big Data engineering purposes. Results do not represent "
+    "real students or real institutional outcomes."
+)
+
 
 def format_value(value: float | int | None, unit: str | None = None) -> str:
     """Format a KPI value with units (design.md §13).
@@ -170,6 +179,11 @@ def risk_signal_card(
         "Risk indicator = count of five predefined observed signals. "
         "It is not a failure prediction model."
     )
+
+
+def synthetic_data_notice() -> None:
+    """Render the global synthetic-data disclosure (design.md §38)."""
+    st.caption(SYNTHETIC_DATA_NOTICE)
 
 
 def empty_state(message: str) -> None:

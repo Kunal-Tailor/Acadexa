@@ -440,7 +440,7 @@ Build each analytical view as one reviewable page-level task.
 - [x] 12.6 — Build Data Quality view showing injected/detected/corrected/dropped/remaining issues from actual pipeline output.
   Commit: `Update - 12.6 - build data quality dashboard`
 
-- [ ] 12.7 — Add the synthetic-data disclosure and non-causal/risk methodology notices to the appropriate dashboard locations.
+- [x] 12.7 — Add the synthetic-data disclosure and non-causal/risk methodology notices to the appropriate dashboard locations.
   Commit: `Update - 12.7 - add analytical disclosure and methodology notices`
 
 - [ ] 12.8 — Perform one cross-dashboard usability/accessibility/error-state pass without adding new features.

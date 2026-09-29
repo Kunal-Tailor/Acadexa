@@ -1,10 +1,11 @@
-"""Unit tests for shared dashboard layout and components (Tasks 11.4–11.5).
+"""Unit tests for shared dashboard layout and components (Tasks 11.4–11.5, 12.7).
 
 Covers the navigation model, breadcrumbs, scope-aware global filters
-(11.4) and the reusable KPI/analytical/status/risk-signal components
-following docs/design.md (11.5). Pure helpers are tested directly;
-rendering is verified headlessly via AppTest on the app and on a small
-component script. Small fixtures only.
+(11.4), the reusable KPI/analytical/status/risk-signal components
+following docs/design.md (11.5), and the synthetic-data disclosure plus
+methodology notices (12.7). Pure helpers are tested directly; rendering
+is verified headlessly via AppTest on the app and on a small component
+script. Small fixtures only.
 """
 
 from __future__ import annotations
@@ -426,3 +427,51 @@ def test_shell_restricts_nav_and_filters_for_faculty() -> None:
     assert at.header[0].value == "Courses"
     assert [s.label for s in at.selectbox] == ["Academic year", "Semester", "Course"]
     assert any("CSA101" in c.value for c in at.caption)
+
+
+# ── 12.7: synthetic-data disclosure and methodology notices ─────────
+
+
+def test_synthetic_data_notice_text() -> None:
+    """Global disclosure matches design.md §38 wording."""
+    notice = components.SYNTHETIC_DATA_NOTICE
+    assert "fully synthetic" in notice
+    assert "do not represent" in notice
+    assert "real students" in notice
+
+
+def test_login_screen_shows_synthetic_disclosure() -> None:
+    """The login screen discloses synthetic data before any analytics."""
+    st_test = pytest.importorskip("streamlit.testing.v1")
+    at = st_test.AppTest.from_file(str(APP_PATH))
+    at.run()
+    assert not at.exception
+    assert any("fully synthetic" in c.value for c in at.caption)
+
+
+def test_shell_sidebar_shows_persistent_disclosure() -> None:
+    """Every authenticated page carries the disclosure in the sidebar."""
+    st_test = pytest.importorskip("streamlit.testing.v1")
+    at = st_test.AppTest.from_file(str(APP_PATH))
+    at.run()
+    _login_as(at, "University Administrator", "University Admin")
+    assert not at.exception
+    assert any("fully synthetic" in c.value for c in at.sidebar.caption)
+
+
+def test_risk_methodology_notice_present_on_student_page() -> None:
+    """Risk methodology accompanies the five-rule breakdown (design §39)."""
+    st_test = pytest.importorskip("streamlit.testing.v1")
+    from acadexa.database import check_connection
+
+    from acadexa.dashboard.config import DashboardConfig
+
+    cfg = DashboardConfig.from_env()
+    if not check_connection(config=cfg.database):
+        pytest.skip("MongoDB is not reachable in current environment")
+    at = st_test.AppTest.from_file(str(APP_PATH))
+    at.run()
+    _login_as(at, "University Administrator", "University Admin")
+    at.sidebar.radio[0].set_value("Students").run()
+    assert not at.exception
+    assert any("not a failure prediction" in c.value for c in at.caption)

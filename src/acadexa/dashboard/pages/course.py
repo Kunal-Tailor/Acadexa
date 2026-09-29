@@ -377,7 +377,7 @@ def _risk_section(summary: CourseSummary) -> None:
     st.caption(
         "Risk indicator = count of five predefined observed signals. "
         "It is not a failure prediction model. Per-student breakdowns "
-        "arrive in the Student view."
+        "appear in the Student view."
     )
 
 
