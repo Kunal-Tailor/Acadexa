@@ -70,6 +70,13 @@ from acadexa.generator.university import (
     UniversityHierarchy,
     generate_university_hierarchy,
 )
+from acadexa.generator.full_scale import (
+    FullScaleConfigReport,
+    FullScaleMismatch,
+    build_hierarchy_counts,
+    record_hierarchy_counts,
+    validate_full_scale_config,
+)
 
 __all__ = [
     "DECOY_RELATIONSHIP",
@@ -84,6 +91,8 @@ __all__ = [
     "GeneratorError",
     "GeneratorRun",
     "GeneratorRunMetadata",
+    "FullScaleConfigReport",
+    "FullScaleMismatch",
     "GroundTruthRegistry",
     "INJECTION_RATE_KEYS",
     "InjectionManifest",
@@ -92,6 +101,7 @@ __all__ = [
     "PLANTED_RELATIONSHIPS",
     "UniversityHierarchy",
     "assign_course_difficulty",
+    "build_hierarchy_counts",
     "build_generation_manifest",
     "build_injection_manifest",
     "build_manifests",
@@ -124,8 +134,10 @@ __all__ = [
     "load_ground_truth_registry",
     "load_injection_manifest",
     "read_lms_events_from_parquet",
+    "record_hierarchy_counts",
     "save_generation_manifest",
     "save_injection_manifest",
+    "validate_full_scale_config",
     "validate_lms_events_parquet",
     "write_lms_events_to_parquet",
 ]

@@ -1,0 +1,80 @@
+{
+  "manifest_version": "1.0.0",
+  "manifest_type": "full_scale_hierarchy",
+  "generated_at": "2026-09-30T05:01:57.977744+00:00",
+  "seed": 42,
+  "note": "Actual full-target hierarchy counts (Task 14.2). Targets are engineering values from the frozen configuration (Task 14.1); the course catalog is the configured initial catalog, smaller than the 250-course full target.",
+  "actual_counts": {
+    "schools": 6,
+    "departments": 18,
+    "programs": 40,
+    "courses": 72,
+    "school_ids": [
+      "cet",
+      "lad",
+      "sci",
+      "set",
+      "sol",
+      "som"
+    ],
+    "by_school": [
+      {
+        "id": "cet",
+        "code": "CET",
+        "name": "School of Computer Engineering & Technology",
+        "departments": 3,
+        "programs": 7,
+        "courses": 12
+      },
+      {
+        "id": "lad",
+        "code": "LAD",
+        "name": "School of Liberal Arts & Design",
+        "departments": 3,
+        "programs": 8,
+        "courses": 12
+      },
+      {
+        "id": "sci",
+        "code": "SCI",
+        "name": "School of Sciences",
+        "departments": 3,
+        "programs": 6,
+        "courses": 12
+      },
+      {
+        "id": "set",
+        "code": "SET",
+        "name": "School of Engineering & Technology",
+        "departments": 3,
+        "programs": 7,
+        "courses": 12
+      },
+      {
+        "id": "sol",
+        "code": "SOL",
+        "name": "School of Law",
+        "departments": 3,
+        "programs": 6,
+        "courses": 12
+      },
+      {
+        "id": "som",
+        "code": "SOM",
+        "name": "School of Management",
+        "departments": 3,
+        "programs": 6,
+        "courses": 12
+      }
+    ],
+    "catalog_target_courses": 250,
+    "school_names": {
+      "cet": "School of Computer Engineering & Technology",
+      "set": "School of Engineering & Technology",
+      "sci": "School of Sciences",
+      "som": "School of Management",
+      "sol": "School of Law",
+      "lad": "School of Liberal Arts & Design"
+    }
+  }
+}

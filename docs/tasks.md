@@ -482,10 +482,10 @@ Measure technology trade-offs using real workloads.
 
 Scale the validated architecture toward the documented target.
 
-- [ ] 14.1 — Review and freeze the generator configuration for the full target run. Do not change schema or architecture in this task.
+- [x] 14.1 — Review and freeze the generator configuration for the full target run. Do not change schema or architecture in this task.
   Commit: `Update - 14.1 - freeze full-scale generator configuration`
 
-- [ ] 14.2 — Run/implement full university hierarchy generation for the six-school target and record actual counts.
+- [x] 14.2 — Run/implement full university hierarchy generation for the six-school target and record actual counts.
   Commit: `Update - 14.2 - generate full university hierarchy`
 
 - [ ] 14.3 — Generate the full target student population and academic records across two academic years/four semesters using the validated generator.
