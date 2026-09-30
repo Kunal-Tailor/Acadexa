@@ -468,10 +468,10 @@ Measure technology trade-offs using real workloads.
 - [x] 13.4 — Implement the equivalent PySpark benchmark.
   Commit: `Update - 13.4 - benchmark PySpark workload`
 
-- [ ] 13.5 — Add the full feature-table join benchmark where equivalent implementations are practical.
+- [x] 13.5 — Add the full feature-table join benchmark where equivalent implementations are practical.
   Commit: `Update - 13.5 - benchmark feature-table join`
 
-- [ ] 13.6 — Generate benchmark output containing dataset size, execution time, memory observations where practical and environment information. Do not manufacture conclusions.
+- [x] 13.6 — Generate benchmark output containing dataset size, execution time, memory observations where practical and environment information. Do not manufacture conclusions.
   Commit: `Update - 13.6 - publish benchmark results`
 
 ---

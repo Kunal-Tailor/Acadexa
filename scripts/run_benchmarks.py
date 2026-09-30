@@ -1,9 +1,8 @@
-"""Entry point: run the J8 benchmark suite (Tasks 13.1 & 13.2, rules.md §18, §30).
+"""Entry point: run the J8 benchmark suite (Phase 13, rules.md §18, §30).
 
 Executes registered benchmark workloads per engine, records measured
-timing/memory/dataset metadata to a run manifest, and prints a summary.
-Formatted result publication belongs to Task 13.6; this script saves only
-the raw run manifest. Engine choices grow as later Phase 13 tasks land.
+timing/memory/dataset metadata to a run manifest, publishes the measured
+benchmark report (JSON + Markdown, no conclusions), and prints a summary.
 """
 
 from __future__ import annotations
@@ -35,9 +34,19 @@ from acadexa.benchmarks.runner import (
     capture_environment,
     new_run_id,
 )
-from acadexa.benchmarks.pandas import run_weekly_engagement_pandas
-from acadexa.benchmarks.mongodb import run_weekly_engagement_mongodb
-from acadexa.benchmarks.spark import run_weekly_engagement_spark
+from acadexa.benchmarks.pandas import (
+    run_feature_table_join_pandas,
+    run_weekly_engagement_pandas,
+)
+from acadexa.benchmarks.mongodb import (
+    run_feature_table_join_mongodb,
+    run_weekly_engagement_mongodb,
+)
+from acadexa.benchmarks.spark import (
+    run_feature_table_join_spark,
+    run_weekly_engagement_spark,
+)
+from acadexa.benchmarks.report import build_benchmark_report, save_report
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -79,6 +88,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Spark engine Parquet output directory (default: temporary directory)",
     )
     parser.add_argument(
+        "--base-path",
+        type=str,
+        default="data/processed",
+        help="Base directory of cleaned domain datasets for the "
+        "feature-table join pandas/Spark engines (default: 'data/processed')",
+    )
+    parser.add_argument(
         "--manifest-path",
         type=str,
         default=str(DEFAULT_BENCHMARK_MANIFEST_PATH),
@@ -88,6 +104,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--no-measure-memory",
         action="store_true",
         help="Disable tracemalloc peak-memory measurement",
+    )
+    parser.add_argument(
+        "--no-report",
+        action="store_true",
+        help="Skip writing the formatted benchmark report files",
+    )
+    parser.add_argument(
+        "--report-only",
+        action="store_true",
+        help="Regenerate report files from an existing manifest without running",
     )
     parser.add_argument(
         "-q",
@@ -121,6 +147,64 @@ def print_summary(run: BenchmarkRun) -> None:
     print("=" * 66)
 
 
+def _scratch_output_dir(prefix: str) -> tuple[str, bool]:
+    """Create a temporary Spark output directory (caller cleans up)."""
+    return tempfile.mkdtemp(prefix=prefix), True
+
+
+def _run_spark_with_cleanup(func, output_arg: str | None, prefix: str, *args):
+    """Run a Spark engine function with temporary output handling."""
+    output_path = output_arg
+    cleanup_output = False
+    if output_path is None:
+        output_path, cleanup_output = _scratch_output_dir(prefix)
+    try:
+        return func(*args, output_path)
+    finally:
+        if cleanup_output:
+            shutil.rmtree(output_path, ignore_errors=True)
+
+
+def _execute_workload(args: argparse.Namespace):
+    """Dispatch one workload/engine combination (Tasks 13.2–13.5)."""
+    measure = not args.no_measure_memory
+    if args.workload == "weekly_lms_engagement" and args.engine == ENGINE_PANDAS:
+        return run_weekly_engagement_pandas(args.input_path, measure_memory=measure)
+    if args.workload == "weekly_lms_engagement" and args.engine == ENGINE_MONGODB:
+        return run_weekly_engagement_mongodb(
+            collection=args.collection, measure_memory=measure
+        )
+    if args.workload == "weekly_lms_engagement" and args.engine == ENGINE_PYSPARK:
+        return _run_spark_with_cleanup(
+            run_weekly_engagement_spark,
+            args.output_path,
+            "acadexa_bench_spark_",
+            args.input_path,
+        )
+    if args.workload == "feature_table_join" and args.engine == ENGINE_PANDAS:
+        return run_feature_table_join_pandas(args.base_path, measure_memory=measure)
+    if args.workload == "feature_table_join" and args.engine == ENGINE_MONGODB:
+        return run_feature_table_join_mongodb(measure_memory=measure)
+    if args.workload == "feature_table_join" and args.engine == ENGINE_PYSPARK:
+        return _run_spark_with_cleanup(
+            run_feature_table_join_spark,
+            args.output_path,
+            "acadexa_bench_join_",
+            args.base_path,
+        )
+    return None
+
+
+def _publish_outputs(run: BenchmarkRun, manifest_path: str, quiet: bool) -> None:
+    """Save the raw manifest plus the formatted benchmark report (Task 13.6)."""
+    run.save(manifest_path)
+    report = build_benchmark_report(run)
+    json_path, md_path = save_report(report, manifest_path)
+    if not quiet:
+        print_summary(run)
+        print(f"Benchmark report: {json_path} and {md_path}")
+
+
 def main(argv: list[str] | None = None) -> int:
     """Main script entry point for running benchmarks."""
     args = parse_args(argv)
@@ -128,6 +212,14 @@ def main(argv: list[str] | None = None) -> int:
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
+
+    if args.report_only:
+        run = BenchmarkRun.load(args.manifest_path)
+        _, _ = save_report(build_benchmark_report(run), args.manifest_path)
+        if not args.quiet:
+            print(f"Regenerated benchmark report from {args.manifest_path}")
+        return 0
+
     started_dt = datetime.now(timezone.utc)
     started_wall = time.perf_counter()
 
@@ -139,37 +231,20 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
 
-    if args.workload == "weekly_lms_engagement" and args.engine == ENGINE_PANDAS:
-        result = run_weekly_engagement_pandas(
-            args.input_path, measure_memory=not args.no_measure_memory
-        )
-    elif args.workload == "weekly_lms_engagement" and args.engine == ENGINE_MONGODB:
-        result = run_weekly_engagement_mongodb(
-            collection=args.collection,
-            measure_memory=not args.no_measure_memory,
-        )
-    elif args.workload == "weekly_lms_engagement" and args.engine == ENGINE_PYSPARK:
-        output_path = args.output_path
-        cleanup_output = False
-        if output_path is None:
-            output_path = tempfile.mkdtemp(prefix="acadexa_bench_spark_")
-            cleanup_output = True
-        try:
-            result = run_weekly_engagement_spark(args.input_path, output_path)
-        finally:
-            if cleanup_output:
-                shutil.rmtree(output_path, ignore_errors=True)
-    else:
+    result = _execute_workload(args)
+    if result is None:
         print(f"ERROR: unsupported workload/engine: {args.workload}/{args.engine}")
         return 2
     run.results.append(result)
 
     run.duration_sec = round(time.perf_counter() - started_wall, 3)
     run.ended_at = datetime.now(timezone.utc).isoformat()
-    run.save(args.manifest_path)
-
-    if not args.quiet:
-        print_summary(run)
+    if args.no_report:
+        run.save(args.manifest_path)
+        if not args.quiet:
+            print_summary(run)
+    else:
+        _publish_outputs(run, args.manifest_path, args.quiet)
     return 0 if result.success else 1
 
 

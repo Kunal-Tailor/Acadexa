@@ -47,6 +47,32 @@ class WorkloadDefinition:
 
 
 WORKLOADS: dict[str, WorkloadDefinition] = {
+    "feature_table_join": WorkloadDefinition(
+        workload_id="feature_table_join",
+        title="Feature-table join",
+        description=(
+            "Join per-domain academic summaries at student × course × "
+            "semester grain with a join-focused metric subset (marks "
+            "totals, attendance counts, coursework counts, LMS event "
+            "totals). Per-engine scope is practical, not identical: "
+            "pandas/Spark join four domains including LMS weekly "
+            "aggregates, while MongoDB joins the three operational "
+            "collections it holds (LMS weekly aggregates live outside "
+            "MongoDB by architecture). Scopes are recorded per result."
+        ),
+        input_description="Cleaned academic_records, attendance, coursework "
+        "and LMS weekly aggregates (Parquet) or the operational MongoDB collections",
+        output_grain="student_id × course_id × semester_id",
+        metrics=(
+            "total_marks",
+            "classes_conducted",
+            "classes_attended",
+            "total_coursework",
+            "total_submissions",
+            "late_submissions",
+            "lms_total_events",
+        ),
+    ),
     "weekly_lms_engagement": WorkloadDefinition(
         workload_id="weekly_lms_engagement",
         title="Weekly LMS engagement aggregation",
