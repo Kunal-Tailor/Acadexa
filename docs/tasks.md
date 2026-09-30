@@ -462,10 +462,10 @@ Measure technology trade-offs using real workloads.
 - [x] 13.2 — Implement the weekly LMS engagement benchmark using pandas where the workload is feasible.
   Commit: `Update - 13.2 - benchmark pandas workload`
 
-- [ ] 13.3 — Implement the equivalent MongoDB aggregation benchmark.
+- [x] 13.3 — Implement the equivalent MongoDB aggregation benchmark.
   Commit: `Update - 13.3 - benchmark MongoDB aggregation`
 
-- [ ] 13.4 — Implement the equivalent PySpark benchmark.
+- [x] 13.4 — Implement the equivalent PySpark benchmark.
   Commit: `Update - 13.4 - benchmark PySpark workload`
 
 - [ ] 13.5 — Add the full feature-table join benchmark where equivalent implementations are practical.

@@ -1,6 +1,6 @@
 """Acadexa benchmark workloads: J8 harness and engine implementations."""
 
-from acadexa.benchmarks import runner
+from acadexa.benchmarks import mongodb, pandas, runner, spark
 from acadexa.benchmarks.runner import (
     ENGINE_MONGODB,
     ENGINE_PANDAS,
@@ -26,8 +26,11 @@ __all__ = [
     "WorkloadDefinition",
     "capture_environment",
     "get_workload",
+    "mongodb",
     "new_run_id",
+    "pandas",
     "run_benchmark",
     "run_timed",
     "runner",
+    "spark",
 ]

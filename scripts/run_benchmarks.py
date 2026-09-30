@@ -10,7 +10,9 @@ from __future__ import annotations
 
 import argparse
 import logging
+import shutil
 import sys
+import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -25,13 +27,17 @@ if str(SRC_DIR) not in sys.path:
 
 from acadexa.benchmarks.runner import (
     DEFAULT_BENCHMARK_MANIFEST_PATH,
+    ENGINE_MONGODB,
     ENGINE_PANDAS,
+    ENGINE_PYSPARK,
     WORKLOADS,
     BenchmarkRun,
     capture_environment,
     new_run_id,
 )
 from acadexa.benchmarks.pandas import run_weekly_engagement_pandas
+from acadexa.benchmarks.mongodb import run_weekly_engagement_mongodb
+from acadexa.benchmarks.spark import run_weekly_engagement_spark
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -50,14 +56,27 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--engine",
         type=str,
         default=ENGINE_PANDAS,
-        choices=[ENGINE_PANDAS],
+        choices=[ENGINE_PANDAS, ENGINE_MONGODB, ENGINE_PYSPARK],
         help="Engine implementation to run (default: 'pandas')",
     )
     parser.add_argument(
         "--input-path",
         type=str,
         default="data/raw/lms_events",
-        help="Workload input path (default: 'data/raw/lms_events')",
+        help="Workload input path: Parquet directory (pandas/Spark) "
+        "(default: 'data/raw/lms_events')",
+    )
+    parser.add_argument(
+        "--collection",
+        type=str,
+        default="lms_events",
+        help="MongoDB collection for the MongoDB engine (default: 'lms_events')",
+    )
+    parser.add_argument(
+        "--output-path",
+        type=str,
+        default=None,
+        help="Spark engine Parquet output directory (default: temporary directory)",
     )
     parser.add_argument(
         "--manifest-path",
@@ -124,7 +143,23 @@ def main(argv: list[str] | None = None) -> int:
         result = run_weekly_engagement_pandas(
             args.input_path, measure_memory=not args.no_measure_memory
         )
-    else:  # pragma: no cover - unreachable until later Phase 13 tasks land
+    elif args.workload == "weekly_lms_engagement" and args.engine == ENGINE_MONGODB:
+        result = run_weekly_engagement_mongodb(
+            collection=args.collection,
+            measure_memory=not args.no_measure_memory,
+        )
+    elif args.workload == "weekly_lms_engagement" and args.engine == ENGINE_PYSPARK:
+        output_path = args.output_path
+        cleanup_output = False
+        if output_path is None:
+            output_path = tempfile.mkdtemp(prefix="acadexa_bench_spark_")
+            cleanup_output = True
+        try:
+            result = run_weekly_engagement_spark(args.input_path, output_path)
+        finally:
+            if cleanup_output:
+                shutil.rmtree(output_path, ignore_errors=True)
+    else:
         print(f"ERROR: unsupported workload/engine: {args.workload}/{args.engine}")
         return 2
     run.results.append(result)
