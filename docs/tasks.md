@@ -456,10 +456,10 @@ Build each analytical view as one reviewable page-level task.
 
 Measure technology trade-offs using real workloads.
 
-- [ ] 13.1 — Implement J8 benchmark harness with repeatable workload definitions, timing and run metadata.
+- [x] 13.1 — Implement J8 benchmark harness with repeatable workload definitions, timing and run metadata.
   Commit: `Update - 13.1 - implement benchmark harness`
 
-- [ ] 13.2 — Implement the weekly LMS engagement benchmark using pandas where the workload is feasible.
+- [x] 13.2 — Implement the weekly LMS engagement benchmark using pandas where the workload is feasible.
   Commit: `Update - 13.2 - benchmark pandas workload`
 
 - [ ] 13.3 — Implement the equivalent MongoDB aggregation benchmark.
