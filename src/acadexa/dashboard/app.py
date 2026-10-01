@@ -118,6 +118,10 @@ def main() -> None:
     """Streamlit entry point: login screen or authenticated shell."""
     config = get_dashboard_config()
     st.set_page_config(page_title=config.app_title, layout="wide")
+    st.markdown(
+        "<style>[data-testid='stSidebarNav'] {display: none;}</style>",
+        unsafe_allow_html=True,
+    )
     try:
         users = get_dummy_users()
     except (AuthConfigError, FileNotFoundError, ValueError) as exc:

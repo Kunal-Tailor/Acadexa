@@ -559,10 +559,10 @@ Verify correctness after scaling.
 - [x] 16.4 — Validate full-scale risk signal calculations against independent small fixtures and selected sampled records.
   Commit: `Update - 16.4 - validate full-scale risk signals`
 
-- [ ] 16.5 — Test dashboard behavior against full-scale gold collections, including role scope, filters, drill-down and error/empty states.
+- [x] 16.5 — Test dashboard behavior against full-scale gold collections, including role scope, filters, drill-down and error/empty states.
   Commit: `Update - 16.5 - validate dashboard at full scale`
 
-- [ ] 16.6 — Perform a local resource audit covering Spark memory, MongoDB usage, Parquet size, pipeline runtime and dashboard responsiveness.
+- [x] 16.6 — Perform a local resource audit covering Spark memory, MongoDB usage, Parquet size, pipeline runtime and dashboard responsiveness.
   Commit: `Update - 16.6 - record full-scale resource audit`
 
 ---
