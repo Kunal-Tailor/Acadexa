@@ -1,0 +1,120 @@
+{
+  "report_version": "1.0.0",
+  "manifest_version": "1.0.0",
+  "run_id": "bench_20261001_154957",
+  "generated_at": "2026-10-01T16:03:54.734425+00:00",
+  "environment": {
+    "python_version": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "cpu_count": 20,
+    "pandas_version": "3.0.1",
+    "pyspark_version": "4.2.0",
+    "pymongo_version": "4.17.0",
+    "pyarrow_version": "25.0.1",
+    "numpy_version": "1.26.4",
+    "scale": "full",
+    "lms_input_path": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\raw\\lms_events",
+    "cleaned_base_path": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\cleaned"
+  },
+  "workloads": [
+    {
+      "workload_id": "feature_table_join",
+      "title": "Feature-table join",
+      "description": "Join per-domain academic summaries at student \u00d7 course \u00d7 semester grain with a join-focused metric subset (marks totals, attendance counts, coursework counts, LMS event totals). Per-engine scope is practical, not identical: pandas/Spark join four domains including LMS weekly aggregates, while MongoDB joins the three operational collections it holds (LMS weekly aggregates live outside MongoDB by architecture). Scopes are recorded per result.",
+      "output_grain": "student_id \u00d7 course_id \u00d7 semester_id",
+      "results": [
+        {
+          "engine": "pandas",
+          "duration_sec": 1.4558247000022675,
+          "input_rows": 0,
+          "output_rows": 0,
+          "peak_memory_mb": null,
+          "status": "FAILED: FileNotFoundError: Domain dataset not found: D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\cleaned\\lms_weekly_engagement",
+          "extra": {
+            "base_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\cleaned",
+            "join_semantics": "outer",
+            "collections": "academic_records+attendance+coursework+lms_weekly"
+          }
+        },
+        {
+          "engine": "mongodb",
+          "duration_sec": 5.08541420000256,
+          "input_rows": 0,
+          "output_rows": 0,
+          "peak_memory_mb": null,
+          "status": "FAILED: ServerSelectionTimeoutError: localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms), Timeout: 5.0s, Topology Description: <TopologyDescription id: 6abe8464d0c2cffe146d5fec, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms)')>]>",
+          "extra": {
+            "join_semantics": "left",
+            "collections": "academic_records+attendance+coursework"
+          }
+        },
+        {
+          "engine": "pyspark",
+          "duration_sec": 1.4223172000019986,
+          "input_rows": 0,
+          "output_rows": 0,
+          "peak_memory_mb": null,
+          "status": "FAILED: AnalysisException: [PATH_NOT_FOUND] Path does not exist: file:/D:/College/Secondary/Projects/acadexa/data/fullscale/cleaned/lms_weekly_engagement. SQLSTATE: 42K03",
+          "extra": {
+            "base_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\cleaned",
+            "output_path": "C:\\Users\\Rishav\\AppData\\Local\\Temp\\acadexa_bench_join_hkf1zaor",
+            "join_semantics": "outer",
+            "collections": "academic_records+attendance+coursework+lms_weekly+hierarchy",
+            "spark_master": "local[2]",
+            "spark_driver_memory": "2g"
+          }
+        }
+      ]
+    },
+    {
+      "workload_id": "weekly_lms_engagement",
+      "title": "Weekly LMS engagement aggregation",
+      "description": "Aggregate event-level LMS data into weekly student-course engagement summaries: total events, positive-only durations, distinct active days, approved activity-category roll-ups and per-type breakdowns (same task as Spark J2).",
+      "output_grain": "student_id \u00d7 course_id \u00d7 school \u00d7 semester_id \u00d7 week_start \u00d7 week_number",
+      "results": [
+        {
+          "engine": "pandas",
+          "duration_sec": 643.3580986000015,
+          "input_rows": 0,
+          "output_rows": 0,
+          "peak_memory_mb": null,
+          "status": "FAILED: MemoryError: ",
+          "extra": {
+            "input_path": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\raw\\lms_events"
+          }
+        },
+        {
+          "engine": "mongodb",
+          "duration_sec": 5.163671700000123,
+          "input_rows": 0,
+          "output_rows": 0,
+          "peak_memory_mb": null,
+          "status": "FAILED: ServerSelectionTimeoutError: localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms), Timeout: 5.0s, Topology Description: <TopologyDescription id: 6abe83c6d0c2cffe146d5feb, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms)')>]>",
+          "extra": {
+            "collection": "lms_events"
+          }
+        },
+        {
+          "engine": "pyspark",
+          "duration_sec": 151.11664720000044,
+          "input_rows": 74757153,
+          "output_rows": 4682117,
+          "peak_memory_mb": null,
+          "status": "SUCCESS",
+          "extra": {
+            "input_path": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\raw\\lms_events",
+            "output_path": "C:\\Users\\Rishav\\AppData\\Local\\Temp\\acadexa_bench_spark_4vfq5cns",
+            "spark_master": "local[2]",
+            "spark_driver_memory": "2g"
+          }
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Measured results from the local project environment; no technology conclusions are drawn.",
+    "Each engine includes its own read path: pandas/Spark read Parquet datasets, MongoDB aggregates its serving collections.",
+    "Feature-table join scopes differ by engine holdings: pandas/Spark join four domains including LMS weekly aggregates, MongoDB joins the three operational collections.",
+    "Memory figures are Python-allocator peaks where measured; JVM execution memory is not captured (driver memory recorded)."
+  ]
+}

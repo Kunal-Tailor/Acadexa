@@ -1,0 +1,87 @@
+{
+  "task": "15.7",
+  "stage": "J7_publish_gold",
+  "status": "SUCCESS",
+  "start_time": "2026-10-01T15:49:08.325474+00:00",
+  "end_time": "2026-10-01T15:49:35.486843+00:00",
+  "duration_sec": 27.161,
+  "output_counts": {
+    "gold_student_features": 48000,
+    "gold_course_metrics": 288,
+    "gold_school_summary": 18,
+    "gold_risk_indicators": 12000
+  },
+  "details": {
+    "published_collections": [
+      "student_features",
+      "course_metrics",
+      "school_summary",
+      "risk_indicators"
+    ],
+    "risk_signal_breakdown": {
+      "total_students": 12000,
+      "flagged_students": 12000,
+      "high_risk_students": 10182,
+      "signal_count_distribution": {
+        "0": 0,
+        "1": 10,
+        "2": 1808,
+        "3": 4751,
+        "4": 4195,
+        "5": 1236
+      },
+      "flag_counts": {
+        "low_attendance": 6245,
+        "lms_decline": 2094,
+        "late_submissions": 8578,
+        "marks_decline": 11922,
+        "low_quiz_activity": 12000
+      }
+    },
+    "validation_report": {
+      "student_features": {
+        "is_valid": true,
+        "row_count": 48000,
+        "grain_unique": true
+      },
+      "course_metrics": {
+        "is_valid": true,
+        "row_count": 288,
+        "grain_unique": true
+      },
+      "school_summary": {
+        "is_valid": true,
+        "row_count": 18,
+        "grain_unique": true
+      },
+      "risk_indicators": {
+        "is_valid": true,
+        "row_count": 12000,
+        "grain_unique": true
+      }
+    }
+  },
+  "gold_validation_summary": {
+    "student_features": {
+      "is_valid": true,
+      "row_count": 48000,
+      "grain_unique": true
+    },
+    "course_metrics": {
+      "is_valid": true,
+      "row_count": 288,
+      "grain_unique": true
+    },
+    "school_summary": {
+      "is_valid": true,
+      "row_count": 18,
+      "grain_unique": true
+    },
+    "risk_indicators": {
+      "is_valid": true,
+      "row_count": 12000,
+      "grain_unique": true
+    }
+  },
+  "data_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale"
+}

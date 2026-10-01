@@ -1,0 +1,17 @@
+{
+  "task": "15.5",
+  "stage": "J5_trend_detection",
+  "status": "SUCCESS",
+  "start_time": "2026-10-01T15:48:30.515609+00:00",
+  "end_time": "2026-10-01T15:48:55.061503+00:00",
+  "duration_sec": 24.545,
+  "output_counts": {
+    "trend_indicators": 288000
+  },
+  "details": {
+    "total_rows": 288000,
+    "lms_decline_count": 5816,
+    "marks_decline_count": 60578
+  },
+  "data_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale"
+}

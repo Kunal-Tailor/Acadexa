@@ -525,16 +525,16 @@ Run the validated processing architecture at target scale.
 - [x] 15.4 — Run J4 full-scale correlation analysis and store measured results.
   Commit: `Update - 15.4 - run full-scale correlation analytics`
 
-- [ ] 15.5 — Run J5 full-scale trend detection and validate the synthetic decliner behavior.
+- [x] 15.5 — Run J5 full-scale trend detection and validate the synthetic decliner behavior.
   Commit: `Update - 15.5 - run full-scale trend detection`
 
-- [ ] 15.6 — Run J6 full-scale five-rule risk signals and validate signal distributions.
+- [x] 15.6 — Run J6 full-scale five-rule risk signals and validate signal distributions.
   Commit: `Update - 15.6 - run full-scale risk analytics`
 
-- [ ] 15.7 — Run J7 full-scale publication and validate all gold collections.
+- [x] 15.7 — Run J7 full-scale publication and validate all gold collections.
   Commit: `Update - 15.7 - publish full-scale gold layer`
 
-- [ ] 15.8 — Run J8 against the documented benchmark workloads and record actual performance.
+- [x] 15.8 — Run J8 against the documented benchmark workloads and record actual performance.
   Commit: `Update - 15.8 - run full-scale benchmarks`
 
 **Checkpoint:** Full-scale processing succeeds within the local resource constraints or produces documented engineering findings where the target requires adjustment.

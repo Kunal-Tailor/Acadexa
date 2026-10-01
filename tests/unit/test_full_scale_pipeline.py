@@ -287,3 +287,114 @@ class TestFullScalePipelineContinuity:
         assert total < 14_400, f"Total pipeline duration {total:.1f}s exceeds 4h"
         # J1 (74M rows) should dominate
         assert j1 > j2, "J1 (cleaning 74M LMS rows) should take longer than J2"
+
+# ---------------------------------------------------------------------------
+# Task 15.5 — J5 Trend Detection
+# ---------------------------------------------------------------------------
+
+class TestFullScaleJ5:
+    def test_j5_manifest_exists(self):
+        assert (MANIFESTS_DIR / "full_scale_j5.json").exists()
+
+    def test_j5_task_and_stage(self):
+        d = _load("full_scale_j5.json")
+        assert d["task"] == "15.5"
+        assert d["stage"] == "J5_trend_detection"
+
+    def test_j5_status_success(self):
+        assert _load("full_scale_j5.json")["status"] == "SUCCESS"
+
+    def test_j5_output_counts(self):
+        counts = _load("full_scale_j5.json")["output_counts"]
+        assert counts["trend_indicators"] == 288_000
+
+    def test_j5_details(self):
+        details = _load("full_scale_j5.json")["details"]
+        assert details["total_rows"] == 288_000
+        assert details["lms_decline_count"] > 0
+        assert details["marks_decline_count"] > 0
+
+# ---------------------------------------------------------------------------
+# Task 15.6 — J6 Risk Signals
+# ---------------------------------------------------------------------------
+
+class TestFullScaleJ6:
+    def test_j6_manifest_exists(self):
+        assert (MANIFESTS_DIR / "full_scale_j6.json").exists()
+
+    def test_j6_task_and_stage(self):
+        d = _load("full_scale_j6.json")
+        assert d["task"] == "15.6"
+        assert d["stage"] == "J6_risk_signals"
+
+    def test_j6_status_success(self):
+        assert _load("full_scale_j6.json")["status"] == "SUCCESS"
+
+    def test_j6_output_counts(self):
+        counts = _load("full_scale_j6.json")["output_counts"]
+        assert counts["risk_indicators"] == 12_000
+
+    def test_j6_details(self):
+        details = _load("full_scale_j6.json")["details"]
+        assert details["total_students"] == 12_000
+        assert details["flagged_students"] > 0
+        assert details["high_risk_students"] > 0
+        assert "signal_counts_breakdown" in details
+
+# ---------------------------------------------------------------------------
+# Task 15.7 — J7 Publish Gold Data & Validate
+# ---------------------------------------------------------------------------
+
+class TestFullScaleJ7:
+    def test_j7_manifest_exists(self):
+        assert (MANIFESTS_DIR / "full_scale_j7.json").exists()
+
+    def test_j7_task_and_stage(self):
+        d = _load("full_scale_j7.json")
+        assert d["task"] == "15.7"
+        assert d["stage"] == "J7_publish_gold"
+
+    def test_j7_status_success(self):
+        assert _load("full_scale_j7.json")["status"] == "SUCCESS"
+
+    def test_j7_output_counts(self):
+        counts = _load("full_scale_j7.json")["output_counts"]
+        assert counts["gold_student_features"] == 48_000
+        assert counts["gold_course_metrics"] == 288
+        assert counts["gold_school_summary"] == 18
+        assert counts["gold_risk_indicators"] == 12_000
+
+    def test_j7_validation_summary(self):
+        summary = _load("full_scale_j7.json")["gold_validation_summary"]
+        for collection in [
+            "student_features", "course_metrics", 
+            "school_summary", "risk_indicators"
+        ]:
+            assert collection in summary
+            assert summary[collection]["is_valid"] is True
+            assert summary[collection]["grain_unique"] is True
+
+# ---------------------------------------------------------------------------
+# Task 15.8 — J8 Benchmarks
+# ---------------------------------------------------------------------------
+
+class TestFullScaleJ8:
+    def test_j8_manifest_exists(self):
+        assert (MANIFESTS_DIR / "full_scale_j8.json").exists()
+
+    def test_j8_task_and_stage(self):
+        d = _load("full_scale_j8.json")
+        assert d["task"] == "15.8"
+        assert d["stage"] == "J8_benchmarks"
+
+    def test_j8_results_structure(self):
+        d = _load("full_scale_j8.json")
+        results = d["results"]
+        assert isinstance(results, list)
+        assert len(results) == 6
+
+    def test_j8_summary(self):
+        summary = _load("full_scale_j8.json")["summary"]
+        assert summary["total_runs"] == 6
+        assert summary["successful_runs"] + summary["failed_runs"] == 6
+

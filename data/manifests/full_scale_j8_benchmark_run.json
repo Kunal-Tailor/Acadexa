@@ -1,0 +1,111 @@
+{
+  "manifest_version": "1.0.0",
+  "run_id": "bench_20261001_154957",
+  "started_at": "2026-10-01T15:49:57.486677+00:00",
+  "ended_at": "2026-10-01T16:03:54.734425+00:00",
+  "duration_sec": 837.248,
+  "environment": {
+    "python_version": "3.11.9",
+    "platform": "Windows-10-10.0.26300-SP0",
+    "cpu_count": 20,
+    "pandas_version": "3.0.1",
+    "pyspark_version": "4.2.0",
+    "pymongo_version": "4.17.0",
+    "pyarrow_version": "25.0.1",
+    "numpy_version": "1.26.4",
+    "scale": "full",
+    "lms_input_path": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\raw\\lms_events",
+    "cleaned_base_path": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\cleaned"
+  },
+  "results": [
+    {
+      "workload_id": "weekly_lms_engagement",
+      "engine": "pandas",
+      "duration_sec": 643.358,
+      "input_rows": 0,
+      "output_rows": 0,
+      "peak_memory_mb": null,
+      "success": false,
+      "error": "MemoryError: ",
+      "extra": {
+        "input_path": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\raw\\lms_events"
+      }
+    },
+    {
+      "workload_id": "weekly_lms_engagement",
+      "engine": "mongodb",
+      "duration_sec": 5.164,
+      "input_rows": 0,
+      "output_rows": 0,
+      "peak_memory_mb": null,
+      "success": false,
+      "error": "ServerSelectionTimeoutError: localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms), Timeout: 5.0s, Topology Description: <TopologyDescription id: 6abe83c6d0c2cffe146d5feb, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms)')>]>",
+      "extra": {
+        "collection": "lms_events"
+      }
+    },
+    {
+      "workload_id": "weekly_lms_engagement",
+      "engine": "pyspark",
+      "duration_sec": 151.117,
+      "input_rows": 74757153,
+      "output_rows": 4682117,
+      "peak_memory_mb": null,
+      "success": true,
+      "error": null,
+      "extra": {
+        "input_path": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\raw\\lms_events",
+        "output_path": "C:\\Users\\Rishav\\AppData\\Local\\Temp\\acadexa_bench_spark_4vfq5cns",
+        "spark_master": "local[2]",
+        "spark_driver_memory": "2g"
+      }
+    },
+    {
+      "workload_id": "feature_table_join",
+      "engine": "pandas",
+      "duration_sec": 1.456,
+      "input_rows": 0,
+      "output_rows": 0,
+      "peak_memory_mb": null,
+      "success": false,
+      "error": "FileNotFoundError: Domain dataset not found: D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\cleaned\\lms_weekly_engagement",
+      "extra": {
+        "base_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\cleaned",
+        "join_semantics": "outer",
+        "collections": "academic_records+attendance+coursework+lms_weekly"
+      }
+    },
+    {
+      "workload_id": "feature_table_join",
+      "engine": "mongodb",
+      "duration_sec": 5.085,
+      "input_rows": 0,
+      "output_rows": 0,
+      "peak_memory_mb": null,
+      "success": false,
+      "error": "ServerSelectionTimeoutError: localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms), Timeout: 5.0s, Topology Description: <TopologyDescription id: 6abe8464d0c2cffe146d5fec, topology_type: Unknown, servers: [<ServerDescription ('localhost', 27017) server_type: Unknown, rtt: None, error=AutoReconnect('localhost:27017: [WinError 10061] No connection could be made because the target machine actively refused it (configured timeouts: socketTimeoutMS: 5000.0ms, connectTimeoutMS: 5000.0ms)')>]>",
+      "extra": {
+        "join_semantics": "left",
+        "collections": "academic_records+attendance+coursework"
+      }
+    },
+    {
+      "workload_id": "feature_table_join",
+      "engine": "pyspark",
+      "duration_sec": 1.422,
+      "input_rows": 0,
+      "output_rows": 0,
+      "peak_memory_mb": null,
+      "success": false,
+      "error": "AnalysisException: [PATH_NOT_FOUND] Path does not exist: file:/D:/College/Secondary/Projects/acadexa/data/fullscale/cleaned/lms_weekly_engagement. SQLSTATE: 42K03",
+      "extra": {
+        "base_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale\\cleaned",
+        "output_path": "C:\\Users\\Rishav\\AppData\\Local\\Temp\\acadexa_bench_join_hkf1zaor",
+        "join_semantics": "outer",
+        "collections": "academic_records+attendance+coursework+lms_weekly+hierarchy",
+        "spark_master": "local[2]",
+        "spark_driver_memory": "2g"
+      }
+    }
+  ]
+}

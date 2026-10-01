@@ -1,0 +1,25 @@
+{
+  "task": "15.6",
+  "stage": "J6_risk_signals",
+  "status": "SUCCESS",
+  "start_time": "2026-10-01T15:48:55.061503+00:00",
+  "end_time": "2026-10-01T15:49:08.325474+00:00",
+  "duration_sec": 13.265,
+  "output_counts": {
+    "risk_indicators": 12000
+  },
+  "details": {
+    "total_students": 12000,
+    "flagged_students": 12000,
+    "high_risk_students": 10182,
+    "signal_counts_breakdown": {
+      "0": 0,
+      "1": 10,
+      "2": 1808,
+      "3": 4751,
+      "4": 4195,
+      "5": 1236
+    }
+  },
+  "data_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale"
+}
