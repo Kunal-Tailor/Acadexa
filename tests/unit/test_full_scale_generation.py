@@ -76,3 +76,54 @@ def test_full_scale_attendance_coursework_record() -> None:
     assert disk["attendance"] > 500_000_000
     assert disk["coursework"] > 500_000_000
     assert disk["attendance"] + disk["coursework"] > 1_000_000_000
+
+
+def test_full_scale_generation_manifest_record() -> None:
+    """14.7 record: full-scale generation manifest containing actual counts, seed, config, disk, duration."""
+    from acadexa.generator.manifests import GenerationManifest
+
+    full_gen_path = PROJECT_ROOT / "data" / "manifests" / "full_scale_generation_manifest.json"
+    assert full_gen_path.exists()
+
+    manifest = _load(full_gen_path)
+    assert manifest["manifest_version"] == "1.0.0"
+    assert manifest["manifest_type"] == "generation_manifest"
+    assert manifest["seed"] == 42
+    assert manifest["target_counts"] == {
+        "target_students": 12000,
+        "target_courses": 250,
+        "target_lms_events": 70000000,
+    }
+
+    actual = manifest["actual_counts"]
+    assert actual["students"] == 12000
+    assert actual["courses"] == 72
+    assert actual["academic_records"] == 288000
+    assert actual["attendance"] == 4608000
+    assert actual["coursework"] == 3338810
+    assert actual["lms_events"] == 74757153
+
+    # Validate configuration snapshot presence
+    config = manifest["configuration"]
+    assert "hierarchy" in config
+    assert "academic_periods" in config
+    assert "generator" in config
+    assert "courses" in config
+    assert "risk" in config
+
+    # Validate execution duration and storage
+    assert manifest["generation_duration_sec"] == 5632.24
+    disk = manifest["disk_usage_bytes"]
+    assert disk["students"] > 0
+    assert disk["courses"] > 0
+    assert disk["academic_records"] > 0
+    assert disk["attendance"] > 0
+    assert disk["coursework"] > 0
+    assert disk["lms_events"] > 1_000_000_000
+    assert sum(disk.values()) > 3_000_000_000
+
+    # Validate via GenerationManifest model
+    obj = GenerationManifest.load(full_gen_path)
+    assert obj.seed == 42
+    assert obj.actual_counts["lms_events"] == 74757153
+    assert obj.metadata == {"scale": "full", "task": "14.7"}

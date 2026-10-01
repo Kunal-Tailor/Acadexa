@@ -500,7 +500,7 @@ Scale the validated architecture toward the documented target.
 - [x] 14.6 — Generate the defined MongoDB LMS serving slice from the full dataset without loading all LMS events into MongoDB.
   Commit: `Update - 14.6 - generate full LMS serving slice`
 
-- [ ] 14.7 — Record full-scale generation manifest containing actual counts, seed, configuration, disk usage and generation duration.
+- [x] 14.7 — Record full-scale generation manifest containing actual counts, seed, configuration, disk usage and generation duration.
   Commit: `Update - 14.7 - record full-scale generation manifest`
 
 **Checkpoint:** Full synthetic data exists and actual scale is documented.

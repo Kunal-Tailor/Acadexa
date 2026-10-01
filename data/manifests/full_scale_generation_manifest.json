@@ -1,0 +1,920 @@
+{
+  "manifest_version": "1.0.0",
+  "manifest_type": "generation_manifest",
+  "seed": 42,
+  "generated_at": "2026-10-01T12:42:04.537164+00:00",
+  "target_counts": {
+    "target_students": 12000,
+    "target_courses": 250,
+    "target_lms_events": 70000000
+  },
+  "actual_counts": {
+    "students": 12000,
+    "courses": 72,
+    "academic_records": 288000,
+    "attendance": 4608000,
+    "coursework": 3338810,
+    "lms_events": 74757153
+  },
+  "configuration": {
+    "hierarchy": {
+      "university": {
+        "id": "RAS",
+        "name": "RAS University",
+        "structure_reference": "MIT-WPU (fictional institution, synthetic data only)"
+      },
+      "schools": {
+        "cet": {
+          "code": "CET",
+          "name": "School of Computer Engineering & Technology"
+        },
+        "set": {
+          "code": "SET",
+          "name": "School of Engineering & Technology"
+        },
+        "sci": {
+          "code": "SCI",
+          "name": "School of Sciences"
+        },
+        "som": {
+          "code": "SOM",
+          "name": "School of Management"
+        },
+        "sol": {
+          "code": "SOL",
+          "name": "School of Law"
+        },
+        "lad": {
+          "code": "LAD",
+          "name": "School of Liberal Arts & Design"
+        }
+      },
+      "departments": {
+        "csa": {
+          "school": "cet",
+          "code": "CSA",
+          "name": "Computer Science and Applications"
+        },
+        "itl": {
+          "school": "cet",
+          "code": "ITL",
+          "name": "Information Technology"
+        },
+        "cyb": {
+          "school": "cet",
+          "code": "CYB",
+          "name": "Cyber Security & Digital Forensics"
+        },
+        "mec": {
+          "school": "set",
+          "code": "MEC",
+          "name": "Mechanical Engineering"
+        },
+        "civ": {
+          "school": "set",
+          "code": "CIV",
+          "name": "Civil Engineering"
+        },
+        "ext": {
+          "school": "set",
+          "code": "EXT",
+          "name": "Electronics & Telecommunication Engineering"
+        },
+        "mat": {
+          "school": "sci",
+          "code": "MAT",
+          "name": "Mathematics & Statistics"
+        },
+        "phy": {
+          "school": "sci",
+          "code": "PHY",
+          "name": "Physics"
+        },
+        "chem": {
+          "school": "sci",
+          "code": "CHE",
+          "name": "Chemistry"
+        },
+        "mgt": {
+          "school": "som",
+          "code": "MGT",
+          "name": "Management Studies"
+        },
+        "eco": {
+          "school": "som",
+          "code": "ECO",
+          "name": "Economics & Commerce"
+        },
+        "bda": {
+          "school": "som",
+          "code": "BDA",
+          "name": "Business Analytics"
+        },
+        "law": {
+          "school": "sol",
+          "code": "LAW",
+          "name": "Legal Studies"
+        },
+        "pol": {
+          "school": "sol",
+          "code": "POL",
+          "name": "Policy & Governance"
+        },
+        "crm": {
+          "school": "sol",
+          "code": "CRM",
+          "name": "Criminology & Forensic Studies"
+        },
+        "des": {
+          "school": "lad",
+          "code": "DES",
+          "name": "Design"
+        },
+        "med": {
+          "school": "lad",
+          "code": "MED",
+          "name": "Media & Communication"
+        },
+        "hum": {
+          "school": "lad",
+          "code": "HUM",
+          "name": "Humanities & Social Sciences"
+        }
+      },
+      "programs": {
+        "btech_cse_ai_ds": {
+          "department": "csa",
+          "degree": "B.Tech",
+          "name": "B.Tech CSE (AI & DS)"
+        },
+        "btech_cse_full_stack": {
+          "department": "csa",
+          "degree": "B.Tech",
+          "name": "B.Tech CSE (Full Stack)"
+        },
+        "mtech_cse_data_science": {
+          "department": "csa",
+          "degree": "M.Tech",
+          "name": "M.Tech CSE (Data Science)"
+        },
+        "btech_it": {
+          "department": "itl",
+          "degree": "B.Tech",
+          "name": "B.Tech Information Technology"
+        },
+        "btech_it_business_systems": {
+          "department": "itl",
+          "degree": "B.Tech",
+          "name": "B.Tech IT (Business Systems)"
+        },
+        "btech_cse_cyber_security": {
+          "department": "cyb",
+          "degree": "B.Tech",
+          "name": "B.Tech CSE (Cyber Security)"
+        },
+        "btech_cse_blockchain": {
+          "department": "cyb",
+          "degree": "B.Tech",
+          "name": "B.Tech CSE (Blockchain)"
+        },
+        "btech_mechanical": {
+          "department": "mec",
+          "degree": "B.Tech",
+          "name": "B.Tech Mechanical Engineering"
+        },
+        "btech_mechanical_robotics": {
+          "department": "mec",
+          "degree": "B.Tech",
+          "name": "B.Tech Mechanical (Robotics & Automation)"
+        },
+        "mtech_mechanical_design": {
+          "department": "mec",
+          "degree": "M.Tech",
+          "name": "M.Tech Mechanical (Design)"
+        },
+        "btech_civil": {
+          "department": "civ",
+          "degree": "B.Tech",
+          "name": "B.Tech Civil Engineering"
+        },
+        "btech_civil_infrastructure": {
+          "department": "civ",
+          "degree": "B.Tech",
+          "name": "B.Tech Civil (Sustainable Infrastructure)"
+        },
+        "btech_entc": {
+          "department": "ext",
+          "degree": "B.Tech",
+          "name": "B.Tech Electronics & Telecommunication"
+        },
+        "btech_entc_vlsi": {
+          "department": "ext",
+          "degree": "B.Tech",
+          "name": "B.Tech E&TC (VLSI Design)"
+        },
+        "bsc_mathematics": {
+          "department": "mat",
+          "degree": "B.Sc",
+          "name": "B.Sc Mathematics (Hons)"
+        },
+        "bsc_data_science": {
+          "department": "mat",
+          "degree": "B.Sc",
+          "name": "B.Sc Data Science & Analytics"
+        },
+        "bsc_physics": {
+          "department": "phy",
+          "degree": "B.Sc",
+          "name": "B.Sc Physics (Hons)"
+        },
+        "msc_physics": {
+          "department": "phy",
+          "degree": "M.Sc",
+          "name": "M.Sc Physics"
+        },
+        "bsc_chemistry": {
+          "department": "chem",
+          "degree": "B.Sc",
+          "name": "B.Sc Chemistry (Hons)"
+        },
+        "msc_chemistry": {
+          "department": "chem",
+          "degree": "M.Sc",
+          "name": "M.Sc Chemistry"
+        },
+        "bba": {
+          "department": "mgt",
+          "degree": "BBA",
+          "name": "BBA (Hons)"
+        },
+        "mba": {
+          "department": "mgt",
+          "degree": "MBA",
+          "name": "MBA"
+        },
+        "b_com_hons": {
+          "department": "eco",
+          "degree": "B.Com",
+          "name": "B.Com (Hons)"
+        },
+        "ba_economics": {
+          "department": "eco",
+          "degree": "B.A",
+          "name": "B.A Economics (Hons)"
+        },
+        "bba_data_analytics": {
+          "department": "bda",
+          "degree": "BBA",
+          "name": "BBA (Data Analytics)"
+        },
+        "mba_business_analytics": {
+          "department": "bda",
+          "degree": "MBA",
+          "name": "MBA (Business Analytics)"
+        },
+        "ba_llb_hons": {
+          "department": "law",
+          "degree": "BA LLB",
+          "name": "BA LLB (Hons)"
+        },
+        "bba_llb_hons": {
+          "department": "law",
+          "degree": "BBA LLB",
+          "name": "BBA LLB (Hons)"
+        },
+        "llb": {
+          "department": "law",
+          "degree": "LLB",
+          "name": "LLB"
+        },
+        "llm_constitutional": {
+          "department": "pol",
+          "degree": "LLM",
+          "name": "LLM (Constitutional & Administrative Law)"
+        },
+        "llm_international": {
+          "department": "pol",
+          "degree": "LLM",
+          "name": "LLM (International Law & Policy)"
+        },
+        "ba_criminology": {
+          "department": "crm",
+          "degree": "B.A",
+          "name": "B.A Criminology & Forensic Science"
+        },
+        "bdes_interaction": {
+          "department": "des",
+          "degree": "B.Des",
+          "name": "B.Des Interaction Design"
+        },
+        "bdes_graphic_digital": {
+          "department": "des",
+          "degree": "B.Des",
+          "name": "B.Des Graphic & Digital Media"
+        },
+        "bdes_film_animation": {
+          "department": "des",
+          "degree": "B.Des",
+          "name": "B.Des Film & Animation"
+        },
+        "ba_mass_communication": {
+          "department": "med",
+          "degree": "B.A",
+          "name": "B.A Mass Media & Communication"
+        },
+        "ba_film_television": {
+          "department": "med",
+          "degree": "B.A",
+          "name": "B.A Film & Television Production"
+        },
+        "ba_psychology": {
+          "department": "hum",
+          "degree": "B.A",
+          "name": "B.A Psychology (Hons)"
+        },
+        "ba_english": {
+          "department": "hum",
+          "degree": "B.A",
+          "name": "B.A English (Hons)"
+        },
+        "ba_sociology": {
+          "department": "hum",
+          "degree": "B.A",
+          "name": "B.A Sociology (Hons)"
+        }
+      }
+    },
+    "courses": {
+      "courses": {
+        "CSA101": {
+          "title": "Programming Fundamentals",
+          "department": "csa"
+        },
+        "CSA102": {
+          "title": "Data Structures & Algorithms",
+          "department": "csa"
+        },
+        "CSA103": {
+          "title": "Database Systems",
+          "department": "csa"
+        },
+        "CSA104": {
+          "title": "Machine Learning Foundations",
+          "department": "csa"
+        },
+        "ITL101": {
+          "title": "Computer Networks",
+          "department": "itl"
+        },
+        "ITL102": {
+          "title": "Cloud Computing Fundamentals",
+          "department": "itl"
+        },
+        "ITL103": {
+          "title": "Operating Systems",
+          "department": "itl"
+        },
+        "ITL104": {
+          "title": "Web Technologies",
+          "department": "itl"
+        },
+        "CYB101": {
+          "title": "Cyber Security Fundamentals",
+          "department": "cyb"
+        },
+        "CYB102": {
+          "title": "Cryptography",
+          "department": "cyb"
+        },
+        "CYB103": {
+          "title": "Digital Forensics",
+          "department": "cyb"
+        },
+        "CYB104": {
+          "title": "Network Security",
+          "department": "cyb"
+        },
+        "MEC101": {
+          "title": "Engineering Mechanics",
+          "department": "mec"
+        },
+        "MEC102": {
+          "title": "Thermodynamics",
+          "department": "mec"
+        },
+        "MEC103": {
+          "title": "Machine Design",
+          "department": "mec"
+        },
+        "MEC104": {
+          "title": "Robotics & Automation",
+          "department": "mec"
+        },
+        "CIV101": {
+          "title": "Structural Analysis",
+          "department": "civ"
+        },
+        "CIV102": {
+          "title": "Geotechnical Engineering",
+          "department": "civ"
+        },
+        "CIV103": {
+          "title": "Transportation Engineering",
+          "department": "civ"
+        },
+        "CIV104": {
+          "title": "Sustainable Construction",
+          "department": "civ"
+        },
+        "EXT101": {
+          "title": "Circuit Analysis",
+          "department": "ext"
+        },
+        "EXT102": {
+          "title": "Signals & Systems",
+          "department": "ext"
+        },
+        "EXT103": {
+          "title": "VLSI Design Fundamentals",
+          "department": "ext"
+        },
+        "EXT104": {
+          "title": "Embedded Systems",
+          "department": "ext"
+        },
+        "MAT101": {
+          "title": "Linear Algebra",
+          "department": "mat"
+        },
+        "MAT102": {
+          "title": "Calculus & Differential Equations",
+          "department": "mat"
+        },
+        "MAT103": {
+          "title": "Probability & Statistics",
+          "department": "mat"
+        },
+        "MAT104": {
+          "title": "Discrete Mathematics",
+          "department": "mat"
+        },
+        "PHY101": {
+          "title": "Classical Mechanics",
+          "department": "phy"
+        },
+        "PHY102": {
+          "title": "Electromagnetism",
+          "department": "phy"
+        },
+        "PHY103": {
+          "title": "Quantum Physics",
+          "department": "phy"
+        },
+        "PHY104": {
+          "title": "Computational Physics",
+          "department": "phy"
+        },
+        "CHE101": {
+          "title": "Organic Chemistry",
+          "department": "chem"
+        },
+        "CHE102": {
+          "title": "Physical Chemistry",
+          "department": "chem"
+        },
+        "CHE103": {
+          "title": "Inorganic Chemistry",
+          "department": "chem"
+        },
+        "CHE104": {
+          "title": "Analytical Chemistry",
+          "department": "chem"
+        },
+        "MGT101": {
+          "title": "Principles of Management",
+          "department": "mgt"
+        },
+        "MGT102": {
+          "title": "Organizational Behavior",
+          "department": "mgt"
+        },
+        "MGT103": {
+          "title": "Marketing Management",
+          "department": "mgt"
+        },
+        "MGT104": {
+          "title": "Financial Accounting",
+          "department": "mgt"
+        },
+        "ECO101": {
+          "title": "Microeconomics",
+          "department": "eco"
+        },
+        "ECO102": {
+          "title": "Macroeconomics",
+          "department": "eco"
+        },
+        "ECO103": {
+          "title": "Business Statistics",
+          "department": "eco"
+        },
+        "ECO104": {
+          "title": "Corporate Finance",
+          "department": "eco"
+        },
+        "BDA101": {
+          "title": "Data Analytics Foundations",
+          "department": "bda"
+        },
+        "BDA102": {
+          "title": "Business Intelligence",
+          "department": "bda"
+        },
+        "BDA103": {
+          "title": "Data Visualization",
+          "department": "bda"
+        },
+        "BDA104": {
+          "title": "Decision Analysis",
+          "department": "bda"
+        },
+        "LAW101": {
+          "title": "Legal Methods",
+          "department": "law"
+        },
+        "LAW102": {
+          "title": "Law of Contract",
+          "department": "law"
+        },
+        "LAW103": {
+          "title": "Constitutional Law",
+          "department": "law"
+        },
+        "LAW104": {
+          "title": "Jurisprudence",
+          "department": "law"
+        },
+        "POL101": {
+          "title": "Public Policy Analysis",
+          "department": "pol"
+        },
+        "POL102": {
+          "title": "International Law & Organizations",
+          "department": "pol"
+        },
+        "POL103": {
+          "title": "Governance & Ethics",
+          "department": "pol"
+        },
+        "POL104": {
+          "title": "Human Rights Law",
+          "department": "pol"
+        },
+        "CRM101": {
+          "title": "Criminology Foundations",
+          "department": "crm"
+        },
+        "CRM102": {
+          "title": "Forensic Science Techniques",
+          "department": "crm"
+        },
+        "CRM103": {
+          "title": "Criminal Law & Procedure",
+          "department": "crm"
+        },
+        "CRM104": {
+          "title": "Investigation & Evidence",
+          "department": "crm"
+        },
+        "DES101": {
+          "title": "Design Thinking",
+          "department": "des"
+        },
+        "DES102": {
+          "title": "Interaction Design Fundamentals",
+          "department": "des"
+        },
+        "DES103": {
+          "title": "Typography & Visual Systems",
+          "department": "des"
+        },
+        "DES104": {
+          "title": "Human-Centered Design",
+          "department": "des"
+        },
+        "MED101": {
+          "title": "Media & Communication Theory",
+          "department": "med"
+        },
+        "MED102": {
+          "title": "Journalism Practice",
+          "department": "med"
+        },
+        "MED103": {
+          "title": "Film & Television Production",
+          "department": "med"
+        },
+        "MED104": {
+          "title": "Digital Media Strategy",
+          "department": "med"
+        },
+        "HUM101": {
+          "title": "Psychology Foundations",
+          "department": "hum"
+        },
+        "HUM102": {
+          "title": "English Literature & Criticism",
+          "department": "hum"
+        },
+        "HUM103": {
+          "title": "Sociological Thought",
+          "department": "hum"
+        },
+        "HUM104": {
+          "title": "Technical Communication",
+          "department": "hum"
+        }
+      }
+    },
+    "academic_periods": {
+      "academic_years": {
+        "AY1": {
+          "label": "2024-25"
+        },
+        "AY2": {
+          "label": "2025-26"
+        }
+      },
+      "semesters": {
+        "S1": {
+          "academic_year": "AY1",
+          "semester_index": 1,
+          "position_in_year": 1,
+          "term": "odd",
+          "start_date": "2024-07-15",
+          "end_date": "2024-11-03",
+          "teaching_weeks": 16
+        },
+        "S2": {
+          "academic_year": "AY1",
+          "semester_index": 2,
+          "position_in_year": 2,
+          "term": "even",
+          "start_date": "2025-01-06",
+          "end_date": "2025-04-27",
+          "teaching_weeks": 16
+        },
+        "S3": {
+          "academic_year": "AY2",
+          "semester_index": 3,
+          "position_in_year": 1,
+          "term": "odd",
+          "start_date": "2025-07-14",
+          "end_date": "2025-11-02",
+          "teaching_weeks": 16
+        },
+        "S4": {
+          "academic_year": "AY2",
+          "semester_index": 4,
+          "position_in_year": 2,
+          "term": "even",
+          "start_date": "2026-01-05",
+          "end_date": "2026-04-26",
+          "teaching_weeks": 16
+        }
+      }
+    },
+    "generator": {
+      "generator": {
+        "seed": 42
+      },
+      "scale": {
+        "target_students": 12000,
+        "target_courses": 250,
+        "courses_per_student_per_semester": 6,
+        "elective_courses_per_semester": 3,
+        "target_lms_events": 70000000,
+        "lms_events_per_student_per_day": 15,
+        "teaching_days_per_academic_year": 200,
+        "school_population": {
+          "cet": 2600,
+          "set": 3000,
+          "som": 2400,
+          "lad": 2200,
+          "sci": 1000,
+          "sol": 800
+        }
+      },
+      "behavior": {
+        "student_traits": {
+          "ability": {
+            "mean": 0.65,
+            "std": 0.15
+          },
+          "diligence": {
+            "mean": 0.6,
+            "std": 0.18
+          },
+          "engagement": {
+            "mean": 0.55,
+            "std": 0.2
+          },
+          "observation_noise_std": 0.1,
+          "ability_marks_weight": 24.0,
+          "diligence_attendance_weight": 0.13,
+          "engagement_attendance_weight": 0.1,
+          "diligence_late_weight": 0.4
+        },
+        "decliners": {
+          "rate": 0.08,
+          "start_week": 5,
+          "weekly_engagement_decay": 0.07,
+          "marks_decline_lag_weeks": 3,
+          "component_weeks": {
+            "internal": 4,
+            "midterm": 9,
+            "endterm": 15
+          },
+          "marks_weekly_decline": 2.0,
+          "score_weekly_decay": 0.04
+        },
+        "rhythms": {
+          "weekend_event_factor": 0.4,
+          "mid_semester_dip_factor": 0.8,
+          "pre_deadline_spike_factor": 1.6,
+          "pre_exam_spike_factor": 1.8
+        },
+        "academic_performance": {
+          "baseline_mean": 72.0,
+          "record_std": 10.0,
+          "component_std": 4.0
+        },
+        "grade_scale": {
+          "A": 85,
+          "B": 75,
+          "C": 65,
+          "D": 50
+        },
+        "weekly_attendance": {
+          "classes_conducted": 4,
+          "base_probability": 0.85,
+          "alignment_weight": 0.2,
+          "weekly_noise_std": 0.08,
+          "probability_floor": 0.05,
+          "probability_ceiling": 0.98
+        },
+        "coursework": {
+          "assignments_per_course_per_semester": 8,
+          "quizzes_per_course_per_semester": 4,
+          "assignment_window_days": 7,
+          "quiz_window_days": 3,
+          "max_late_days": 7,
+          "missing_probability": 0.04,
+          "late_probability": 0.14,
+          "late_marks_alignment": 0.9,
+          "quiz_retry_probability": 0.3,
+          "max_quiz_attempts": 3,
+          "assignment_max_score": 20,
+          "quiz_max_score": 5,
+          "score_noise_std": 0.15
+        }
+      },
+      "school_profiles": {
+        "cet": {
+          "lms_activity": 1.4,
+          "attendance": 1.0,
+          "quiz_activity": 1.5,
+          "late_submission": 1.0
+        },
+        "set": {
+          "lms_activity": 0.9,
+          "attendance": 1.0,
+          "quiz_activity": 1.0,
+          "late_submission": 1.1
+        },
+        "som": {
+          "lms_activity": 1.0,
+          "attendance": 1.15,
+          "quiz_activity": 0.8,
+          "late_submission": 1.1
+        },
+        "lad": {
+          "lms_activity": 1.0,
+          "attendance": 0.95,
+          "quiz_activity": 0.5,
+          "late_submission": 1.2
+        },
+        "sci": {
+          "lms_activity": 1.0,
+          "attendance": 1.1,
+          "quiz_activity": 1.0,
+          "late_submission": 0.95
+        },
+        "sol": {
+          "lms_activity": 0.85,
+          "attendance": 1.05,
+          "quiz_activity": 0.6,
+          "late_submission": 1.0
+        }
+      },
+      "course_difficulty": {
+        "easy_share": 0.3,
+        "medium_share": 0.45,
+        "hard_share": 0.25,
+        "max_score_drag": 12,
+        "attendance_drag": 0.08
+      },
+      "lms_events": {
+        "chunk_size": 100000,
+        "event_type_distribution": {
+          "LOGIN": 0.12,
+          "LOGOUT": 0.12,
+          "VIDEO_VIEW": 0.18,
+          "VIDEO_COMPLETE": 0.08,
+          "PDF_VIEW": 0.12,
+          "RESOURCE_DOWNLOAD": 0.1,
+          "QUIZ_ATTEMPT": 0.08,
+          "ASSIGNMENT_VIEW": 0.1,
+          "ASSIGNMENT_SUBMISSION": 0.06,
+          "COURSE_PAGE_VIEW": 0.03,
+          "FORUM_POST": 0.01
+        }
+      },
+      "data_quality_injection": {
+        "duplicate_lms_events": 0.01,
+        "nulls_non_key": 0.015,
+        "timestamp_inconsistencies": 0.01,
+        "course_id_formatting": 0.005,
+        "orphan_records": 0.001,
+        "out_of_range_values": 0.001,
+        "null_key_fields_allowed": false
+      }
+    },
+    "risk": {
+      "risk": {
+        "max_signal_count": 5,
+        "points_per_signal": 1,
+        "score_type": "observed_signal_count"
+      },
+      "signals": {
+        "low_attendance": {
+          "window": "term_to_date",
+          "threshold_percent": 75.0,
+          "comparison": "below"
+        },
+        "lms_decline": {
+          "window_weeks": 4,
+          "comparison_ratio": 0.5,
+          "comparison": "less_than_or_equal"
+        },
+        "late_submissions": {
+          "scope": "assignments",
+          "late_rate_threshold": 0.3,
+          "comparison": "greater_than"
+        },
+        "marks_decline": {
+          "recent_items": 3,
+          "point_drop_threshold": 10.0,
+          "comparison": "greater_than_or_equal"
+        },
+        "low_quiz_activity": {
+          "scope": "course",
+          "percentile_threshold": 0.25,
+          "comparison": "bottom_quartile"
+        }
+      }
+    }
+  },
+  "generation_duration_sec": 5632.24,
+  "disk_usage_bytes": {
+    "students": 2644065,
+    "courses": 17258,
+    "academic_records": 57610896,
+    "attendance": 857106327,
+    "coursework": 1063488703,
+    "lms_events": 1384299429,
+    "ground_truth_registry": 322403
+  },
+  "output_files": {
+    "students": "data/fullscale/generated/students.json",
+    "courses": "data/fullscale/generated/courses.json",
+    "academic_records": "data/fullscale/generated/academic_records.json",
+    "attendance": "data/fullscale/generated/attendance.json",
+    "coursework": "data/fullscale/generated/coursework.json",
+    "lms_events": "data/fullscale/raw/lms_events",
+    "ground_truth_registry": "data/fullscale/manifests/ground_truth_registry.json"
+  },
+  "injected_issues_summary": {
+    "duplicate_lms_events": 740169,
+    "nulls_non_key": 590317,
+    "timestamp_inconsistencies": 779625,
+    "course_id_formatting": 414959,
+    "orphan_records": 82991,
+    "out_of_range_values": 35988
+  },
+  "injection_manifest_path": "data/fullscale/manifests/injection_manifest.json",
+  "metadata": {
+    "scale": "full",
+    "task": "14.7"
+  }
+}
