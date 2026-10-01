@@ -1,17 +1,21 @@
-# IDE Context — Acadexa Full Session Record (Task 0.1 → 9.7)
+# IDE Context — Acadexa Full Session Record (Task 0.1 → 14.4; 14.5/14.6 running)
 
 **Document:** `docs/IDE_Context.md`  
 **Purpose:** Complete, self-contained, authoritative working memory and architectural context for any human developer or IDE agent resuming this codebase.  
 **Created by:** Task 4.9 (`Update - 4.9 - add IDE context documentation`), updated by Task 7.7, and comprehensively expanded by Task 9.7 (`Update - 9.7 - IDE_Context data addition`) at Phase 9 Checkpoint.  
-**Snapshot date:** 2026-09-29  
+**Session update:** Tasks 10.1 → 14.4 implemented 2026-09-29 → 2026-10-01 in one continuous IDE session (Sections 13–15); Tasks 14.5/14.6 in progress.  
+**Snapshot date:** 2026-10-01  
 **Repository:** `D:\College\Secondary\Projects\acadexa`, branch `main`  
-**State at snapshot:** Tasks 0.1 → 9.7 fully implemented; full test suite **438+ passed**; Phase 9 completed; ready for Phase 10 (MVP Validation Gate).
+**State at snapshot:** Tasks 0.1 → 14.4 fully implemented (≈190 new unit/integration tests this session, all passing alongside the existing suite); full-scale core data generated (12,000 students, 288K records, 4.6M attendance, 3.3M coursework); full LMS generation running in background (PID 3104, see Section 14 — do not kill it).
 
 > **How to use this file:**
 > Read Sections 1–4 before touching any code — they define the immutable non-negotiables, environment constraints, and working protocols.
 > Section 5 contains the complete, deep execution history (what happened, design decisions taken, why they were taken, what broke, what worked, and exact document alignments).
 > Sections 6–8 describe the current end-to-end architecture, calibration numbers, data volumes, quality metrics, and test suite breakdown.
 > Sections 9–11 cover what is working, deliberate deferrals, session failure modes and gotchas, and the exhaustive step-by-step roadmap for Phase 10.
+> Section 13 records the Tasks 10.1 → 14.4 session (this chat): per-task goals, files, decisions, verification and measurements.
+> Section 14 is the live state of the in-progress full-scale run — read it first on resumption before touching generation, data, or MongoDB.
+> Section 15 is the resumption blueprint: finishing Phase 14, then Phase 15.
 
 ---
 
@@ -613,6 +617,18 @@ python scripts/generate_data.py
 # Load raw collections and LMS slice into MongoDB
 python scripts/load_mongodb.py
 
+# Run the Streamlit dashboard (PYTHONPATH=src required)
+$env:PYTHONPATH='src'; streamlit run src/acadexa/dashboard/app.py
+# → http://localhost:8501 · demo login: admin / cet.admin / faculty.csa / analyst (no password)
+
+# Run J8 benchmarks (raw manifest + JSON/Markdown report beside it)
+$env:PYTHONPATH='src'; python scripts/run_benchmarks.py --engine pandas
+$env:PYTHONPATH='src'; python scripts/run_benchmarks.py --workload feature_table_join --engine mongodb
+$env:PYTHONPATH='src'; python scripts/run_benchmarks.py --report-only --manifest-path <manifest>.json
+
+# Full-scale generation lives under data/fullscale/ (gitignored except .gitkeep);
+# committed stage records live under data/manifests/full_scale_*.json
+
 # Inspect Git status (Agent must NEVER commit)
 git status --short
 git diff --stat
@@ -620,4 +636,124 @@ git log --oneline -n 15
 ```
 
 ---
-*End of IDE Context. This document serves as the official project state record through Task 9.6.*
+## 13. Session Record: Tasks 10.1 → 14.4 (2026-09-29 → 2026-10-01 chat)
+
+One continuous IDE session implemented Phases 10 (MVP Validation Gate), 11 (Dashboard Foundation), 12 (Dashboard Views), 13 (Benchmarking) and 14.1–14.4 (Full-Scale Generation start). Standing user instructions for the whole session: work only the requested task(s); stop when done and report ready-to-commit (agent never runs `git commit`); keep `docs/tasks.md` checkboxes updated as tasks complete; commit message format `Update - <Phase>.<Task> - <description>`; user reviews diffs and commits manually. Multi-task turns were explicitly requested by the user each time (11.1–11.3, 11.4/11.5, 13.1/13.2, 13.3/13.4, 13.5/13.6, 14.1/14.2, 14.3/14.4). Total added: ≈190 unit/integration tests, 7 dashboard pages, J8 harness + 6 engine workloads, full-scale core data. Every turn ended with the full affected suite green.
+
+### Phase 10 — MVP Validation Gate (all five tasks)
+
+#### Task 10.1 — End-to-end MVP pipeline test
+- **Goal:** generation → Parquet/MongoDB → Spark J1–J7 → gold collections on a tiny fixture.
+- **Files:** `tests/integration/test_mvp_pipeline.py` (new).
+- **Decisions:** parquet-only pipeline (`publish_to_mongo=False`) so the gate never depends on a live database; separate MongoDB round-trip test that skips when unreachable (established repo convention).
+- **Verify:** integration file green; `git status` showed only the new file.
+
+#### Task 10.2 — Ground-truth recovery comparison
+- **Goal:** compare planted relationships vs recovered analytics plus the decoy relationship.
+- **Files:** `src/acadexa/validation/recovery.py` (new; `RecoveryEntry`/`RecoveryReport`, fixed ±0.10 thresholds aligned with `interpret_spearman_association`, `compare_ground_truth_recovery`, `evaluate_recovery_from_paths`), `src/acadexa/validation/__init__.py` (exports), `tests/unit/test_recovery.py` (10 tests).
+- **Decisions:** recovery reads the registry file but never mutates expectations; `spearman_normalized` preferred with `spearman_raw` fallback; statuses `recovered` / `not_recovered` / `correctly_no_association` / `spurious_association` / `not_evaluated`; non-causal language enforced by test.
+- **Verify:** 10 passed (incl. small Spark end-to-end marking planted signals recovered).
+
+#### Task 10.3 — Risk-signal boundary validation
+- **Goal:** positive/negative/boundary behavior for all five rule-based signals from configuration (not hard-coded): 75% attendance, 50% LMS ratio, 30% late rate, 10-point marks drop, bottom-quartile quiz.
+- **Files:** `tests/unit/test_risk_boundaries.py` (6 tests; thresholds via `RiskSignalThresholds.from_config()`), plus a zero prior-activity denominator guard.
+- **Verify:** 6 passed; existing `test_risk_signals.py` 5 passed (no regression).
+
+#### Task 10.4 — Generator reproducibility
+- **Goal:** same seed/config twice ⇒ identical datasets and manifests (volatile timestamps/durations/paths excluded from comparison).
+- **Files:** `tests/unit/test_generator_reproducibility.py` (1 test: core JSON exact equality, LMS Parquet payload equality, ground-truth + generation/injection manifest equality).
+- **Verify:** passed in ~28s.
+
+#### Task 10.5 — MVP resource baseline (smoke, no optimization)
+- **Goal:** measured dev-scale runtime/memory observations with generous anti-hang guards only.
+- **Files:** `tests/integration/test_mvp_resource_baseline.py` (generation + full J1→J7 pipeline, per-stage durations from pipeline metadata, per-dir disk usage, Python RSS via optional psutil with JVM caveat documented, JSON report to tmp + printed summary, measured baseline table in the docstring labeled informational).
+- **Measured (Windows 11, Python 3.11.9, PySpark local[2]/1g, 12 students, seed 42):** generation ~12s (66,587 LMS events, deterministic across runs); pipeline ~110–160s wall (J1 dominates ~39–55s); total ~120–175s; disk ~6.2 MB deterministic; Python RSS ~120 → ~136 → ~158 MB.
+- **Verify:** passed twice (wall time varies naturally; counts/disk/RSS deterministic).
+
+### Phase 11 — Streamlit Dashboard Foundation
+
+- **Setup:** `pip install streamlit` → **1.64.0** (already declared in `requirements.txt`, so no manifest change). Headless UI testing via `streamlit.testing.v1.AppTest` throughout.
+- **11.1–11.3** — `config/dashboard/dummy_users.toml` (4 users, exactly the 4 approved roles with scoped assignments); `dashboard/config.py` (`DashboardConfig`: title, env-driven MongoDB, gold/operational collections); `data_access.py` (`DashboardDataAccess`: bounded reads, `(records, error)` failure contract, never fabricated values); `auth.py` (role constants, `User`, fail-fast dummy-user loading, passwordless `authenticate`); `session.py` (dict-based login/logout over one key, works with `st.session_state` and plain dicts); `permissions.py` (central `ROLE_CAPABILITIES` per features.md §20, `resolve_scope`, `can`, `build_mongo_scope_filter`, `describe_scope`); `app.py` (login screen + authenticated shell). Tests: `test_dashboard_foundation.py`, 19 passed. Real `streamlit run --server.headless` boot verified.
+- **11.4–11.5** — `dashboard/layout.py` (NAV_ITEMS in design.md §8 order, role-gated `visible_nav_items`, breadcrumbs with › separator, scope-aware global filters with year/semester options from tracked `academic_periods.toml`, header/sidebar/filter render helpers); `dashboard/components.py` (KPI/analytical/status/risk-signal/empty/error components per design §47–§48; "Data unavailable" never renders as zero; out-of-contract inputs fail fast). Tests: `test_dashboard_layout_components.py`, started at 24.
+- **Standing rule discovered:** existing-test contracts (login title, first subheader) are preserved across shell redesigns; AppTest element access is by `key=` (lists have no `len()`); script-run exceptions surface as `at.exception[0].message` element lists.
+
+### Phase 12 — Dashboard Views (12.1 → 12.8)
+
+One module per page under `src/acadexa/dashboard/pages/` (three layers each: scoped `fetch_*` → pure `compute_*` → Streamlit `render_*_page`), dispatched from `app.py` by nav key. All pages read actual gold/serving data only; empty/error states follow design §30/§31; association-not-causation notes everywhere (rules.md §20).
+
+- **12.1 University Overview** (`pages/university.py`, 13 tests): six F-E01 KPIs, school comparison (no composite best-school score, design §15), academic-vs-engagement scatter, trend summary, risk summary.
+- **12.2 School/Department** (`pages/school.py`, 12 tests): data-driven school picker, scoped KPIs, coursework behavior from gold late rates, department/course breakdowns, trends, risk distribution. Aggregation math reused from the overview module (single canonical implementation).
+- **12.3 Course** (`pages/course.py`, 17 tests): catalogue-first metadata with metric fallback, enrollment (max across semesters), coursework math, difficulty-adjusted performance, trend mix, enrolled-student risk counts. Fixed one stale notice ("arrive in" → "appear in" the Student view) in 12.7.
+- **12.4 Student** (`pages/student.py`, 12 tests): profile, per-course academics, attendance derived from raw counts with zero-denominator guard, coursework items, LMS by-activity, latest-semester trend, latest-week risk via shared `risk_signal_card` (reused, not reimplemented). Faculty scope joins via enrollment records.
+- **12.5 Analysis** (`pages/analysis.py`, 17 tests): J4/J5 outputs live only in Parquet and are not MongoDB-served, so the page derives serving-scale analytics from bounded gold reads (documented design decision): pure-Python Spearman with tie averaging, interpretation boundaries pinned equal to canonical `analytics.correlation` by test, recovery via `validation.recovery.compare_ground_truth_recovery` against the tracked registry (quiz/decoy/confounder honestly `not_evaluated`); methodology section states raw-gold (not within-course normalized) provenance.
+- **12.6 Data Quality** (`pages/data_quality.py`, 9 tests): tracked J1 report → pipeline-wide totals, per-category Healthy/Attention/Issue table (design §25–§26), per-dataset outcomes, methodology note (detected counts are measured output, not injected counts restated).
+- **12.7 Disclosures** (4 tests appended to layout/components suite): gap analysis showed per-section methodology notes already complete, so only the global design §38 disclosure was added (`SYNTHETIC_DATA_NOTICE` + `synthetic_data_notice()` in login screen and sidebar footer, persistent but non-dominating).
+- **12.8 Usability/accessibility/error-state pass** (`tests/unit/test_dashboard_usability_pass.py`, 2 tests): role×page matrix (4 roles × all visible pages, 19 visits — all green, all widgets labeled, no duplicate widget IDs); rendered-text microcopy guard (causal/predictive language only in negated methodology form). **One real find fixed:** Analysis tables mixed floats with `"—"` strings, causing pyarrow Arrow-conversion tracebacks — coefficients now render as fixed-precision strings via extracted pure row builders.
+- **Suite totals observed:** 56 (12.2) → 85 (12.3) → 97 (12.4) → 114 (12.5) → 123 (12.6) → 127 (12.7) → 129 (12.8), always fully green. Live dev data in MongoDB during this session: 36 students, 72 courses, 864 academic records, 13,824 attendance, 9,964 coursework, 22,357 LMS events, gold 3/4/2/3. Dashboard verified viewable at `http://localhost:8501` (`$env:PYTHONPATH='src'; streamlit run src/acadexa/dashboard/app.py`).
+
+### Phase 13 — Benchmarking (J8; rules.md §30: measured, never manufactured, no conclusions)
+
+- **13.1 Harness** (`benchmarks/runner.py`, 9 tests): `WorkloadDefinition` registry, `BenchmarkResult` (duration/rows/optional peak/success/error), `BenchmarkRun` manifest save/load, `capture_environment`, `run_timed` (tracemalloc peak documented as Python-allocator only), `run_benchmark` (failures recorded, never raised).
+- **13.2 pandas weekly engagement** (`benchmarks/pandas/weekly_engagement.py`, 7 tests): J2-equivalent grain/metrics (Monday weeks, semester bounds, positive-only durations, active days, category roll-ups) with category/bounds imported from the J2 module (canonical, no drift); timed read+aggregate. Measured on dev data: 227,662 events → 14,048 rows in ~45s, ~103 MB peak.
+- **13.3 MongoDB weekly engagement** (`benchmarks/mongodb/weekly_engagement.py`, 8 tests): `$match`/`$project`/`$group`/`$sort` pipeline over the event shape (works on regular and time-series collections); fixed `$date`→`$toDate` bug found by tests. Measured: 22,357 events → 1,170 rows in ~0.85s.
+- **13.4 PySpark weekly engagement** (`benchmarks/spark/weekly_engagement.py`, 3 tests): runs the canonical J2 job itself (same code path, not a reimplementation) to scratch output; memory measurement off with driver memory recorded instead.
+- **13.5 Feature-table join** (workload registry + three engines): pandas outer join of four cleaned domains (`pandas/feature_join.py`); MongoDB left join of the three operational collections it holds (`mongodb/feature_join.py`, coursework semester derived from due dates exactly as J3 does — tests caught the first version missing this); Spark runs real J3 (`spark/feature_join.py`). Per-engine scope differences recorded in result extras by design ("where equivalent implementations are practical"). Measured: pandas 38,452 → 864 rows in ~0.3s; MongoDB 864 → 864 in ~2.2s.
+- **13.6 Result publication** (`benchmarks/report.py`): structured + Markdown output (dataset size, timing, memory with explicit n/a, environment, per-engine scope caveats, explicit no-conclusions statement — tests assert winner-language is absent); CLI auto-writes report files beside the manifest plus `--report-only` regeneration. `scripts/run_benchmarks.py` wired for all workloads/engines (`--base-path`, `--collection`, `--output-path`, `--no-report`).
+- **Full benchmark suite:** 43 passed across 7 files. `reports/benchmarks/` is gitignored (run outputs stay uncommitted).
+
+### Phase 14 — Full-Scale Generation (14.1 → 14.4 done; 14.5/14.6 running)
+
+- **14.1 Freeze** (`generator/full_scale.py`, 6 tests): frozen constants (seed 42; 12,000 students with exact six-school split 2600/3000/2400/2200/1000/800; 250 courses; 6 courses/student/semester; 70M LMS events; 6 schools/18 depts/40 programs; S1–S4 × 16 weeks over AY1–AY2; 8% decliners; 11 event types; six injection rates) plus `validate_full_scale_config()` mismatch reporting. No schema/architecture change. Tests caught an order-sensitive school-ID comparison in the module.
+- **14.2 Hierarchy** (5 tests + committed `data/manifests/full_scale_hierarchy.json`): full-target run recorded 6 schools, 18 departments, 40 programs, 72-course configured catalog (against the 250 target), per-school breakdowns reconciling to totals.
+- **14.3/14.4 Core data:** new `generate_dataset(..., generate_lms_events=False)` flag (previously even "skip writing" still generated all ~70M events just to count them) plus a scale-label fix (config-scale runs now record `"full"`). Full run into ignored `data/fullscale/` (`.gitignore` extended, dev data untouched) took **837.25s**: **12,000 students, 72 courses, 288,000 academic records (exactly 72,000 × S1–S4), 4,608,000 attendance (exactly 1,152,000 × S1–S4), 3,338,810 coursework (~2 GB on disk)**. School split matches frozen population exactly. Short week-groups trace to the 4,608 injected attendance orphans (≈0.1% frozen rate) — expected pre-cleaning footprint for Phase 15, verified against the injection manifest.
+- **Committed stage records:** `data/manifests/full_scale_students.json` (14.3) and `data/manifests/full_scale_attendance_coursework.json` (14.4); `tests/unit/test_full_scale_generation.py` asserts exact values (3 tests); orchestrator skip-flag test added to `test_orchestrator.py`.
+- **Regression at 14.4:** freeze/hierarchy/manifests/config suites 54 passed; orchestrator+generation 9 passed.
+
+### Session conventions discovered (persist these)
+- PowerShell 5.1 only: no `&&`/`sed`/`grep`/`head`; use `Select-Object`, `Get-Process`/`Get-CimInstance`, `workdir` param instead of `cd`; LF→CRLF warnings on edited files are benign.
+- `pytest.ini` sets `pythonpath = src .`; tests import `scripts.*` directly; MongoDB live tests skip when unreachable; Spark tests share one module-scoped local session.
+- One-off drivers/scripts live in `$env:TEMP`, never in the repo (a stray repo-root driver was caught and removed in 14.3/14.4).
+- `data/manifests/*.json` are committed stage records; everything else generated stays ignored (`data/fullscale/` added for full-scale outputs).
+- pytestsurvey: keep new-test value assertions exact and deterministic; mark known live-data dependencies explicitly (dev-DB markers like `## 3 / 5`, `MGT101` follow the established convention).
+
+*End of Section 13. Sections 14–15 record live/in-progress state as of 2026-10-01.*
+
+---
+
+## 14. LIVE STATE: Full LMS Generation Running (Tasks 14.5/14.6) — READ FIRST
+
+> **Do NOT kill PID 3104.** It is the detached full-scale LMS run (started 2026-10-01 16:10:35). Killing it discards hours of compute; the 14.3/14.4 core files are only rewritten at the very end, so an accidental kill leaves them intact but wastes the run.
+
+### What is running and why
+- **Command (already launched, do not relaunch):** `python -u <TEMP>/run_full_lms_tmp.py <repo>` → `generate_dataset(target_students=None, data_dir="data/fullscale/")` with all defaults (seed 42, LMS stream ON, quality injection ON).
+- **Why a full re-run, not LMS-only:** the orchestrator passes *clean* (pre-injection) records/coursework into the LMS stream and threads one RNG stream through core+LMS injection, so only a full run reproduces exact orchestrated semantics (RNG order, first-chunk min-injections, coherent manifests). Core regen (~14 min) is cheap relative to the LMS stream.
+- **Expected output:** ~70M events (≈12,000 × 15/day × 200 days/yr × 2 yrs ≈ 72M) as year/month-partitioned Parquet under `data/fullscale/raw/lms_events/` (~2–3 GB per architecture estimates); manifests refresh under `data/fullscale/manifests/`.
+
+### How to monitor (short commands only — long sleeps get killed)
+```powershell
+Get-Process -Id 3104 -ErrorAction SilentlyContinue | Select-Object Id, CPU
+Test-Path -LiteralPath "data/fullscale/raw/lms_events"
+Get-ChildItem -Path "data/fullscale/raw/lms_events" -Recurse -Filter "*.parquet" | Measure-Object | Select-Object Count
+Get-Content (Join-Path $env:TEMP "full_lms_run.log")
+Get-Content (Join-Path $env:TEMP "full_lms_run.err.log") | Select-Object -Last 5
+```
+- No `raw/lms_events` dir yet = still in core regen/injection (normal for the first ~15–30 min under machine load; verify liveness via CPU delta, not wall time). Parquet part files accumulating = LMS streaming in progress. `DONE` + JSON summary in the log = finished.
+- **Shell quirk discovered:** shells that `Start-Process` the file named `run_full_lms_tmp.py` were killed (`ChildProcess.kill`); the identical script renamed (e.g. `driver_hello.py`) launches fine, and an early duplicate launch died on its own leaving exactly one writer (verified via `Win32_Process` command lines + output inspection). If relaunching ever becomes necessary, use a fresh filename and confirm a single writer before proceeding.
+
+### Finish checklist (in order — this is the 14.5/14.6 task work)
+1. Wait for `DONE` in `$env:TEMP/full_lms_run.log`; record `actual_counts.lms_events`, `disk_usage_bytes`, `duration_sec`.
+2. Sanity-check the Parquet dataset (row count vs manifest, readable sample, partition layout).
+3. Write committed `data/manifests/full_scale_lms.json` (Temp helper `build_lms_manifest_tmp.py` exists — same shape as the 14.3/14.4 records: version/task/seed/target/actual/disk/duration/note).
+4. Run the slice load: `python <TEMP>/load_full_slice_tmp.py <repo>` (uses `load_lms_serving_slice` → S4 + CET/SOM from `data/fullscale/raw/lms_events` into MongoDB `acadexa.lms_events`, clearing the 22k dev slice; ~7M docs expected). Writes committed `data/manifests/full_scale_lms_slice.json` itself.
+5. Add `tests/unit/test_full_scale_lms.py` asserting exact committed values (counts, S4/CET/SOM spec, scanned ≥ selected, selected == inserted == db count) + slice-spec unit coverage if missing.
+6. Run the affected suites (new file + manifests/config/freeze/hierarchy + a dashboard smoke subset), mark `docs/tasks.md` 14.5/14.6 `[x]`, report ready-to-commit (`Update - 14.5 - generate full LMS Parquet dataset`, `Update - 14.6 - generate full LMS serving slice`).
+7. Do NOT start Phase 15 (full-scale Spark pipeline) — separate task.
+
+## 15. Resumption Blueprint: Finish Phase 14 → Phase 15
+
+- **If PID 3104 is gone and `DONE` is in the log:** continue at finish checklist step 2 above.
+- **If PID 3104 is gone with no `DONE` and no usable output:** relaunch with a fresh TEMP filename (see quirk above), then continue monitoring.
+- **If 14.5/14.6 are committed:** next is Phase 15 (full-scale Spark pipeline J1→J7 over `data/fullscale/`, tasks 15.1–15.8), then Phase 16 validation and Phase 17 final documentation. Uncommitted prompt pattern will be: `Proceed with task <TASK_15.x> from docs/TASKS.md only.`
+- **Standing rules that still apply:** one task (or explicitly bundled set) at a time; agent never commits; keep `docs/tasks.md` checked as work completes; TEMP-only drivers; no output under `data/` except via ignored dirs + committed `data/manifests/*.json` records; dashboard reads MongoDB gold, never raw Parquet.
+
+*End of IDE Context. This document serves as the official project state record through Task 14.4, with Tasks 14.5/14.6 in progress as described in Sections 14–15.*
