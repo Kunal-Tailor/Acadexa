@@ -1,0 +1,62 @@
+{
+  "manifest_version": "1.0.0",
+  "manifest_type": "injection_manifest",
+  "seed": 42,
+  "generated_at": "2026-10-01T12:42:04.141130+00:00",
+  "total_injected": 2644049,
+  "injected_issue_counts": {
+    "duplicate_lms_events": 740169,
+    "nulls_non_key": 590317,
+    "timestamp_inconsistencies": 779625,
+    "course_id_formatting": 414959,
+    "orphan_records": 82991,
+    "out_of_range_values": 35988
+  },
+  "per_dataset_counts": {
+    "academic_records": {
+      "nulls_non_key": 4320,
+      "course_id_formatting": 1440,
+      "orphan_records": 288,
+      "out_of_range_values": 288
+    },
+    "attendance": {
+      "course_id_formatting": 23040,
+      "orphan_records": 4608,
+      "out_of_range_values": 4608
+    },
+    "coursework": {
+      "nulls_non_key": 48081,
+      "timestamp_inconsistencies": 32054,
+      "course_id_formatting": 16694,
+      "orphan_records": 3338,
+      "out_of_range_values": 3157
+    },
+    "lms_events": {
+      "duplicate_lms_events": 740169,
+      "nulls_non_key": 537916,
+      "timestamp_inconsistencies": 747571,
+      "course_id_formatting": 373785,
+      "orphan_records": 74757,
+      "out_of_range_values": 27935
+    }
+  },
+  "rates": {
+    "duplicate_lms_events": 0.01,
+    "nulls_non_key": 0.015,
+    "timestamp_inconsistencies": 0.01,
+    "course_id_formatting": 0.005,
+    "orphan_records": 0.001,
+    "out_of_range_values": 0.001
+  },
+  "baseline_counts": {
+    "students": 12000,
+    "courses": 72,
+    "academic_records": 288000,
+    "attendance": 4608000,
+    "coursework": 3338810,
+    "lms_events": 74757153
+  },
+  "metadata": {
+    "scale": "full"
+  }
+}

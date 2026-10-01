@@ -547,16 +547,16 @@ Run the validated processing architecture at target scale.
 
 Verify correctness after scaling.
 
-- [ ] 16.1 — Compare full-scale generated counts against the generation manifest and schema expectations.
+- [x] 16.1 — Compare full-scale generated counts against the generation manifest and schema expectations.
   Commit: `Update - 16.1 - validate full-scale record counts`
 
-- [ ] 16.2 — Validate full-scale data-quality detection against the injection manifest.
+- [x] 16.2 — Validate full-scale data-quality detection against the injection manifest.
   Commit: `Update - 16.2 - validate full-scale data quality`
 
-- [ ] 16.3 — Run full-scale ground-truth recovery and document recovered/non-recovered/decoy relationships.
+- [x] 16.3 — Run full-scale ground-truth recovery and document recovered/non-recovered/decoy relationships.
   Commit: `Update - 16.3 - validate full-scale ground truth recovery`
 
-- [ ] 16.4 — Validate full-scale risk signal calculations against independent small fixtures and selected sampled records.
+- [x] 16.4 — Validate full-scale risk signal calculations against independent small fixtures and selected sampled records.
   Commit: `Update - 16.4 - validate full-scale risk signals`
 
 - [ ] 16.5 — Test dashboard behavior against full-scale gold collections, including role scope, filters, drill-down and error/empty states.
