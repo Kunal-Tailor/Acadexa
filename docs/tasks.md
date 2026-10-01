@@ -573,7 +573,7 @@ Verify correctness after scaling.
 
 Turn the working implementation into a defensible academic project.
 
-- [ ] 17.1 — Update `README.md` with actual setup commands, measured scale and current project status. Do not leave target values presented as measured values.
+- [x] 17.1 — Update `README.md` with actual setup commands, measured scale and current project status. Do not leave target values presented as measured values.
   Commit: `Update - 17.1 - finalize README with measured project status`
 
 - [ ] 17.2 — Update `docs/tasks.md` statuses and ensure completed tasks match the actual Git history.
