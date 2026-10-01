@@ -673,9 +673,14 @@ def load_lms_serving_slice(
 
     if clear_existing:
         try:
-            coll.delete_many({})
-        except PyMongoError as exc:
-            raise LoadValidationError(f"Failed clearing collection 'lms_events': {exc}") from exc
+            coll.drop()
+            init_database(database=db, config=cfg, create_gold_placeholders=True)
+            coll = db["lms_events"]
+        except PyMongoError:
+            try:
+                coll.delete_many({})
+            except PyMongoError as exc:
+                raise LoadValidationError(f"Failed clearing collection 'lms_events': {exc}") from exc
 
     total_scanned = 0
     slice_selected = 0
@@ -765,7 +770,7 @@ def load_lms_serving_slice(
                     buffer.append(doc)
                     if len(buffer) >= batch_size:
                         try:
-                            res = coll.insert_many(buffer, ordered=True)
+                            res = coll.insert_many(buffer, ordered=False)
                             inserted_count += len(res.inserted_ids)
                         except PyMongoError as exc:
                             raise LoadValidationError(f"Failed inserting LMS slice batch: {exc}") from exc
@@ -773,7 +778,7 @@ def load_lms_serving_slice(
 
         if buffer:
             try:
-                res = coll.insert_many(buffer, ordered=True)
+                res = coll.insert_many(buffer, ordered=False)
                 inserted_count += len(res.inserted_ids)
             except PyMongoError as exc:
                 raise LoadValidationError(f"Failed inserting LMS slice batch: {exc}") from exc
@@ -781,9 +786,17 @@ def load_lms_serving_slice(
 
     # Query MongoDB post-insertion count
     try:
-        actual_db_count = coll.count_documents({})
-    except PyMongoError as exc:
-        raise LoadValidationError(f"Failed counting documents in collection 'lms_events': {exc}") from exc
+        stats = db.command("collStats", coll.name)
+        ts_stats = stats.get("timeseries")
+        if isinstance(ts_stats, dict) and "numMeasurementsCommitted" in ts_stats:
+            actual_db_count = ts_stats["numMeasurementsCommitted"]
+        else:
+            actual_db_count = coll.count_documents({})
+    except Exception:
+        try:
+            actual_db_count = coll.count_documents({})
+        except PyMongoError as exc:
+            raise LoadValidationError(f"Failed counting documents in collection 'lms_events': {exc}") from exc
 
     duration_sec = round(time.perf_counter() - start_time, 3)
 

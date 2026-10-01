@@ -1,0 +1,28 @@
+{
+  "manifest_version": "1.0.0",
+  "task": "14.5",
+  "generated_at": "2026-10-01T12:42:39.011337+00:00",
+  "seed": 42,
+  "target_lms_events": 70000000,
+  "actual_counts": {
+    "lms_events": 74757153,
+    "parquet_part_files": 13338
+  },
+  "disk_usage_bytes": {
+    "lms_events": 1384299429
+  },
+  "generation_duration_sec": 5632.24,
+  "injected_lms_issues": {
+    "duplicate_lms_events": 740169,
+    "nulls_non_key": 590317,
+    "timestamp_inconsistencies": 779625,
+    "course_id_formatting": 414959,
+    "orphan_records": 82991,
+    "out_of_range_values": 35988
+  },
+  "chunking": {
+    "mode": "streamed Parquet parts",
+    "config_chunk_size": 100000
+  },
+  "note": "Full LMS event dataset in chunked Parquet (Task 14.5)."
+}

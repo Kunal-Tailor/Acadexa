@@ -1,0 +1,23 @@
+{
+  "manifest_version": "1.0.0",
+  "task": "14.6",
+  "generated_at": "2026-10-01T13:52:03.004285+00:00",
+  "spec": {
+    "schools": [
+      "CET",
+      "SOM"
+    ],
+    "semester_id": "S4",
+    "start_date": "2026-01-05",
+    "end_date": "2026-04-26"
+  },
+  "actual_counts": {
+    "total_scanned": 18688887,
+    "slice_selected": 8958633,
+    "inserted_count": 8958633,
+    "actual_db_count": 8958633
+  },
+  "validated": true,
+  "load_duration_sec": 1714.56,
+  "note": "Defined LMS serving slice from the full Parquet dataset (Task 14.6). Full event history remains outside MongoDB."
+}

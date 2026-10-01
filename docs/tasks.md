@@ -494,10 +494,10 @@ Scale the validated architecture toward the documented target.
 - [x] 14.4 — Generate full attendance and coursework datasets and record actual counts/storage usage.
   Commit: `Update - 14.4 - generate full attendance and coursework data`
 
-- [ ] 14.5 — Generate the full LMS event dataset in chunked Parquet form toward the ~70M target and record actual event count and disk usage.
+- [x] 14.5 — Generate the full LMS event dataset in chunked Parquet form toward the ~70M target and record actual event count and disk usage.
   Commit: `Update - 14.5 - generate full LMS Parquet dataset`
 
-- [ ] 14.6 — Generate the defined MongoDB LMS serving slice from the full dataset without loading all LMS events into MongoDB.
+- [x] 14.6 — Generate the defined MongoDB LMS serving slice from the full dataset without loading all LMS events into MongoDB.
   Commit: `Update - 14.6 - generate full LMS serving slice`
 
 - [ ] 14.7 — Record full-scale generation manifest containing actual counts, seed, configuration, disk usage and generation duration.

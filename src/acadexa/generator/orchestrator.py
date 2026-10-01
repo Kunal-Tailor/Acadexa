@@ -153,7 +153,7 @@ def generate_dataset(
     target_students: int | None = 36,
     data_dir: str | Path = "data",
     lms_parquet_path: str | Path | None = None,
-    chunk_size: int = 1000,
+    chunk_size: int | None = None,
     inject_issues: bool = True,
     injection_rates: dict[str, float] | None = None,
     min_injections: int = 1,
@@ -281,6 +281,38 @@ def generate_dataset(
         )
         collection_issue_counts["coursework"] = cw_counts
 
+    # Save Core Collections early to avoid keeping ~8 million dictionaries in memory
+    output_files: dict[str, Path] = {}
+    attendance_count = len(attendance)
+    coursework_count = len(coursework)
+    if save_core_collections:
+        generated_dir.mkdir(parents=True, exist_ok=True)
+        collections_to_save = {
+            "students": students,
+            "courses": courses,
+            "academic_records": academic_records,
+            "attendance": attendance,
+            "coursework": coursework,
+        }
+        for name, data in collections_to_save.items():
+            path = generated_dir / f"{name}.json"
+            content = json.dumps(_jsonable(data), indent=2, ensure_ascii=False)
+            path.write_text(content, encoding="utf-8")
+            output_files[name] = path
+
+    # Free large memory allocations from attendance and coursework before LMS streaming
+    del attendance
+    del coursework
+    del clean_coursework
+    import gc
+    gc.collect()
+
+    # Resolve LMS event chunk size (respect config for full scale, 1000 for small tests)
+    if chunk_size is None:
+        lms_cfg = run.configs.get("generator", {}).get("lms_events", {})
+        config_chunk = lms_cfg.get("chunk_size", 100_000)
+        chunk_size = 1000 if (target_students is not None and target_students < 1000) else config_chunk
+
     # 8. LMS Events Generation with Streaming Injection
     lms_issue_counts: dict[str, int] = {k: 0 for k in INJECTION_RATE_KEYS}
     lms_events_count = 0
@@ -292,7 +324,7 @@ def generate_dataset(
                 run,
                 students=students,
                 records=clean_records,
-                coursework=clean_coursework,
+                coursework=None,
                 chunk_size=chunk_size,
             ):
                 if inject_issues:
@@ -346,23 +378,6 @@ def generate_dataset(
             timestamp=datetime.now(timezone.utc),
         )
 
-    # 10. Save Core Collections
-    output_files: dict[str, Path] = {}
-    if save_core_collections:
-        generated_dir.mkdir(parents=True, exist_ok=True)
-        collections_to_save = {
-            "students": students,
-            "courses": courses,
-            "academic_records": academic_records,
-            "attendance": attendance,
-            "coursework": coursework,
-        }
-        for name, data in collections_to_save.items():
-            path = generated_dir / f"{name}.json"
-            content = json.dumps(_jsonable(data), indent=2, ensure_ascii=False)
-            path.write_text(content, encoding="utf-8")
-            output_files[name] = path
-
     if save_lms_parquet:
         output_files["lms_events"] = target_lms_path
     if save_manifests:
@@ -373,8 +388,8 @@ def generate_dataset(
         "students": len(students),
         "courses": len(courses),
         "academic_records": len(academic_records),
-        "attendance": len(attendance),
-        "coursework": len(coursework),
+        "attendance": attendance_count,
+        "coursework": coursework_count,
         "lms_events": lms_events_count,
     }
 

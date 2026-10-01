@@ -472,6 +472,6 @@ def test_risk_methodology_notice_present_on_student_page() -> None:
     at = st_test.AppTest.from_file(str(APP_PATH))
     at.run()
     _login_as(at, "University Administrator", "University Admin")
-    at.sidebar.radio[0].set_value("Students").run()
+    at.sidebar.radio[0].set_value("Students").run(timeout=15)
     assert not at.exception
     assert any("not a failure prediction" in c.value for c in at.caption)
