@@ -1,0 +1,16 @@
+{
+  "task": "15.3",
+  "stage": "J3_feature_table",
+  "status": "SUCCESS",
+  "start_time": "2026-10-01T14:37:49.686190+00:00",
+  "end_time": "2026-10-01T14:39:11.124763+00:00",
+  "duration_sec": 81.439,
+  "output_counts": {
+    "student_course_features": 288000
+  },
+  "details": {
+    "total_students": 12000,
+    "total_features_rows": 288000
+  },
+  "data_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale"
+}

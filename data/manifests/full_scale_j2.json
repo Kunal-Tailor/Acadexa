@@ -1,0 +1,16 @@
+{
+  "task": "15.2",
+  "stage": "J2_event_aggregation",
+  "status": "SUCCESS",
+  "start_time": "2026-10-01T14:34:03.025798+00:00",
+  "end_time": "2026-10-01T14:37:49.686190+00:00",
+  "duration_sec": 226.66,
+  "output_counts": {
+    "lms_weekly_engagement": 4607646
+  },
+  "details": {
+    "total_input_events": 73961848,
+    "total_output_rows": 4607646
+  },
+  "data_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale"
+}

@@ -1,0 +1,15 @@
+{
+  "task": "15.4",
+  "stage": "J4_correlation",
+  "status": "SUCCESS",
+  "start_time": "2026-10-01T14:39:11.124763+00:00",
+  "end_time": "2026-10-01T14:39:46.875514+00:00",
+  "duration_sec": 35.751,
+  "output_counts": {
+    "correlations_evaluated": 5
+  },
+  "details": {
+    "total_relationships_evaluated": 5
+  },
+  "data_dir": "D:\\College\\Secondary\\Projects\\acadexa\\data\\fullscale"
+}

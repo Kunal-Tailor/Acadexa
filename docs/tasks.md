@@ -513,16 +513,16 @@ Scale the validated architecture toward the documented target.
 
 Run the validated processing architecture at target scale.
 
-- [ ] 15.1 — Run J1 on the full dataset and record cleaning/data-quality metrics.
+- [x] 15.1 — Run J1 on the full dataset and record cleaning/data-quality metrics.
   Commit: `Update - 15.1 - run full-scale data validation`
 
-- [ ] 15.2 — Run J2 full-scale LMS aggregation and record runtime/memory observations.
+- [x] 15.2 — Run J2 full-scale LMS aggregation and record runtime/memory observations.
   Commit: `Update - 15.2 - run full-scale LMS aggregation`
 
-- [ ] 15.3 — Run J3 full-scale feature-table generation and validate output grain/counts.
+- [x] 15.3 — Run J3 full-scale feature-table generation and validate output grain/counts.
   Commit: `Update - 15.3 - run full-scale feature engineering`
 
-- [ ] 15.4 — Run J4 full-scale correlation analysis and store measured results.
+- [x] 15.4 — Run J4 full-scale correlation analysis and store measured results.
   Commit: `Update - 15.4 - run full-scale correlation analytics`
 
 - [ ] 15.5 — Run J5 full-scale trend detection and validate the synthetic decliner behavior.
