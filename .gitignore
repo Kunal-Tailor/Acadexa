@@ -58,6 +58,8 @@ data/generated/*
 !data/generated/.gitkeep
 data/samples/*
 !data/samples/.gitkeep
+data/fullscale/*
+!data/fullscale/.gitkeep
 *.parquet
 *.parquet/
 *.orc

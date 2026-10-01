@@ -488,10 +488,10 @@ Scale the validated architecture toward the documented target.
 - [x] 14.2 — Run/implement full university hierarchy generation for the six-school target and record actual counts.
   Commit: `Update - 14.2 - generate full university hierarchy`
 
-- [ ] 14.3 — Generate the full target student population and academic records across two academic years/four semesters using the validated generator.
+- [x] 14.3 — Generate the full target student population and academic records across two academic years/four semesters using the validated generator.
   Commit: `Update - 14.3 - generate full academic dataset`
 
-- [ ] 14.4 — Generate full attendance and coursework datasets and record actual counts/storage usage.
+- [x] 14.4 — Generate full attendance and coursework datasets and record actual counts/storage usage.
   Commit: `Update - 14.4 - generate full attendance and coursework data`
 
 - [ ] 14.5 — Generate the full LMS event dataset in chunked Parquet form toward the ~70M target and record actual event count and disk usage.

@@ -149,3 +149,29 @@ def test_scripts_generate_data_quiet(tmp_path: Path, capsys: pytest.CaptureFixtu
     assert exit_code == 0
     captured = capsys.readouterr()
     assert captured.out == ""
+
+
+def test_generate_dataset_skips_lms_event_stream(tmp_path: Path) -> None:
+    """generate_lms_events=False skips the LMS stream, keeping core output."""
+    result = generate_dataset(
+        target_students=6,
+        data_dir=tmp_path,
+        chunk_size=500,
+        inject_issues=True,
+        min_injections=1,
+        generate_lms_events=False,
+    )
+    assert result.actual_counts["lms_events"] == 0
+    assert result.actual_counts["students"] == 6
+    assert result.actual_counts["academic_records"] > 0
+    assert not (tmp_path / "raw" / "lms_events").exists()
+    assert (tmp_path / "generated" / "students.json").exists()
+    assert (tmp_path / "generated" / "attendance.json").exists()
+    assert (tmp_path / "generated" / "coursework.json").exists()
+    assert result.injection_manifest is not None
+    assert result.injection_manifest.total_injected > 0
+    gen_manifest = load_generation_manifest(
+        tmp_path / "manifests" / "generation_manifest.json"
+    )
+    assert gen_manifest.actual_counts["lms_events"] == 0
+    assert gen_manifest.actual_counts["students"] == 6

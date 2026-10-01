@@ -1,0 +1,32 @@
+{
+  "manifest_version": "1.0.0",
+  "task": "14.3",
+  "generated_at": "2026-09-30T05:39:53.313193+00:00",
+  "seed": 42,
+  "target_counts": {
+    "students": 12000,
+    "academic_records": 288000
+  },
+  "actual_counts": {
+    "students": 12000,
+    "courses": 72,
+    "academic_records": 288000,
+    "records_by_semester": {
+      "S1": 72000,
+      "S2": 72000,
+      "S3": 72000,
+      "S4": 72000
+    },
+    "distinct_student_course_semester": 288000
+  },
+  "students_by_school": {
+    "School of Computer Engineering & Technology": 2600,
+    "School of Engineering & Technology": 3000,
+    "School of Law": 800,
+    "School of Liberal Arts & Design": 2200,
+    "School of Management": 2400,
+    "School of Sciences": 1000
+  },
+  "generation_duration_sec": 837.25,
+  "duration_note": "Full core run wall time (Tasks 14.3 and 14.4 executed together)."
+}

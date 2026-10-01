@@ -1,0 +1,32 @@
+{
+  "manifest_version": "1.0.0",
+  "task": "14.4",
+  "generated_at": "2026-09-30T05:39:53.313193+00:00",
+  "seed": 42,
+  "actual_counts": {
+    "attendance": 4608000,
+    "attendance_by_semester": {
+      "S1": 1152000,
+      "S2": 1152000,
+      "S3": 1152000,
+      "S4": 1152000
+    },
+    "attendance_weeks_per_record_values": [
+      1,
+      2,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "coursework": 3338810,
+    "coursework_distinct_items": 4877
+  },
+  "disk_usage_bytes": {
+    "attendance": 857106327,
+    "coursework": 1063488703
+  },
+  "generation_duration_sec": 837.25,
+  "duration_note": "Full core run wall time (Tasks 14.3 and 14.4 executed together)."
+}

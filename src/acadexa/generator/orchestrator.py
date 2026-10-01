@@ -160,6 +160,7 @@ def generate_dataset(
     save_manifests: bool = True,
     save_core_collections: bool = True,
     save_lms_parquet: bool = True,
+    generate_lms_events: bool = True,
 ) -> GenerationResult:
     """Generate a complete synthetic dataset and write all artifacts (task 5.8).
 
@@ -190,6 +191,10 @@ def generate_dataset(
         save_core_collections: Whether to save students, courses, records, etc.
             to data_dir/generated/ (default True).
         save_lms_parquet: Whether to write LMS events to Parquet (default True).
+        generate_lms_events: Whether to generate LMS events at all (default
+            True). When False, the LMS event stream is skipped entirely
+            (staged full-scale generation runs core collections first and
+            generates the event stream in a later task).
 
     Returns:
         GenerationResult containing generated collections, counts, manifests, and file paths.
@@ -278,46 +283,47 @@ def generate_dataset(
 
     # 8. LMS Events Generation with Streaming Injection
     lms_issue_counts: dict[str, int] = {k: 0 for k in INJECTION_RATE_KEYS}
-
-    def _stream_lms_chunks() -> Iterator[list[dict[str, Any]]]:
-        first_chunk = True
-        for chunk in generate_lms_events_chunks(
-            run,
-            students=students,
-            records=clean_records,
-            coursework=clean_coursework,
-            chunk_size=chunk_size,
-        ):
-            if inject_issues:
-                # Apply min_injections on first chunk only, then pure probability
-                chunk_min = min_injections if first_chunk else 0
-                perturbed, c_counts = inject_quality_issues_lms_events(
-                    chunk,
-                    run=run,
-                    rates=effective_rates,
-                    rng=q_rng,
-                    min_injections=chunk_min,
-                )
-                for k, v in c_counts.items():
-                    lms_issue_counts[k] += v
-                first_chunk = False
-                yield perturbed
-            else:
-                yield chunk
-
     lms_events_count = 0
-    if save_lms_parquet:
-        lms_events_count = write_lms_events_to_parquet(
-            output_path=target_lms_path,
-            run=run,
-            chunks=_stream_lms_chunks(),
-            chunk_size=chunk_size,
-            overwrite=True,
-        )
-    else:
-        # Just consume chunks to count and perturb
-        for chunk in _stream_lms_chunks():
-            lms_events_count += len(chunk)
+
+    if generate_lms_events:
+        def _stream_lms_chunks() -> Iterator[list[dict[str, Any]]]:
+            first_chunk = True
+            for chunk in generate_lms_events_chunks(
+                run,
+                students=students,
+                records=clean_records,
+                coursework=clean_coursework,
+                chunk_size=chunk_size,
+            ):
+                if inject_issues:
+                    # Apply min_injections on first chunk only, then pure probability
+                    chunk_min = min_injections if first_chunk else 0
+                    perturbed, c_counts = inject_quality_issues_lms_events(
+                        chunk,
+                        run=run,
+                        rates=effective_rates,
+                        rng=q_rng,
+                        min_injections=chunk_min,
+                    )
+                    for k, v in c_counts.items():
+                        lms_issue_counts[k] += v
+                    first_chunk = False
+                    yield perturbed
+                else:
+                    yield chunk
+
+        if save_lms_parquet:
+            lms_events_count = write_lms_events_to_parquet(
+                output_path=target_lms_path,
+                run=run,
+                chunks=_stream_lms_chunks(),
+                chunk_size=chunk_size,
+                overwrite=True,
+            )
+        else:
+            # Just consume chunks to count and perturb
+            for chunk in _stream_lms_chunks():
+                lms_events_count += len(chunk)
 
     if inject_issues:
         collection_issue_counts["lms_events"] = lms_issue_counts
@@ -383,6 +389,13 @@ def generate_dataset(
     gen_manifest_path = manifests_dir / "generation_manifest.json"
     inj_manifest_path = manifests_dir / "injection_manifest.json"
 
+    # target_students=None preserves config scale (full target), so only an
+    # explicit small override counts as a development-scale run.
+    scale_label = (
+        "development"
+        if target_students is not None and target_students < 1000
+        else "full"
+    )
     gen_manifest, inj_manifest = build_manifests(
         run=run,
         actual_counts=actual_counts,
@@ -390,8 +403,8 @@ def generate_dataset(
         generation_duration_sec=duration_sec,
         disk_usage_bytes=disk_usage,
         output_files={k: str(v) for k, v in output_files.items()},
-        generation_metadata={"scale": "development" if (target_students or 0) < 1000 else "full"},
-        injection_metadata={"scale": "development" if (target_students or 0) < 1000 else "full"},
+        generation_metadata={"scale": scale_label},
+        injection_metadata={"scale": scale_label},
         save=save_manifests,
         generation_manifest_path=gen_manifest_path,
         injection_manifest_path=inj_manifest_path,
