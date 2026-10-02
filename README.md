@@ -250,11 +250,12 @@ net start MongoDB
 # Run the Streamlit application
 $env:PYTHONPATH = "src"
 streamlit run src/acadexa/dashboard/app.py
-```
-*Navigate to `http://localhost:8501` in your browser.*
 
 # Ensure MongoDB service is stopped
 net stop MongoDB
+```
+*Navigate to `http://localhost:8501` in your browser.*
+
 
 ---
 
