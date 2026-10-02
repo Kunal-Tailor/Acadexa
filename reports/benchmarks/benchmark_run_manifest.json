@@ -1,0 +1,37 @@
+{
+  "manifest_version": "1.0.0",
+  "run_id": "bench_20260930_042934",
+  "started_at": "2026-09-30T04:29:34.083246+00:00",
+  "ended_at": "2026-09-30T04:29:34.392169+00:00",
+  "duration_sec": 0.309,
+  "environment": {
+    "python_version": "3.11.9",
+    "platform": "Windows-10-10.0.26200-SP0",
+    "cpu_count": 20,
+    "pandas_version": "3.0.1",
+    "pyspark_version": "4.2.0",
+    "pymongo_version": "4.17.0",
+    "pyarrow_version": "25.0.1",
+    "numpy_version": "1.26.4",
+    "workload": "feature_table_join",
+    "engine": "pandas",
+    "input_path": "data/raw/lms_events"
+  },
+  "results": [
+    {
+      "workload_id": "feature_table_join",
+      "engine": "pandas",
+      "duration_sec": 0.296,
+      "input_rows": 38452,
+      "output_rows": 864,
+      "peak_memory_mb": 3.349,
+      "success": true,
+      "error": null,
+      "extra": {
+        "base_dir": "data/processed",
+        "join_semantics": "outer",
+        "collections": "academic_records+attendance+coursework+lms_weekly"
+      }
+    }
+  ]
+}

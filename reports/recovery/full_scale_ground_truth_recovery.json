@@ -1,0 +1,82 @@
+{
+  "report_version": "1.0.0",
+  "generated_at": "2026-10-01T16:34:15.628844+00:00",
+  "seed": 42,
+  "summary": {
+    "planted": 4,
+    "recovered": 2,
+    "not_recovered": 2,
+    "decoy": 1,
+    "decoy_clean": 1,
+    "decoy_spurious": 0,
+    "not_evaluated": 1
+  },
+  "entries": [
+    {
+      "relationship_id": "attendance_marks",
+      "relationship_type": "planted",
+      "expected_direction": "positive",
+      "expected_strength": "moderate",
+      "observed_corr": 0.44311024475981625,
+      "observed_metric": "spearman_normalized",
+      "scope": "overall",
+      "status": "recovered",
+      "interpretation": "attendance_marks: recovered planted association; observed Spearman association 0.443 (planted expectation: positive)."
+    },
+    {
+      "relationship_id": "lms_engagement_marks",
+      "relationship_type": "planted",
+      "expected_direction": "positive",
+      "expected_strength": "moderate_school_dependent",
+      "observed_corr": 0.03461746030206111,
+      "observed_metric": "spearman_normalized",
+      "scope": "overall",
+      "status": "not_recovered",
+      "interpretation": "lms_engagement_marks: planted association not recovered; observed Spearman association 0.035 (planted expectation: positive)."
+    },
+    {
+      "relationship_id": "late_submissions_marks",
+      "relationship_type": "planted",
+      "expected_direction": "negative",
+      "expected_strength": "moderate",
+      "observed_corr": -0.292206239119634,
+      "observed_metric": "spearman_normalized",
+      "scope": "overall",
+      "status": "recovered",
+      "interpretation": "late_submissions_marks: recovered planted association; observed Spearman association -0.292 (planted expectation: negative)."
+    },
+    {
+      "relationship_id": "quiz_attempts_marks",
+      "relationship_type": "planted",
+      "expected_direction": "positive",
+      "expected_strength": "moderate_school_dependent",
+      "observed_corr": -0.002676082931949777,
+      "observed_metric": "spearman_normalized",
+      "scope": "overall",
+      "status": "not_recovered",
+      "interpretation": "quiz_attempts_marks: planted association not recovered; observed Spearman association -0.003 (planted expectation: positive)."
+    },
+    {
+      "relationship_id": "course_difficulty_confounder",
+      "relationship_type": "confounder",
+      "expected_direction": "negative",
+      "expected_strength": "moderate",
+      "observed_corr": null,
+      "observed_metric": null,
+      "scope": "overall",
+      "status": "not_evaluated",
+      "interpretation": "course_difficulty_confounder: no observed association available; planted expectation not evaluated."
+    },
+    {
+      "relationship_id": "decoy_forum_marks",
+      "relationship_type": "decoy",
+      "expected_direction": "none",
+      "expected_strength": "none",
+      "observed_corr": 0.011685843026255537,
+      "observed_metric": "spearman_normalized",
+      "scope": "overall",
+      "status": "correctly_no_association",
+      "interpretation": "decoy_forum_marks: decoy correctly shows no observed monotonic association; observed Spearman association 0.012 (planted expectation: none)."
+    }
+  ]
+}

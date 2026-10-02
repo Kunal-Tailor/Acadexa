@@ -68,15 +68,12 @@ data/fullscale/*
 # Small manifests may be committed as reproducibility artifacts
 # (data/manifests/ is intentionally NOT ignored)
 
-# ── Reports (generated analytical outputs) ─────────────
-reports/quality/*
-reports/benchmarks/*
-reports/recovery/*
+# ── Reports (generated analytical outputs; keep final validation reports) ──
 reports/exports/*
-!reports/quality/.gitkeep
-!reports/benchmarks/.gitkeep
-!reports/recovery/.gitkeep
 !reports/exports/.gitkeep
+!reports/**/*.gitkeep
+!reports/**/*.md
+!reports/**/*.json
 
 # ── Spark artifacts ────────────────────────────────────
 spark-warehouse/

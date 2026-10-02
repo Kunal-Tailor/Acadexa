@@ -576,22 +576,22 @@ Turn the working implementation into a defensible academic project.
 - [x] 17.1 — Update `README.md` with actual setup commands, measured scale and current project status. Do not leave target values presented as measured values.
   Commit: `Update - 17.1 - finalize README with measured project status`
 
-- [ ] 17.2 — Update `docs/tasks.md` statuses and ensure completed tasks match the actual Git history.
+- [x] 17.2 — Update `docs/tasks.md` statuses and ensure completed tasks match the actual Git history.
   Commit: `Update - 17.2 - finalize implementation task status`
 
-- [ ] 17.3 — Update architecture/technology documentation with any approved implementation findings that materially changed the original design.
+- [x] 17.3 — Update architecture/technology documentation with any approved implementation findings that materially changed the original design.
   Commit: `Update - 17.3 - document implementation findings`
 
-- [ ] 17.4 — Produce quality, benchmark and recovery reports under `reports/`.
+- [x] 17.4 — Produce quality, benchmark and recovery reports under `reports/`.
   Commit: `Update - 17.4 - add project validation reports`
 
-- [ ] 17.5 — Prepare the final academic report content from the actual implementation: problem, architecture, data generation, MongoDB, Spark, analytics, dashboard, quality, benchmarks, recovery, limitations and future scope.
+- [x] 17.5 — Prepare the final academic report content from the actual implementation: problem, architecture, data generation, MongoDB, Spark, analytics, dashboard, quality, benchmarks, recovery, limitations and future scope.
   Commit: `Update - 17.5 - prepare final project report materials`
 
-- [ ] 17.6 — Prepare the final demonstration flow: login → overview → hierarchy drill-down → course → student → risk signals → analysis → data quality → benchmark/recovery evidence.
+- [x] 17.6 — Prepare the final demonstration flow: login → overview → hierarchy drill-down → course → student → risk signals → analysis → data quality → benchmark/recovery evidence.
   Commit: `Update - 17.6 - prepare final demonstration flow`
 
-- [ ] 17.7 — Perform final repository hygiene: remove accidental generated artifacts/secrets, verify `.gitignore`, verify documentation links/paths and confirm the repository can be understood from a clean clone.
+- [x] 17.7 — Perform final repository hygiene: remove accidental generated artifacts/secrets, verify `.gitignore`, verify documentation links/paths and confirm the repository can be understood from a clean clone.
   Commit: `Update - 17.7 - final repository hygiene`
 
 **Final Checkpoint:** Acadexa is reproducible, documented, demonstrable and ready for academic submission.

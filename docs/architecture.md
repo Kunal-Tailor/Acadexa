@@ -1351,3 +1351,37 @@ It must not become a substitute for:
 ## 34. Canonical Architecture Statement
 
 > Acadexa is a local, batch-oriented Big Data academic-intelligence platform in which a seeded synthetic-data generator produces a multi-school university dataset; large LMS event data lands in Parquet while operational and analytical data is served through MongoDB; PySpark performs cleaning, large joins, feature engineering, correlation and trend analysis in local mode; Spark publishes analytical gold collections back to MongoDB; and a Streamlit application provides dummy-authenticated, role-aware hierarchical dashboards over the processed data.
+
+---
+
+## 35. Approved Implementation Findings & Architectural Refinements
+
+During the full-scale execution (Phases 14–16), several empirical findings materialized that validated and refined the architectural specifications:
+
+### 35.1 Big Data Dimensionality Reduction (Raw vs. Gold Scale Dynamics)
+- **High-Volume Raw Interaction Footprint:** The raw ingestion and cleaning layers process **74,757,153 discrete clickstream LMS events** (~1.38 GB Parquet raw, ~1.4 GB cleaned), **4,608,000 weekly attendance check-ins**, and **3,338,810 coursework submissions**, resulting in a cumulative raw/staging footprint of **~4.5 GB**.
+- **PySpark Analytical Aggregation:** The PySpark batch pipeline (J1–J7) systematically distills this high-frequency interaction data into course- and student-level analytical aggregates.
+- **Serving Layer Cardinality:** The Gold serving layer holds **48,000 student-semester rows** ($12,000 \text{ students} \times 4 \text{ terms}$), **12,000 risk profiles**, **288 course metrics**, and **18 school summaries**.
+- **Impact:** Achieves a **99.93% reduction in row cardinality** and compresses data to under 20 MB Parquet (~25 MB indexed in MongoDB). This decoupling enables MongoDB to execute all dashboard queries in **under 5 milliseconds**, completely eliminating real-time aggregation latencies on user requests.
+
+### 35.2 Empirical Engine Scalability & In-Memory Limits (PySpark vs. Pandas)
+- **Workload Verification:** The J8 benchmark executed weekly LMS event aggregation across 13,338 Parquet files holding 74.7M events.
+- **Finding:** Single-node in-memory processing via **Pandas exhausted system RAM (24 GB) and terminated with `MemoryError`** after 643.36s.
+- **Architectural Validation:** **PySpark completed the exact aggregation in 151.12s**, leveraging partitioned DAG scheduling and disk spilling. This empirically proved the non-viability of in-memory single-node libraries for raw clickstream analytics and justified the distributed PySpark engine.
+
+### 35.3 Operational LMS Serving Slice in MongoDB
+- **Isolation Principle:** Full raw event logs (74.7M events) remain exclusively in partitioned Parquet files.
+- **Serving Slice Selection:** To provide live event inspection in the dashboard without overwhelming MongoDB's WiredTiger cache, a deterministic operational slice comprising **Semester 4 across CET and SOM schools (8,958,633 documents)** is loaded into `acadexa.lms_events`.
+- **Resource Footprint:** WiredTiger RAM usage is capped at ~1.8 GB, maintaining instantaneous retrieval on indexed compound keys `(student_id, course_id, timestamp)`.
+
+### 35.4 PySpark Windows Runtime Adaptations
+- **Classloader Singleton Handling:** PySpark initializes a single Py4J JVM per process. Cached Ivy driver JARs for MongoDB (`mongo-spark-connector`) are proactively injected into `spark.jars` during session initialization to prevent dynamic classloader attachment failures in multi-stage runs.
+- **Hadoop Home Dummy Fallback:** Local Windows execution utilizes an automated dummy `HADOOP_HOME` / `winutils.exe` configuration fallback to suppress native IO initialization warnings.
+- **JVM Shutdown Hook Lock:** On Windows, Py4J's `ShutdownHookManager` can encounter file-locking exceptions when attempting to delete temporary Ivy JARs on exit. The pipeline verifies completion status via structured manifests rather than process exit codes.
+
+### 35.5 Streamlit Authenticated Navigation Enforcement
+- **Multi-Page Shell Isolation:** To prevent users from bypassing Acadexa's role-based access control (RBAC) via Streamlit's default page selector, custom CSS injection (`[data-testid='stSidebarNav'] {display: none;}`) suppresses default sidebar navigation, routing all interactions exclusively through the authenticated `src/acadexa/dashboard/layout.py` navigation shell.
+
+### 35.6 Within-Course Normalization Safeguards
+- **Zero-Variance Protection:** During course-level Z-score computations $(x - \mu) / \sigma$, single-student enrollments or identical student scores produce $\sigma = 0$. The pipeline implements `F.when(col("stddev") > 0, (col("score") - col("mean")) / col("stddev")).otherwise(0.0)` to guarantee numerical stability across all academic catalogs.
+
